@@ -15,6 +15,7 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
@@ -54,7 +55,7 @@ ROOT_URLCONF = 'xoRETw.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -78,10 +79,11 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', 
         'NAME': 'xoretw2$default',
         'USER': 'xoretw2',
-        'PASSWORD': 'xoretw2',
-        'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
+        'PASSWORD': 'G188eARE',
+        'HOST': 'mysql.server',   # Or an IP Address that your DB is hosted on
     }
 }
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
