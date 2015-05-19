@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div style="padding-left:20px;">
+	<p>{% trans "Signed out" %}</p>
+	<p><a class="btn btn-default" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div style="padding-left:20px;">
+	<h3>Sign up</h3>
+	<br>	
+	<form method="post" action=".">
+	  {% csrf_token %}
+	  {{ form.as_p }}
+
+	  <input class="btn btn-success" type="submit" value="{% trans 'Sign up' %}" />
+	</form>
+	<br>
+	<p><a class="btn btn-default" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load staticfiles %}
+{% block content %}
+
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand">xoRETw</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href="#">File</a></li>
+        <li><a href="#">Options</a></li>
+      </ul>
+		<ul class="nav navbar-nav navbar-right">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{% trans "Signed in" %}: {{ user.username }}  <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="{% url 'auth_logout' %}">Sign out</a></li>
+<!--            
+			<li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+-->            
+          </ul>
+        </li>
+      </ul>    
+    </div><!-- /.navbar-collapse -->
+    
+  </div><!-- /.container-fluid -->
+</nav>
+
+<br>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="btn-toolbar" role="toolbar" aria-label="...">
+				<div class="btn-group" role="group" aria-label="...">
+					<button type="button" class="btn btn-default"><img src="{% static 'img/fileimport.gif' %}" align="absmiddle" title='Import Dialog'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/fileexport.gif' %}" align="absmiddle" title='Export Dialog'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/reload.gif' %}" align="absmiddle" title='Redraw Tree/List'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/expand.gif' %}" align="absmiddle" title='Expand Tree'></button>
+				</div>
+				<div class="btn-group" role="group" aria-label="...">
+					<button type="button" class="btn btn-default"><img src="{% static 'img/collapse.gif' %}" align="absmiddle" title='Collapse Tree'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/goal.gif' %}" align="absmiddle" title='Create Objective'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/dynamite.gif' %}" align="absmiddle" title='Create Obstacle'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/condition.gif' %}" align="absmiddle" title='Create Condition'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/constraint.gif' %}" align="absmiddle" title='Create Context Constraint'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/film.gif' %}" align="absmiddle" title='Create Scenario'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/key.gif' %}" align="absmiddle" title='Create Permission'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/task.gif' %}" align="absmiddle" title='Create Task'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/profile.gif' %}" align="absmiddle" title='Create Work Profile'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/facemask.gif' %}" align="absmiddle" title='Create Role'></button>
+				</div>
+				<div class="btn-group" role="group" aria-label="...">
+					<button type="button" class="btn btn-default"><img src="{% static 'img/trace.gif' %}" align="absmiddle" title='Define Trace-Links'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/hierarchy.gif' %}" align="absmiddle" title='View Trace-Model'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/deriveperm.gif' %}" align="absmiddle" title='Derive Permissions'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/derivecc.gif' %}" align="absmiddle" title='Derive Context Constraints'></button>
+					<button type="button" class="btn btn-default"><img src="{% static 'img/deriverole.gif' %}" align="absmiddle" title='Derive Roles'></button>
+				</div>
+			</div>				
+		</div>
+	</div>
+	<br>
+</div>
+
+{% endblock content %}
