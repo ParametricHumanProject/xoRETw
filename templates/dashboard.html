@@ -26,17 +26,10 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{% trans "Signed in" %}: {{ user.username }}  <span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
             <li><a href="{% url 'auth_logout' %}">Sign out</a></li>
-<!--            
-			<li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li class="divider"></li>
-            <li><a href="#">Separated link</a></li>
--->            
           </ul>
         </li>
       </ul>    
-    </div><!-- /.navbar-collapse -->
-    
+    </div><!-- /.navbar-collapse -->    
   </div><!-- /.container-fluid -->
 </nav>
 
@@ -46,26 +39,22 @@
 		<div class="col-md-12">
 			<div class="btn-toolbar" role="toolbar" aria-label="...">
 				<div class="btn-group" role="group" aria-label="...">
-					<button type="button" class="btn btn-default" title='Expand Tree'><img src="{% static 'img/expand.gif' %}" align="absmiddle"></button>
-					<button type="button" class="btn btn-default"><img src="{% static 'img/collapse.gif' %}" align="absmiddle" title='Collapse Tree'></button>
+					<button type="button" class="btn btn-default" title='Create Objective'><img src="{% static 'img/goal.gif' %}" align="absmiddle"></button>
+					<button type="button" class="btn btn-default" title='Create Obstacle'><img src="{% static 'img/dynamite.gif' %}" align="absmiddle"></button>
+					<button type="button" class="btn btn-default" title='Create Condition'><img src="{% static 'img/condition.gif' %}" align="absmiddle"></button>
+					<button type="button" class="btn btn-default" title='Create Context Constraint'><img src="{% static 'img/constraint.gif' %}" align="absmiddle"></button>
+					<button type="button" class="btn btn-default" title='Create Scenario'><img src="{% static 'img/film.gif' %}" align="absmiddle"></button>
+					<button type="button" class="btn btn-default" title='Create Permission'><img src="{% static 'img/key.gif' %}" align="absmiddle"></button>
+					<button type="button" class="btn btn-default" title='Create Task'><img src="{% static 'img/task.gif' %}" align="absmiddle"></button>
+					<button type="button" class="btn btn-default" title='Create Work Profile'><img src="{% static 'img/profile.gif' %}" align="absmiddle"></button>
+					<button type="button" class="btn btn-default" title='Create Role'><img src="{% static 'img/facemask.gif' %}" align="absmiddle"></button>
 				</div>
 				<div class="btn-group" role="group" aria-label="...">
-					<button type="button" class="btn btn-default"><img src="{% static 'img/goal.gif' %}" align="absmiddle" title='Create Objective'></button>
-					<button type="button" class="btn btn-default"><img src="{% static 'img/dynamite.gif' %}" align="absmiddle" title='Create Obstacle'></button>
-					<button type="button" class="btn btn-default"><img src="{% static 'img/condition.gif' %}" align="absmiddle" title='Create Condition'></button>
-					<button type="button" class="btn btn-default"><img src="{% static 'img/constraint.gif' %}" align="absmiddle" title='Create Context Constraint'></button>
-					<button type="button" class="btn btn-default"><img src="{% static 'img/film.gif' %}" align="absmiddle" title='Create Scenario'></button>
-					<button type="button" class="btn btn-default"><img src="{% static 'img/key.gif' %}" align="absmiddle" title='Create Permission'></button>
-					<button type="button" class="btn btn-default"><img src="{% static 'img/task.gif' %}" align="absmiddle" title='Create Task'></button>
-					<button type="button" class="btn btn-default"><img src="{% static 'img/profile.gif' %}" align="absmiddle" title='Create Work Profile'></button>
-					<button type="button" class="btn btn-default"><img src="{% static 'img/facemask.gif' %}" align="absmiddle" title='Create Role'></button>
-				</div>
-				<div class="btn-group" role="group" aria-label="...">
-					<button type="button" class="btn btn-default"><img src="{% static 'img/trace.gif' %}" align="absmiddle" title='Define Trace-Links'></button>
-					<button type="button" class="btn btn-default"><img src="{% static 'img/hierarchy.gif' %}" align="absmiddle" title='View Trace-Model'></button>
-					<button type="button" class="btn btn-default"><img src="{% static 'img/deriveperm.gif' %}" align="absmiddle" title='Derive Permissions'></button>
-					<button type="button" class="btn btn-default"><img src="{% static 'img/derivecc.gif' %}" align="absmiddle" title='Derive Context Constraints'></button>
-					<button type="button" class="btn btn-default"><img src="{% static 'img/deriverole.gif' %}" align="absmiddle" title='Derive Roles'></button>
+					<button type="button" class="btn btn-default" title='Define Trace-Links'><img src="{% static 'img/trace.gif' %}" align="absmiddle"></button>
+					<button type="button" class="btn btn-default" title='View Trace-Model'><img src="{% static 'img/hierarchy.gif' %}" align="absmiddle"></button>
+					<button type="button" class="btn btn-default" title='Derive Permissions'><img src="{% static 'img/deriveperm.gif' %}" align="absmiddle"></button>
+					<button type="button" class="btn btn-default" title='Derive Context Constraints'><img src="{% static 'img/derivecc.gif' %}" align="absmiddle"></button>
+					<button type="button" class="btn btn-default" title='Derive Roles'><img src="{% static 'img/deriverole.gif' %}" align="absmiddle"></button>
 				</div>
 			</div>				
 		</div>
@@ -74,21 +63,166 @@
     <div class="row">
         <div class="col-md-12">
             <ul class="nav nav-tabs">
-                <li role="presentation" class="active"><a href="#">Home</a></li>
-                <li role="presentation"><a href="#">Help</a></li>
-                <li role="presentation" class="dropdown">
-                <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                Dropdown <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu" role="menu">
-                <li><a href="#">Action</a></li>
-                <li><a href="#">Another action</a></li>
-                <li><a href="#">Something else here</a></li>
-                <li class="divider"></li>
-                <li><a href="#">Separated link</a></li>
-                </ul>
-                </li>
+                
+                {% if object_type == 1 %}  
+                    <li role="presentation" class="active"><a href="{% url 'dashboard' %}?object_type=1">Objectives</a></li>
+                {% else %}
+                    <li role="presentation"><a href="{% url 'dashboard' %}?object_type=1">Objectives</a></li>
+                {% endif %}
+
+
+                {% if object_type == 2 %}  
+                    <li role="presentation" class="active"><a href="{% url 'dashboard' %}?object_type=2">Obstacles</a></li>
+                {% else %}
+                    <li role="presentation"><a href="{% url 'dashboard' %}?object_type=2">Obstacles</a></li>
+                {% endif %}
+                
+                {% if object_type == 3 %}  
+                    <li role="presentation" class="active"><a href="{% url 'dashboard' %}?object_type=3">Conditions</a></li>
+                {% else %}
+                    <li role="presentation"><a href="{% url 'dashboard' %}?object_type=3">Conditions</a></li>
+                {% endif %}
+
+                {% if object_type == 4 %}  
+                    <li role="presentation" class="active"><a href="{% url 'dashboard' %}?object_type=4">Constraints</a></li>
+                {% else %}
+                    <li role="presentation"><a href="{% url 'dashboard' %}?object_type=4">Constraints</a></li>
+                {% endif %}
+
+                {% if object_type == 5 %}  
+                    <li role="presentation" class="active"><a href="{% url 'dashboard' %}?object_type=5">Steps</a></li>
+                {% else %}
+                    <li role="presentation"><a href="{% url 'dashboard' %}?object_type=5">Steps</a></li>
+                {% endif %}
+
+                {% if object_type == 6 %}  
+                    <li role="presentation" class="active"><a href="{% url 'dashboard' %}?object_type=6">Scenarios</a></li>
+                {% else %}
+                    <li role="presentation"><a href="{% url 'dashboard' %}?object_type=6">Scenarios</a></li>
+                {% endif %}
+
+                {% if object_type == 7 %}  
+                    <li role="presentation" class="active"><a href="{% url 'dashboard' %}?object_type=7">Permissions</a></li>
+                {% else %}
+                    <li role="presentation"><a href="{% url 'dashboard' %}?object_type=7">Permissions</a></li>
+                {% endif %}
+
+                {% if object_type == 8 %}  
+                    <li role="presentation" class="active"><a href="{% url 'dashboard' %}?object_type=8">Tasks</a></li>
+                {% else %}
+                    <li role="presentation"><a href="{% url 'dashboard' %}?object_type=8">Tasks</a></li>
+                {% endif %}
+
+                {% if object_type == 9 %}  
+                    <li role="presentation" class="active"><a href="{% url 'dashboard' %}?object_type=9">Profiles</a></li>
+                {% else %}
+                    <li role="presentation"><a href="{% url 'dashboard' %}?object_type=9">Profiles</a></li>
+                {% endif %}
+
+                {% if object_type == 10 %}  
+                    <li role="presentation" class="active"><a href="{% url 'dashboard' %}?object_type=10">Roles</a></li>
+                {% else %}
+                    <li role="presentation"><a href="{% url 'dashboard' %}?object_type=10">Roles</a></li>
+                {% endif %}
+
             </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="border_one" style="height:68.5vh;">
+
+                {% if object_type == 1 %}
+                    <br>
+                    <p>Placeholder for Objectives</p>
+                    <ul>
+                      <li>Test data 1</li>
+                      <li>Test data 2</li>
+                      <li>Test data 3</li>
+                    </ul>                
+                {% endif %}
+
+                {% if object_type == 2 %}  
+                    <br>
+                    <p>Placeholder for Obstacles</p>
+                    <ul>
+                      <li>Test data 1</li>
+                      <li>Test data 2</li>
+                      <li>Test data 3</li>
+                      <li>Test data 4</li>
+                      <li>Test data 5</li>
+                      <li>Test data 6</li>
+                      <li>Test data 7</li>
+                      <li>Test data 8</li>
+                      <li>Test data 9</li>
+                    </ul>                
+                {% endif %}
+                
+                {% if object_type == 3 %}  
+                    <br>
+                    <p>Placeholder for Conditions</p>
+                    <ul>
+                      <li>Test data 1</li>
+                      <li>Test data 2</li>
+                      <li>Test data 3</li>
+                      <li>Test data 4</li>
+                      <li>Test data 5</li>
+                      <li>Test data 6</li>
+                      <li>Test data 7</li>
+                      <li>Test data 8</li>
+                      <li>Test data 9</li>
+                      <li>Test data 10</li>
+                      <li>Test data 11</li>
+                      <li>Test data 12</li>
+                      <li>Test data 13</li>
+                      <li>Test data 14</li>
+                      <li>Test data 15</li>
+                    </ul>                
+                {% endif %}
+
+                {% if object_type == 4 %}  
+                    <br>
+                    <p>Placeholder for Constraints</p>
+                    <ul>
+                      <li>Test data 1</li>
+                      <li>Test data 2</li>
+                      <li>Test data 3</li>
+                      <li>Test data 4</li>
+                      <li>Test data 5</li>
+                      <li>Test data 6</li>
+                      <li>Test data 7</li>
+                    </ul>                                
+                {% endif %}
+
+                {% if object_type == 5 %}  
+                    <br>
+                    <p>Placeholder for Steps</p>
+                {% endif %}
+
+                {% if object_type == 6 %}  
+                    <br>
+                    <p>Placeholder for Scenarios</p>
+                {% endif %}
+
+                {% if object_type == 7 %}  
+                    <br>
+                    <p>Placeholder for Permissions</p>                
+                {% endif %}
+
+                {% if object_type == 8 %}
+                    <br>
+                    <p>Placeholder for Tasks</p>                
+                {% endif %}
+
+                {% if object_type == 9 %} 
+                    <br>
+                    <p>Placeholder for Profiles</p>                
+                {% endif %}
+
+                {% if object_type == 10 %} 
+                    <br>
+                    <p>Placeholder for Roles</p>
+                {% endif %}
         </div>
     </div>
 </div>

@@ -2,20 +2,53 @@
 {% load i18n %}
 
 {% block content %}
-<div style="padding-left:20px;">
-	<h3>Sign in</h3>
-	<br>
-	<form method="post" action=".">
-	  {% csrf_token %} 
-	  {{ form.as_p }}
-
-	  <input class="btn btn-default" type="submit" value="{% trans 'Sign in' %}" />
-	  
-	  <input type="hidden" name="next" value="{{ next }}" />
-	</form>
-	<br>
-	<!-- <p>{% trans "Forgot password" %}? <a href="{% url 'auth_password_reset' %}">{% trans "Reset it" %}</a>!</p> -->
-	<p><a class="btn btn-success" href="{% url 'registration_register' %}">{% trans "Sign up" %}</a></p>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-1">
+            <h3 class="pull-right">Sign in</h3>
+        </div>
+		<div class="col-md-11">
+        </div>
+    </div>
+    <form method="post" action="."> {% csrf_token %} 
+        <div class="row">
+            <div class="col-md-1">
+                <p class="padding-top pull-right">Username</p>
+            </div>
+            <div class="col-md-2">
+                <input id="id_username" class="form-control pull-left" maxlength="254" name="username" type="text">
+            </div>
+            <div class="col-md-9">
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-md-1">
+                <p class="padding-top pull-right">Password</p>
+            </div>
+            <div class="col-md-2">
+                <input id="id_password" class="form-control" name="password" type="password">
+            </div>
+            <div class="col-md-9">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <br>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-2">
+                <div class="btn-toolbar" role="toolbar" aria-label="...">
+                  <div class="btn-group" role="group" aria-label="..."><input class="btn btn-default" type="submit" value="{% trans 'Sign in' %}" /><input type="hidden" name="next" value="{{ next }}" /></div>
+                  <div class="btn-group" role="group" aria-label="..."><p><a class="btn btn-primary pull-right" href="{% url 'registration_register' %}">{% trans "Sign up" %}</a></p></div>
+                </div>
+            </div>
+            <div class="col-md-9">
+            </div>
+        </div>
+    </form>
 </div>
 
 {% endblock %}

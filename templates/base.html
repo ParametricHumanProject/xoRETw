@@ -21,6 +21,21 @@
                 padding-top: 50px;
                 padding-bottom: 20px;
             }
+            .divider{
+                width:25px;
+                height:auto;
+                display:inline-block;
+            }
+            
+            .padding-top{
+                padding-top:7.5px;
+            }
+            .border_one {
+                border-style: solid;
+                border-width: 1.5px;
+                border-color: lightgray;
+            }            
+            
         </style>
         <link rel="stylesheet" href="{% static 'css/bootstrap-theme.min.css' %}">
         <link rel="stylesheet" href="{% static 'css/main.css' %}">
@@ -42,9 +57,15 @@
         <![endif]-->
 		{% block content %}
 		{% endblock content %}
-      <footer>
-        <!-- <p>&copy; Parametric Human Project 2015</p> -->
-      </footer>
+        <nav class="navbar navbar-default navbar-fixed-bottom">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <a target="_blank" class="navbar-brand" href="http://wi.wu-wien.ac.at/home/mark/xoRET/screenshots.html">
+                <img alt="PHP" src="{% static 'img/mini-logo.png' %}">
+              </a>
+            </div>
+          </div>
+        </nav>
     </div> <!-- /container -->      
       
 		<script src="{% static 'js/vendor/jquery-1.11.2.min.js' %}"></script>

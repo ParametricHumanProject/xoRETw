@@ -2,8 +2,19 @@
 {% load i18n %}
 
 {% block content %}
-<div style="padding-left:20px;">
-	<p>{% trans "Signed out" %}</p>
-	<p><a class="btn btn-default" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></p>
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+            <p>{% trans "You have successfully signed out." %}</p>
+        </div>
+    </div>
+	<div class="row">
+        <div class="col-md-12">
+            <p><a class="btn btn-default" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></p>
+        </div>
+    </div>
 </div>
+
+
 {% endblock %}
