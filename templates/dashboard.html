@@ -39,22 +39,22 @@
 		<div class="col-md-12">
 			<div class="btn-toolbar" role="toolbar" aria-label="...">
 				<div class="btn-group" role="group" aria-label="...">
-					<button type="button" class="btn btn-default" title='Create Objective'><img src="{% static 'img/goal.gif' %}" align="absmiddle"></button>
-					<button type="button" class="btn btn-default" title='Create Obstacle'><img src="{% static 'img/dynamite.gif' %}" align="absmiddle"></button>
-					<button type="button" class="btn btn-default" title='Create Condition'><img src="{% static 'img/condition.gif' %}" align="absmiddle"></button>
-					<button type="button" class="btn btn-default" title='Create Context Constraint'><img src="{% static 'img/constraint.gif' %}" align="absmiddle"></button>
-					<button type="button" class="btn btn-default" title='Create Scenario'><img src="{% static 'img/film.gif' %}" align="absmiddle"></button>
-					<button type="button" class="btn btn-default" title='Create Permission'><img src="{% static 'img/key.gif' %}" align="absmiddle"></button>
-					<button type="button" class="btn btn-default" title='Create Task'><img src="{% static 'img/task.gif' %}" align="absmiddle"></button>
-					<button type="button" class="btn btn-default" title='Create Work Profile'><img src="{% static 'img/profile.gif' %}" align="absmiddle"></button>
-					<button type="button" class="btn btn-default" title='Create Role'><img src="{% static 'img/facemask.gif' %}" align="absmiddle"></button>
+                    <button type="button" class="btn btn-default" title='Create Objective' data-toggle="modal" data-target="#create_objective_modal"><img src="{% static 'img/goal.gif' %}" align="absmiddle"></button>
+                    <button type="button" class="btn btn-default" title='Create Obstacle' data-toggle="modal" data-target="#create_obstacle_modal"><img src="{% static 'img/dynamite.gif' %}" align="absmiddle"></button>
+                    <button type="button" class="btn btn-default" title='Create Condition' data-toggle="modal" data-target="#create_condition_modal"><img src="{% static 'img/condition.gif' %}" align="absmiddle"></button>
+                    <button type="button" class="btn btn-default" title='Create Context Constraint' data-toggle="modal" data-target="#create_constraint_modal"><img src="{% static 'img/constraint.gif' %}" align="absmiddle"></button>
+                    <button type="button" class="btn btn-default" title='Create Scenario' data-toggle="modal" data-target="#create_scenario_modal"><img src="{% static 'img/film.gif' %}" align="absmiddle"></button>
+                    <button type="button" class="btn btn-default" title='Create Permission' data-toggle="modal" data-target="#create_permission_modal"><img src="{% static 'img/key.gif' %}" align="absmiddle"></button>
+                    <button type="button" class="btn btn-default" title='Create Task' data-toggle="modal" data-target="#create_task_modal"><img src="{% static 'img/task.gif' %}" align="absmiddle"></button>
+                    <button type="button" class="btn btn-default" title='Create Work Profile' data-toggle="modal" data-target="#create_work_profile_modal"><img src="{% static 'img/profile.gif' %}" align="absmiddle"></button>
+                    <button type="button" class="btn btn-default" title='Create Role' data-toggle="modal" data-target="#create_role_modal"><img src="{% static 'img/facemask.gif' %}" align="absmiddle"></button>
 				</div>
 				<div class="btn-group" role="group" aria-label="...">
-					<button type="button" class="btn btn-default" title='Define Trace-Links'><img src="{% static 'img/trace.gif' %}" align="absmiddle"></button>
-					<button type="button" class="btn btn-default" title='View Trace-Model'><img src="{% static 'img/hierarchy.gif' %}" align="absmiddle"></button>
-					<button type="button" class="btn btn-default" title='Derive Permissions'><img src="{% static 'img/deriveperm.gif' %}" align="absmiddle"></button>
-					<button type="button" class="btn btn-default" title='Derive Context Constraints'><img src="{% static 'img/derivecc.gif' %}" align="absmiddle"></button>
-					<button type="button" class="btn btn-default" title='Derive Roles'><img src="{% static 'img/deriverole.gif' %}" align="absmiddle"></button>
+                    <button type="button" class="btn btn-default" title='Define Trace-Links' data-toggle="modal" data-target="#define_trace_links_modal"><img src="{% static 'img/trace.gif' %}" align="absmiddle"></button>
+                    <button type="button" class="btn btn-default" title='View Trace-Model' data-toggle="modal" data-target="#view_trace_model_modal"><img src="{% static 'img/hierarchy.gif' %}" align="absmiddle"></button>
+                    <button type="button" class="btn btn-default" title='Derive Permissions' data-toggle="modal" data-target="#derive_permissions_modal"><img src="{% static 'img/deriveperm.gif' %}" align="absmiddle"></button>
+                    <button type="button" class="btn btn-default" title='Derive Context Constraints' data-toggle="modal" data-target="#derive_constraints_modal"><img src="{% static 'img/derivecc.gif' %}" align="absmiddle"></button>
+                    <button type="button" class="btn btn-default" title='Derive Roles' data-toggle="modal" data-target="#derive_roles_modal"><img src="{% static 'img/deriverole.gif' %}" align="absmiddle"></button>
 				</div>
 			</div>				
 		</div>
@@ -128,9 +128,10 @@
             </ul>
         </div>
     </div>
+    <br>
     <div class="row">
         <div class="col-md-12">
-            <div class="border_one" style="height:68.5vh;">
+            <div class="border_one" style="height:65vh;">
 
                 {% if object_type == 1 %}
                     <br>
@@ -225,6 +226,274 @@
                 {% endif %}
         </div>
     </div>
+</div>
+
+
+<!-- 1. Create Objective Modal -->
+<div class="modal fade" id="create_objective_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Create Objective</h4>
+      </div>
+      <div class="modal-body">
+        Add layout and widgets here ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Create Obstacle Modal -->
+<div class="modal fade" id="create_obstacle_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Create Obstacle</h4>
+      </div>
+      <div class="modal-body">
+        Add layout and widgets here ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Create Condition Modal -->
+<div class="modal fade" id="create_condition_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Create Condition</h4>
+      </div>
+      <div class="modal-body">
+            Add layout and widgets here ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 4. Create Context Constraint Modal -->
+<div class="modal fade" id="create_constraint_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Create Context Constraint</h4>
+      </div>
+      <div class="modal-body">
+            Add layout and widgets here ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Create Scenario Modal -->
+<div class="modal fade" id="create_scenario_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Create new scenario</h4>
+      </div>
+      <div class="modal-body">
+            Add layout and widgets here ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Create Permission Modal -->
+<div class="modal fade" id="create_permission_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Create Permission</h4>
+      </div>
+      <div class="modal-body">
+            Add layout and widgets here ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. Create Task Modal -->
+<div class="modal fade" id="create_task_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Create Task</h4>
+      </div>
+      <div class="modal-body">
+            Add layout and widgets here ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. Create Work Profile Modal -->
+<div class="modal fade" id="create_work_profile_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Create Work Profile</h4>
+      </div>
+      <div class="modal-body">
+            Add layout and widgets here ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9. Create Role Modal -->
+<div class="modal fade" id="create_role_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Create Role</h4>
+      </div>
+      <div class="modal-body">
+            Add layout and widgets here ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 10. Define Trace-Links Modal -->
+<div class="modal fade" id="define_trace_links_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Define Trace-Links</h4>
+      </div>
+      <div class="modal-body">
+            Add layout and widgets here ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 11. View Trace-Model Modal -->
+<div class="modal fade" id="view_trace_model_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">View Trace-Model</h4>
+      </div>
+      <div class="modal-body">
+            Add layout and widgets here ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 12. Derive Permissions Modal -->
+<div class="modal fade" id="derive_permissions_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Derive Permissions</h4>
+      </div>
+      <div class="modal-body">
+            Add layout and widgets here ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 13. Derive Context Constraints Modal -->
+<div class="modal fade" id="derive_constraints_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Derive Context Constraints</h4>
+      </div>
+      <div class="modal-body">
+            Add layout and widgets here ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 14. Derive Roles Modal -->
+<div class="modal fade" id="derive_roles_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Derive Roles</h4>
+      </div>
+      <div class="modal-body">
+            Add layout and widgets here ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 {% endblock content %}
