@@ -238,10 +238,50 @@
         <h4 class="modal-title" id="myModalLabel">Create Objective</h4>
       </div>
       <div class="modal-body">
-        Add layout and widgets here ...
+        <form>
+          <div class="form-group">
+            <label for="exampleInputEmail1">Objective Name</label>
+            <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter objective name">
+          </div>
+          <div class="form-group">
+            <label for="exampleInputPassword1">Type</label>
+                <div class="dropdown">
+                  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;             
+                    <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Achieve</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Ensure</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Improve</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Increase</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Keep</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Maintain</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Make</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Notify</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Provide</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Reduce</a></li>
+
+                  </ul>
+                </div>
+          </div>
+          <div class="form-group">
+            <label for="exampleInputEmail12">Abstract Context Condition (Text)</label>
+            <input type="text" class="form-control" id="exampleInputEmail12" placeholder="Enter text">
+            <input class="btn btn-default" type="button" value="Add Condition to List">
+          </div>
+            <select multiple class="form-control">
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>     
+            <input class="btn btn-default" type="button" value="Remove Condition from List">     
+        </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
         <button type="button" class="btn btn-primary">Save changes</button>
       </div>
     </div>

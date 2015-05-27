@@ -22,6 +22,7 @@ class Objective(models.Model):
     step = models.ManyToManyField(Step)
     objective = models.ManyToManyField('self')
     scenario = models.ManyToManyField(Scenario)
+    condition = models.ManyToManyField(Condition)
     
 class Obstacle(models.Model):
     name = models.CharField(max_length=50)
