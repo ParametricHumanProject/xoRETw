@@ -235,10 +235,65 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Create Objective</h4>
+        <h4 class="modal-title" id="objective_modal_label">Create Objective</h4>
       </div>
       <div class="modal-body">
         <form>
+            <div class="row">
+                <div class="col-md-9">
+                  <div class="form-group">
+                    <label for="objective_name">Objective Name</label>
+                    <input type="text" class="form-control" id="objective_name" placeholder="Enter objective name">
+                  </div>              
+                </div>  
+                <div class="col-md-3"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-9">
+                          <div class="form-group">
+            <label for="exampleInputPassword1">Type</label>
+                <div class="dropdown">
+                  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+                    Select Objective Type&nbsp;
+                    <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Achieve</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Ensure</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Improve</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Increase</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Keep</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Maintain</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Make</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Notify</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Provide</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Reduce</a></li>
+
+                  </ul>
+                </div>
+          </div>
+                </div>
+            </div>
+            <div class="row">
+            </div>
+            <div class="row">
+            </div>            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
           <div class="form-group">
             <label for="exampleInputEmail1">Objective Name</label>
             <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Enter objective name">
@@ -246,8 +301,8 @@
           <div class="form-group">
             <label for="exampleInputPassword1">Type</label>
                 <div class="dropdown">
-                  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;             
+                  <button class="btn btn-default dropdown-toggle btn-block" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+                                
                     <span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
@@ -537,3 +592,17 @@
 </div>
 
 {% endblock content %}
+
+{% block scripts %}
+<script>
+    $(function() {
+      // Handler for .ready() called.
+        $('#create_objective_modal').on('show.bs.modal', function(e) {
+
+        var $modal = $(this);
+        alert(this);
+        })
+    });
+</script>
+
+{% endblock scripts %}
