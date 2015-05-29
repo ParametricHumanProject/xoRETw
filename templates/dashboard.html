@@ -138,21 +138,40 @@
                 <thead>
                 <tr>
                 <th class="col-md-1">#</th>
-                <th class="col-md-11">Objective</th>
+                <th class="col-md-3">Objective</th>
+                <th class="col-md-8">&nbsp;</th> <!-- toolbar: edit/remove -->
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
                 <th scope="row">1</th>
-                <td>Mark</td>
+                <td data-toggle="context" data-target="#context-menu">Mark glyphs in font format</td>
+                <td>
+                    <div class="btn-group" role="group" aria-label="First group">
+                        <a class="btn" onclick="alert('editing');" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                        <a class="btn" onclick="alert('deleting');" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                    </div>                
+                </td>
                 </tr>
                 <tr>
                 <th scope="row">2</th>
-                <td>Jacob</td>
+                <td data-toggle="context" data-target="#context-menu">Glyphsin font format from the Jacob</td>
+                <td>
+                    <div class="btn-group" role="group" aria-label="First group">
+                        <a class="btn" onclick="alert('editing');" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                        <a class="btn" onclick="alert('deleting');" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                    </div>                
+                </td>
                 </tr>
                 <tr>
                 <th scope="row">3</th>
-                <td>Larry</td>
+                <td data-toggle="context" data-target="#context-menu">Free Shipping Glyphic</td>
+                <td>
+                    <div class="btn-group" role="group" aria-label="First group">
+                        <a class="btn" onclick="alert('editing');" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                        <a class="btn" onclick="alert('deleting');" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                    </div>                
+                </td>
                 </tr>
                 </tbody>
                 </table>
@@ -568,12 +587,18 @@
   </div>
 </div>
 
+
+<!------- context menu ------>
+
+<!--
 <div id="context-menu">
   <ul class="dropdown-menu" role="menu">
-    <li><a tabindex="-1" href="#">Action</a></li>
-    <li><a tabindex="-1" href="#">Separated link</a></li>
+    <li><a tabindex="-1" href="#">Edit</a></li>
+    <li><a tabindex="-1" href="#">Delete</a></li>
   </ul>
 </div>
+-->
+
 
 {% endblock content %}
 
