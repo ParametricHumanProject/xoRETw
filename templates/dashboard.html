@@ -168,7 +168,7 @@
                 <td data-toggle="context" data-target="#context-menu">Free Shipping Glyphic</td>
                 <td>
                     <div class="btn-group" role="group" aria-label="First group">
-                        <a class="btn" onclick="alert('editing');" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                        <a class="btn" onclick="edit_objective(1);" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
                         <a class="btn" onclick="alert('deleting');" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                     </div>                
                 </td>
@@ -590,14 +590,15 @@
 
 <!------- context menu ------>
 
-<!--
+
 <div id="context-menu">
+<!--
   <ul class="dropdown-menu" role="menu">
     <li><a tabindex="-1" href="#">Edit</a></li>
     <li><a tabindex="-1" href="#">Delete</a></li>
   </ul>
+-->  
 </div>
--->
 
 
 {% endblock content %}
@@ -747,6 +748,13 @@ function change_select_label(e) {
 }
 
 
+
+function edit_objective(id) {
+
+    mode = 2; // edit
+    $('#objective_name').val("fgg");
+    $('#objective_modal').modal('show');
+}
     
 </script>
 
