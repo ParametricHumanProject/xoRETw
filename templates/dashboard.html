@@ -148,7 +148,7 @@
                 <td data-toggle="context" data-target="#context-menu">Mark glyphs in font format</td>
                 <td>
                     <div class="btn-group" role="group" aria-label="First group">
-                        <a class="btn" onclick="alert('editing');" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                        <a class="btn" onclick="edit_objective(1);" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
                         <a class="btn" onclick="alert('deleting');" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                     </div>                
                 </td>
@@ -158,7 +158,7 @@
                 <td data-toggle="context" data-target="#context-menu">Glyphsin font format from the Jacob</td>
                 <td>
                     <div class="btn-group" role="group" aria-label="First group">
-                        <a class="btn" onclick="alert('editing');" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                        <a class="btn" onclick="edit_objective(1);" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
                         <a class="btn" onclick="alert('deleting');" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                     </div>                
                 </td>
@@ -325,7 +325,7 @@
                     <label for="condition_list">List of Abstract Context Conditions</label>
                     <select id="condition_list" multiple class="form-control">
                     </select>     
-                    <input id="remove_condition" class="btn btn-default" type="button" disabled="false" value="Remove Condition from List1">     
+                    <input id="remove_condition" class="btn btn-default" type="button" disabled="false" value="Remove Condition from List">     
                   </div>
                 </div>  
             </div>
@@ -747,12 +747,11 @@ function change_select_label(e) {
     $('#objective_type_label').text(property_value);
 }
 
-
-
 function edit_objective(id) {
 
     mode = 2; // edit
-    $('#objective_name').val("fgg");
+    // TODO: get existing data and populate dialog
+    $('#objective_name').val("test");
     $('#objective_modal').modal('show');
 }
     
