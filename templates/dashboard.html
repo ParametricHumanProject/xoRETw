@@ -144,15 +144,15 @@
                 <tbody>
                 <tr>
                 <th scope="row">1</th>
-                <td data-toggle="context" data-target="#context-menu">Mark</td>
+                <td>Mark</td>
                 </tr>
                 <tr>
                 <th scope="row">2</th>
-                <td data-toggle="context" data-target="#context-menu">Jacob</td>
+                <td>Jacob</td>
                 </tr>
                 <tr>
                 <th scope="row">3</th>
-                <td data-toggle="context" data-target="#context-menu">Larry</td>
+                <td>Larry</td>
                 </tr>
                 </tbody>
                 </table>
@@ -594,15 +594,7 @@
         
     });
 
-        $("#testtable td").contextMenu({
-            menuSelector: "#contextMenu",
-            menuSelected: function (invokedOn, selectedMenu) {
-                var msg = "You selected the menu item '" + selectedMenu.text() +
-                    "' on the value '" + invokedOn.text() + "'";
-                console.log(msg);
-            }
-        });        
-    
+
 // Handlers
 
 // Modal 1 - handlers
