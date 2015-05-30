@@ -9,13 +9,24 @@ def home(request):
 def dashboard(request):
     user_id = request.user.id
     object_type = int(request.GET.get('object_type', 1))
+
+    # if this is a POST request we need to process the form data
+    if request.method == 'POST':
+        pass
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        
+        
+        
+        
+        
+        print 'user_id = request.user.id is ', user_id
+        print 'object_type ', object_type
+        
+        
+        #option = int(request.GET.get('object', 0))
+        #return render_to_response('dashboard.html', {}, context_instance=RequestContext(request))
     
-    print 'user_id = request.user.id is ', user_id
-    print 'object_type ', object_type
-    
-    
-    #option = int(request.GET.get('object', 0))
-    #return render_to_response('dashboard.html', {}, context_instance=RequestContext(request))
     return render_to_response('dashboard.html', {'object_type':object_type}, context_instance=RequestContext(request))
 
 
