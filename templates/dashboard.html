@@ -668,6 +668,7 @@ $( '#save_objective_btn' ).click(function() {
         data: objective_data
     }).done(function( msg ) {
         alert( "Data Saved: " + msg );
+        $('#objective_modal').modal('toggle');
     });    
     });
 
