@@ -29,6 +29,7 @@ def dashboard(request):
     else:
         print 'user_id = request.user.id is ', user_id
         print 'object_type ', object_type
+        # if object_type == 1 # objectives
         
     return render_to_response('dashboard.html', {'object_type':object_type}, context_instance=RequestContext(request))
 
