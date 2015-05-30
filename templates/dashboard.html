@@ -664,6 +664,7 @@ $( '#save_objective_btn' ).click(function() {
     $.ajax({
         method: "POST",
         url: "{% url 'dashboard' %}",
+        dataType: "json",
         data: objective_data
     }).done(function( msg ) {
         alert( "Data Saved: " + msg );
