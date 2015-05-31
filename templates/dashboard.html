@@ -168,7 +168,7 @@
                 <td data-toggle="context" data-target="#context-menu">Free Shipping Glyphic</td>
                 <td>
                     <div class="btn-group" role="group" aria-label="First group">
-                        <a class="btn" onclick="edit_objective(1);" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                        <a class="btn" onclick="edit_objective(1);" href="#" role="button" title='Edit objective' disabled="true"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
                         <a class="btn" onclick="alert('deleting');" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                     </div>                
                 </td>
@@ -286,7 +286,7 @@
                 </div>  
             </div>
             <div class="row">
-                <div class="col-md-9">
+                <div class="col-md-3">
                     <div class="form-group">
                         <label for="objective_type">Objective Type</label>
                         <div class="dropdown">
@@ -309,6 +309,7 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-md-9"></div>
             </div>
             <div class="row">
                 <div class="col-md-9">
@@ -643,13 +644,17 @@ $( '#save_objective_btn' ).click(function() {
 
     if (!name) {
         alert('Error: objective name cannot be empty.');
-        $( "#objective_name" ).focus();
+        //flash("#objective_name");
+        $("#objective_name").focus();
+        $( '#objective_name' ).flash();
         return;
     }
     
     var type = $('#objective_type_label').text();
     if (type == 'Select') {
-        alert('Error: objective type not selected.');      
+        alert('Error: objective type not selected.');
+        flash("#dropdown_objective_type");
+        return;    
     }
 
     var conditions = [];
@@ -658,7 +663,7 @@ $( '#save_objective_btn' ).click(function() {
     });    
 
     // create data
-    var objective_data = new Objective(name, type, conditions);
+    var objective_data = new Objective(name, type, conditions, mode);
 
     // post data
     $.ajax({
@@ -672,10 +677,11 @@ $( '#save_objective_btn' ).click(function() {
     });    
     });
 
-function Objective(name, type, conditions) {
+function Objective(name, type, conditions, mode) {
     this.name = name;
     this.type = type;
     this.conditions = conditions;
+    this.mode = mode;
 }
 
 $("#action-1").click(function(e){
@@ -794,30 +800,20 @@ function edit_objective(id) {
     $('#objective_modal').modal('show');
 }
 
-/*
-$.ajax({
-  method: "POST",
-  url: "some.php",
-  data: { name: "John", location: "Boston" }
-})
-  .done(function( msg ) {
-    alert( "Data Saved: " + msg );
-  });
-
-
-
-
-function person(first, last, age, eye) {
-    this.firstName = first;
-    this.lastName = last;
-    this.age = age;
-    this.eyeColor = eye;
+function flash(selector) {
+    $(selector).fadeOut(250).fadeIn(250);
 }
-var myFather = new person("John", "Doe", 50, "blue");
-var myMother = new person("Sally", "Rally", 48, "green");
+
+jQuery.fn.extend({
+  flash: function() {
+    return this.each(function() {
+    $(this).fadeOut();
+    $(this).fadeIn();
+    });
+  }
+});
 
 
-*/
     
 </script>
 

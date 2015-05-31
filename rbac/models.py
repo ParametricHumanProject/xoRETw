@@ -19,10 +19,13 @@ class Task(models.Model):
 
 class Objective(models.Model):
     name = models.CharField(max_length=50)
-    step = models.ManyToManyField(Step)
-    objective = models.ManyToManyField('self')
-    scenario = models.ManyToManyField(Scenario)
-    condition = models.ManyToManyField(Condition)
+    type = models.CharField(max_length=50)
+    conditions = models.ManyToManyField(Condition)
+
+    #step = models.ManyToManyField(Step)
+    #objective = models.ManyToManyField('self')
+    #scenarios = models.ManyToManyField(Scenario)
+
     
 class Obstacle(models.Model):
     name = models.CharField(max_length=50)
