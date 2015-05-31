@@ -8,6 +8,7 @@ from .models import Condition
 
 # constants
 CREATE_NEW = 1
+OBJECT_TYPE_OBJECTIVE = 1
 
 
 def home(request):
@@ -15,50 +16,43 @@ def home(request):
 
 @login_required
 def dashboard(request):
-    user_id = request.user.id
-    object_type = int(request.GET.get('object_type', 1))
+    user = request.user
+    object_type = request.GET.get('object_type', 1) # default Objective tab
+    object_type = int(object_type)
 
-    # if this is a POST request we need to process the form data
+    # if this is a POST request we need to process the data
     if request.method == 'POST':
         
         objective_name = request.POST.get('name', None)
         objective_type = request.POST.get('type', None)
         conditions = request.POST.getlist('conditions[]', None)
         mode = request.POST.get('mode', None)
+        mode = int(mode)
         
-        if mode = CREATE_NEW:
-            print 'objective_name is ', objective_name
-            print 'objective_type is ', objective_type
-            print 'conditions are ', conditions
-            print 'mode is ', mode
-            
-            print type(conditions)
-            
-            objective = Objective(name=objective_name, type=objective_type)
-            print 'A0'
-            objective.save()
-            print 'A1'
-            for condition in conditions:
-                print 'A2'
-                c = Condition(name=condition)
-                print 'A3'
-                c.save()
-                print 'A4'
-                objective.conditions.add(c)
-                print 'A5'
-        # edit mode
-        else:
-            pass
-            
-        response = json.dumps('{"message":"Ok"}')
+        # TODO: handle each object_type        
+        if object_type == OBJECT_TYPE_OBJECTIVE:
+            if mode == CREATE_NEW:
+                
+                objective = Objective(name=objective_name, type=objective_type, user=user)
+                objective.save()
+                for condition in conditions:
+                    c = Condition(name=condition, user=user)
+                    c.save()
+                    objective.conditions.add(c)
+                
+            # edit mode
+            else:
+                pass
+                
+            response = json.dumps('{"message":"Ok"}')
+            return HttpResponse(response, content_type='application/json')
         
-        return HttpResponse(response, content_type='application/json')
-    # if a GET (or any other method) we'll create a blank form
-    else:
-        print 'user_id = request.user.id is ', user_id
-        print 'object_type ', object_type
-        # if object_type == 1 # objectives
-        
+    # if a GET (or any other method)
+    else:    
+        if object_type == OBJECT_TYPE_OBJECTIVE:
+            objectives = Objective.objects.all().filter(user=user)
+            return render_to_response('dashboard.html', {'object_type':object_type, 'objectives':objectives}, context_instance=RequestContext(request))
+            
     return render_to_response('dashboard.html', {'object_type':object_type}, context_instance=RequestContext(request))
 
 

@@ -143,36 +143,20 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                <th scope="row">1</th>
-                <td data-toggle="context" data-target="#context-menu">Mark glyphs in font format</td>
-                <td>
-                    <div class="btn-group" role="group" aria-label="First group">
-                        <a class="btn" onclick="edit_objective(1);" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
-                        <a class="btn" onclick="alert('deleting');" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
-                    </div>                
-                </td>
-                </tr>
-                <tr>
-                <th scope="row">2</th>
-                <td data-toggle="context" data-target="#context-menu">Glyphsin font format from the Jacob</td>
-                <td>
-                    <div class="btn-group" role="group" aria-label="First group">
-                        <a class="btn" onclick="edit_objective(1);" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
-                        <a class="btn" onclick="alert('deleting');" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
-                    </div>                
-                </td>
-                </tr>
-                <tr>
-                <th scope="row">3</th>
-                <td data-toggle="context" data-target="#context-menu">Free Shipping Glyphic</td>
-                <td>
-                    <div class="btn-group" role="group" aria-label="First group">
-                        <a class="btn" onclick="edit_objective(1);" href="#" role="button" title='Edit objective' disabled="true"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
-                        <a class="btn" onclick="alert('deleting');" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
-                    </div>                
-                </td>
-                </tr>
+                
+                {% for objective in objectives %}
+                    <tr>
+                    <th scope="row">{{forloop.counter}}</th>
+                    <td data-toggle="context" data-target="#context-menu">{{objective.name}}-{{objective.id}}</td>
+                    <td>
+                        <div class="btn-group" role="group" aria-label="First group">
+                            <a class="btn" onclick="edit_objective({{objective.id}});" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                            <a class="btn" onclick="alert('TODO: delete function');" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                        </div>                
+                    </td>
+                    </tr>
+                {% endfor %}
+                
                 </tbody>
                 </table>
                 {% endif %}
@@ -674,6 +658,7 @@ $( '#save_objective_btn' ).click(function() {
     }).done(function( msg ) {
         alert( "Data Saved: " + msg );
         $('#objective_modal').modal('toggle');
+        location.reload();
     });    
     });
 
@@ -796,7 +781,7 @@ function edit_objective(id) {
 
     mode = 2; // edit
     // TODO: get existing data and populate dialog
-    $('#objective_name').val("test");
+    //$('#objective_name').val("test");
     $('#objective_modal').modal('show');
 }
 
