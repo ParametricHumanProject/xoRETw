@@ -149,7 +149,7 @@
                     <td data-toggle="context" data-target="#context-menu">{{objective.name}}</td>
                     <td>
                         <div class="btn-group" role="group" aria-label="First group">
-                            <a class="btn" onclick="edit_objective({{objective.id}});" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                            <a class="btn" onclick="edit_objective({{objective.id}}, 1);" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
                             <a class="btn" onclick="delete_objective({{objective.id}});" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                         </div>                
                     </td>
@@ -658,6 +658,7 @@ $( '#save_objective_btn' ).click(function() {
         
         var objective_name = msg['objective_name'];
         var created = msg['created'];
+        alert(created);
         created = (created === "True");
         
         if (created) {

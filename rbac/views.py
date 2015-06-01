@@ -56,9 +56,12 @@ def dashboard(request):
             # edit mode
             else:
                 pass
-                
-            response = json.dumps('{"created":"True"}')
-            return HttpResponse(response, content_type='application/json')
+
+            data = {}
+            data['created'] = 'True'
+            data['objective_name'] = objective_name
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
         
     # if a GET (or any other method)
     else:    
