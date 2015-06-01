@@ -25,29 +25,39 @@ def dashboard(request):
         
         objective_name = request.POST.get('name', None)
         objective_type = request.POST.get('type', None)
-        conditions = request.POST.getlist('conditions[]', None)
+        condition_names = request.POST.getlist('conditions[]', None)
         mode = request.POST.get('mode', None)
         mode = int(mode)
         
         # TODO: handle each object_type        
         if object_type == OBJECT_TYPE_OBJECTIVE:
             if mode == CREATE_NEW:
+                try:
+                    objective, created = Objective.objects.get_or_create(name=objective_name, type=objective_type, user=user)
+                except Exception, e:
+                    print 'error exists already'
+                    data = {}
+                    data['created'] = 'False'
+                    data['objective_name'] = objective_name
+                    json_data = json.dumps(data)
+                    return HttpResponse(json_data, content_type='application/json')
                 
-                objective = Objective(name=objective_name, type=objective_type, user=user)
-                objective.save()
-                for condition in conditions:
-                    c, created = Condition.objects.get_or_create(name=condition, user=user)
+                if created:
+                    objective.save()
+                                    
+                for condition_name in condition_names:
+                    condition, created = Condition.objects.get_or_create(name=condition_name, user=user)
                     
                     if created:
-                        c.save()
+                        condition.save()
                         
-                    objective.conditions.add(c)
+                    objective.conditions.add(condition)
                 
             # edit mode
             else:
                 pass
                 
-            response = json.dumps('{"message":"Ok"}')
+            response = json.dumps('{"created":"True"}')
             return HttpResponse(response, content_type='application/json')
         
     # if a GET (or any other method)
@@ -62,12 +72,30 @@ def delete_objective(request):
     user = request.user
     
     # if this is a POST request we need to process the data
-    if request.method == 'POST':        
+    if request.method == 'POST':      
+        print 'hellopw deltee'  
         objective_id = request.POST.get('objective_id', None)
+        print 'objective_id is ', objective_id
         
+        response = json.dumps('{"message":"FAIL to deltet"}')
         if objective_id:
+            response = json.dumps('{"message":"DELETED"}')
             o = Objective.objects.get(id=objective_id, user=user)
             o.delete()
     
-    response = json.dumps('{"deleted":"Ok"}')
+    return HttpResponse(response, content_type='application/json')
+
+
+def edit_objective(request):
+    user = request.user
+    
+    # if this is a POST request we need to process the data
+    if request.method == 'GET':        
+        objective_id = request.GET.get('objective_id', None)
+        print 'edit objective id ', objective_id
+        
+        if objective_id:
+            o = Objective.objects.get(id=objective_id, user=user)
+    
+    response = json.dumps('{"message":"Edit data"}')
     return HttpResponse(response, content_type='application/json')

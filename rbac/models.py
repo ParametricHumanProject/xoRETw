@@ -24,7 +24,7 @@ class Task(models.Model):
 
 class Objective(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     type = models.CharField(max_length=50)
     conditions = models.ManyToManyField(Condition)
 

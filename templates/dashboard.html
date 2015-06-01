@@ -655,9 +655,18 @@ $( '#save_objective_btn' ).click(function() {
         dataType: "json",
         data: objective_data
     }).done(function( msg ) {
-        //alert( "Data Saved: " + msg );
-        $('#objective_modal').modal('toggle');
-        location.reload();
+        
+        var objective_name = msg['objective_name'];
+        var created = msg['created'];
+        created = (created === "True");
+        
+        if (created) {
+            $('#objective_modal').modal('toggle');
+            location.reload();            
+        } else {
+            alert('Error - objective name: '+ objective_name +', already exists.');
+            $( "#objective_name" ).focus();
+        }
     });    
     });
 
@@ -776,13 +785,6 @@ function change_select_label(e) {
     $('#objective_type_label').text(property_value);
 }
 
-function edit_objective(id) {
-
-    mode = 2; // edit
-    // TODO: get existing data and populate dialog
-    //$('#objective_name').val("test");
-    $('#objective_modal').modal('show');
-}
 
 function flash(selector) {
     $(selector).fadeOut(250).fadeIn(250);
@@ -798,21 +800,38 @@ jQuery.fn.extend({
 });
 
 function delete_objective(id) {
-    //alert('deleteing objective id ' + id);
     $('#objective-' + id).hide(1000);
     
-    // post data
     $.ajax({
         method: "POST",
         url: "{% url 'delete_objective' %}",
         dataType: "json",
-        data: {objective_id: id}
+        data: {objective_id: id},
     }).done(function( msg ) {
-        //alert( "Objective deleted successfully " + msg );
+        var message = JSON.parse(msg);
     }).fail(function() {
-        alert( "error" );
+        alert( "Error - failed to delete objective." );
   });    
+}
 
+function edit_objective(id) {
+
+    mode = 2; // edit
+    // TODO: get existing data and populate dialog
+    
+    //$('#objective_name').val("test");
+    $('#objective_modal').modal('show');
+    $.ajax({
+        method: "GET",
+        url: "{% url 'edit_objective' %}",
+        dataType: "json",
+        data: {objective_id: id},
+    }).done(function( msg ) {
+        //var message = JSON.parse(msg);
+    }).fail(function() {
+        alert( "Error - failed to edit objective." );
+  });    
+    
 }
 
 </script>
