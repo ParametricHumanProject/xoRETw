@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from rbac import views
+from rbac import views
 from django.views.generic.base import RedirectView
 
 urlpatterns = patterns('',
@@ -11,5 +12,6 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', RedirectView.as_view(url='accounts/login', permanent=False), name='index'),
     url(r'^views/dashboard$', views.dashboard, name='dashboard'),
+    url(r'^views/delete_objective$', views.delete_objective, name='delete_objective'),
     (r'^accounts/', include('registration.backends.simple.urls')),
 )

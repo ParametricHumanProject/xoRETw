@@ -3,7 +3,7 @@
 {% load staticfiles %}
 {% block content %}
 
-<nav class="navbar navbar-default navbar-fixed-top">
+<nav class="navbar navbar-fixed-top">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
@@ -128,13 +128,12 @@
             </ul>
         </div>
     </div>
-    <br>
-    <div class="row">
+    <div class="row" style="padding-top:7.5px;">
         <div class="col-md-12">
-            <div class="border_one" style="height:65vh;">
+            <div class="border_one" style="height:67vh; overflow: auto">
 
                 {% if object_type == 1 %}
-                <table id="testtable" class="table table-condensed table-hover">
+                <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
                 <thead>
                 <tr>
                 <th class="col-md-1">#</th>
@@ -145,13 +144,13 @@
                 <tbody>
                 
                 {% for objective in objectives %}
-                    <tr>
+                    <tr id='objective-{{objective.id}}'>
                     <th scope="row">{{forloop.counter}}</th>
-                    <td data-toggle="context" data-target="#context-menu">{{objective.name}}-{{objective.id}}</td>
+                    <td data-toggle="context" data-target="#context-menu">{{objective.name}}</td>
                     <td>
                         <div class="btn-group" role="group" aria-label="First group">
                             <a class="btn" onclick="edit_objective({{objective.id}});" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
-                            <a class="btn" onclick="alert('TODO: delete function');" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                            <a class="btn" onclick="delete_objective({{objective.id}});" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                         </div>                
                     </td>
                     </tr>
@@ -656,7 +655,7 @@ $( '#save_objective_btn' ).click(function() {
         dataType: "json",
         data: objective_data
     }).done(function( msg ) {
-        alert( "Data Saved: " + msg );
+        //alert( "Data Saved: " + msg );
         $('#objective_modal').modal('toggle');
         location.reload();
     });    
@@ -798,8 +797,24 @@ jQuery.fn.extend({
   }
 });
 
-
+function delete_objective(id) {
+    //alert('deleteing objective id ' + id);
+    $('#objective-' + id).hide(1000);
     
+    // post data
+    $.ajax({
+        method: "POST",
+        url: "{% url 'delete_objective' %}",
+        dataType: "json",
+        data: {objective_id: id}
+    }).done(function( msg ) {
+        //alert( "Objective deleted successfully " + msg );
+    }).fail(function() {
+        alert( "error" );
+  });    
+
+}
+
 </script>
 
 {% endblock scripts %}

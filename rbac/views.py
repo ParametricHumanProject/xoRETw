@@ -36,8 +36,11 @@ def dashboard(request):
                 objective = Objective(name=objective_name, type=objective_type, user=user)
                 objective.save()
                 for condition in conditions:
-                    c = Condition(name=condition, user=user)
-                    c.save()
+                    c, created = Condition.objects.get_or_create(name=condition, user=user)
+                    
+                    if created:
+                        c.save()
+                        
                     objective.conditions.add(c)
                 
             # edit mode
@@ -55,4 +58,16 @@ def dashboard(request):
             
     return render_to_response('dashboard.html', {'object_type':object_type}, context_instance=RequestContext(request))
 
-
+def delete_objective(request):
+    user = request.user
+    
+    # if this is a POST request we need to process the data
+    if request.method == 'POST':        
+        objective_id = request.POST.get('objective_id', None)
+        
+        if objective_id:
+            o = Objective.objects.get(id=objective_id, user=user)
+            o.delete()
+    
+    response = json.dumps('{"deleted":"Ok"}')
+    return HttpResponse(response, content_type='application/json')
