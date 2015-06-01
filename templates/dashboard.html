@@ -149,7 +149,7 @@
                     <td data-toggle="context" data-target="#context-menu">{{objective.name}}</td>
                     <td>
                         <div class="btn-group" role="group" aria-label="First group">
-                            <a class="btn" onclick="edit_objective({{objective.id}}, 1);" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                            <a class="btn" onclick="edit_objective_btn({{objective.id}}, 1);" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
                             <a class="btn" onclick="delete_objective({{objective.id}});" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                         </div>                
                     </td>
@@ -622,6 +622,9 @@ $( '#create_objective_btn' ).click(function() {
 });
 
 $( '#save_objective_btn' ).click(function() {
+    
+    // TODO: check mode
+    
     // validate all fields
     var name = $('#objective_name').val().split(' ').join('_');
 
@@ -669,7 +672,7 @@ $( '#save_objective_btn' ).click(function() {
             $( "#objective_name" ).focus();
         }
     });    
-    });
+});
 
 function Objective(name, type, conditions, mode) {
     this.name = name;
@@ -815,20 +818,42 @@ function delete_objective(id) {
   });    
 }
 
-function edit_objective(id) {
+function edit_objective_btn(id) {
 
     mode = 2; // edit
     // TODO: get existing data and populate dialog
-    
-    //$('#objective_name').val("test");
-    $('#objective_modal').modal('show');
+        
     $.ajax({
         method: "GET",
         url: "{% url 'edit_objective' %}",
         dataType: "json",
         data: {objective_id: id},
     }).done(function( msg ) {
-        //var message = JSON.parse(msg);
+        var objective_name = msg['name'];
+        var objective_type = msg['type'];
+        var conditions = msg['conditions'];
+        alert('conditions ' + conditions);
+        
+        $('#objective_name').val(objective_name);
+        $('#objective_type_label').text(objective_type);
+
+        var value = ''
+        var len = conditions.length;
+        for (var i = 0; i < len; i++) {
+            //alert(conditions[i]);
+            //Do something
+            //alert(conditions[i]);
+            value = conditions[i];
+            var option = '<option value=' + value.split(' ').join('_') + '>' + value + '</option>';
+            $("#condition_list").append(option);
+        }        
+        //$("#condition_list").append(option);
+        if (len) {
+            $("#remove_condition").prop('disabled', false);
+        }
+        
+        $('#objective_modal').modal('show');
+                
     }).fail(function() {
         alert( "Error - failed to edit objective." );
   });    

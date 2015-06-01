@@ -35,7 +35,7 @@ def dashboard(request):
                 try:
                     objective, created = Objective.objects.get_or_create(name=objective_name, type=objective_type, user=user)
                 except Exception, e:
-                    print 'error exists already'
+                    #print 'error exists already'
                     data = {}
                     data['created'] = 'False'
                     data['objective_name'] = objective_name
@@ -98,7 +98,20 @@ def edit_objective(request):
         print 'edit objective id ', objective_id
         
         if objective_id:
-            o = Objective.objects.get(id=objective_id, user=user)
+            objective = Objective.objects.get(id=objective_id, user=user)
     
-    response = json.dumps('{"message":"Edit data"}')
-    return HttpResponse(response, content_type='application/json')
+    # get name, type and conditions
+    data = {}
+    data['name'] = objective.name
+    data['type'] = objective.type
+    data['conditions'] = []
+    
+    print 'objective.conditions ', objective.conditions
+    for i in objective.conditions.all():
+        print 'condition i is ', i.name
+        data['conditions'].append(i.name)
+    
+    print 'data is ', data
+    json_data = json.dumps(data)
+    print ' json_data ', json_data
+    return HttpResponse(json_data, content_type='application/json')
