@@ -149,7 +149,7 @@
                     <td data-toggle="context" data-target="#context-menu">{{objective.name}}</td>
                     <td>
                         <div class="btn-group" role="group" aria-label="First group">
-                            <a class="btn" onclick="edit_objective_btn({{objective.id}}, 1);" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                            <a class="btn" onclick="edit_objective_btn({{objective.id}});" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
                             <a class="btn" onclick="delete_objective({{objective.id}});" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                         </div>                
                     </td>
@@ -265,6 +265,7 @@
                   <div class="form-group">
                     <label for="objective_name">Objective Name</label>
                     <input type="text" class="form-control" id="objective_name" placeholder="Enter objective name" required>
+                    <input type="hidden" id="objective_id" value="">
                   </div>              
                 </div>  
             </div>
@@ -589,48 +590,47 @@
 
 {% block scripts %}
 <script>
-    var mode = 0; // edit
-    $(function() {
     
-      // Handler for .ready() called.
+    var mode = 0; // edit
+    
+    // Handler for .ready() called.
+    $(function() {
+        
+        // set modal title for objective dialog
         $('#objective_modal').on('show.bs.modal', function(e) {
             if (mode == 1) {
-                $('#modal_title').text("Create New Objective");        
+                $('#modal_title').text("Create New Objective"); 
+                //$("#save_objective_btn").prop('disabled', false);            
+            } else {
+                $('#modal_title').text("Edit Objective");   
+                //$("#save_objective_btn").prop('disabled', true);     
             }
-            else
-                $('#modal_title').text("Edit Objective");        
         })
-        //$("remove_condition").prop('disabled', true);
-        
     });
 
 
 // Handlers
 
-// Modal 1 - handlers
 $( '#create_objective_btn' ).click(function() {
 
     // set to new mode
     mode = 1;
     
-    // clear all fields
+    // reset all fields
     $('#objective_name').val('');
     $('#objective_type_label').text('Select');
     $('#condition_input').val('');
     $('#condition_list').find('option').remove();
-    
 });
 
 $( '#save_objective_btn' ).click(function() {
     
-    // TODO: check mode
-    
     // validate all fields
+    var id = $('#objective_id').val();
     var name = $('#objective_name').val().split(' ').join('_');
 
     if (!name) {
         alert('Error: objective name cannot be empty.');
-        //flash("#objective_name");
         $("#objective_name").focus();
         $( '#objective_name' ).flash();
         return;
@@ -649,7 +649,7 @@ $( '#save_objective_btn' ).click(function() {
     });    
 
     // create data
-    var objective_data = new Objective(name, type, conditions, mode);
+    var objective_data = new Objective(id, name, type, conditions, mode);
 
     // post data
     $.ajax({
@@ -662,19 +662,28 @@ $( '#save_objective_btn' ).click(function() {
         var objective_name = msg['objective_name'];
         var created = msg['created'];
         alert(created);
-        created = (created === "True");
+        
+        created = (created === "true");
         
         if (created) {
             $('#objective_modal').modal('toggle');
             location.reload();            
-        } else {
-            alert('Error - objective name: '+ objective_name +', already exists.');
-            $( "#objective_name" ).focus();
+        } else {    // created is false
+            
+            // create new mode
+            if (mode == 1) {
+                alert('Error - failed to create objective: '+ objective_name);
+                //$( "#objective_name" ).focus();
+            } else {
+                $('#objective_modal').modal('toggle');
+                //location.reload();            
+            }
         }
     });    
 });
 
-function Objective(name, type, conditions, mode) {
+function Objective(id, name, type, conditions, mode) {
+    this.id = id;
     this.name = name;
     this.type = type;
     this.conditions = conditions;
@@ -726,10 +735,9 @@ $("#add_condition").click(function(e){
     
     var value = $('#condition_input').val();
     
-    
     if (!$.trim(value)) {
         // error
-        alert('error: empty value');
+        alert('Error: condition value cannot be empty.');
         $( "#condition_input" ).focus();
         return;
     }
@@ -741,7 +749,7 @@ $("#add_condition").click(function(e){
         
     for (i = 0; i < option_values.length; i++) { 
         if (option_values[i] == value.split(' ').join('_')) {
-            alert('error: already exists ' + value.split(' ').join('_'));
+            alert('Error: ' + value.split(' ').join('_') + ' already exists');
             $( "#condition_input" ).focus();
             return;
         }
@@ -763,17 +771,14 @@ $("#remove_condition").click(function(e){
     var value = $('#condition_list').val();
         
     if (!value) {
-        alert('error: option not selected');
+        alert('Error: no option selected');
         return;
     }
     
-    //var option = '<option value=1>' + value + '</option>';
     var selector = "#condition_list option[value='" + value + "']";
-    
     $(selector).remove();
     
     var size = $('#condition_list option').size()
-    
     if (!size) {
         $("#remove_condition").prop('disabled', true);
     }
@@ -782,13 +787,11 @@ $("#remove_condition").click(function(e){
 });
 
 
-
 // helper
 function change_select_label(e) {
     var property_value = $( '#'+e.target.id ).text();
     $('#objective_type_label').text(property_value);
 }
-
 
 function flash(selector) {
     $(selector).fadeOut(250).fadeIn(250);
@@ -804,6 +807,7 @@ jQuery.fn.extend({
 });
 
 function delete_objective(id) {
+    
     $('#objective-' + id).hide(1000);
     
     $.ajax({
@@ -814,48 +818,55 @@ function delete_objective(id) {
     }).done(function( msg ) {
         var message = JSON.parse(msg);
     }).fail(function() {
-        alert( "Error - failed to delete objective." );
+        alert( "Error - failed to delete objective" );
   });    
 }
 
 function edit_objective_btn(id) {
 
     mode = 2; // edit
-    // TODO: get existing data and populate dialog
-        
+    
+    // get existing data and populate dialog
     $.ajax({
         method: "GET",
         url: "{% url 'edit_objective' %}",
         dataType: "json",
         data: {objective_id: id},
     }).done(function( msg ) {
+
+        // reset all fields
+        $('#objective_id').val('');
+        $('#objective_name').val('');
+        $('#objective_type_label').text('Select');
+        $('#condition_input').val('');
+        $('#condition_list').find('option').remove();
+        
         var objective_name = msg['name'];
         var objective_type = msg['type'];
         var conditions = msg['conditions'];
-        alert('conditions ' + conditions);
-        
+
+        // set input values
+        $('#objective_id').val(id); //hidden
         $('#objective_name').val(objective_name);
         $('#objective_type_label').text(objective_type);
 
         var value = ''
-        var len = conditions.length;
-        for (var i = 0; i < len; i++) {
-            //alert(conditions[i]);
-            //Do something
-            //alert(conditions[i]);
+        for (var i = 0; i < conditions.length; i++) {
             value = conditions[i];
             var option = '<option value=' + value.split(' ').join('_') + '>' + value + '</option>';
             $("#condition_list").append(option);
         }        
-        //$("#condition_list").append(option);
-        if (len) {
+
+        if (conditions.length) {
             $("#remove_condition").prop('disabled', false);
+        } else {
+            $("#remove_condition").prop('disabled', true);
         }
         
         $('#objective_modal').modal('show');
                 
     }).fail(function() {
-        alert( "Error - failed to edit objective." );
+        alert( "Error - Edit objective failed." );
   });    
     
 }

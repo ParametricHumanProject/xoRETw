@@ -5,21 +5,21 @@ from django.contrib.auth.models import User
 
 class Step(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     step = models.ManyToManyField('self')
 
 class Condition(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
 
 class Scenario(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     step = models.ManyToManyField(Step)
 
 class Task(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     scenario = models.ManyToManyField(Scenario)
 
 class Objective(models.Model):
@@ -28,36 +28,36 @@ class Objective(models.Model):
     type = models.CharField(max_length=50)
     conditions = models.ManyToManyField(Condition)
 
-    #step = models.ManyToManyField(Step)
-    #objective = models.ManyToManyField('self')
-    #scenarios = models.ManyToManyField(Scenario)
+    step = models.ManyToManyField(Step)
+    objective = models.ManyToManyField('self')
+    scenarios = models.ManyToManyField(Scenario)
 
     
 class Obstacle(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     objective = models.ManyToManyField(Objective)
 
 class ContextConstraint(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     condition = models.ManyToManyField(Condition)
     obstacle = models.ManyToManyField(Obstacle)
     objective = models.ManyToManyField(Objective)
 
 class WorkProfile(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     task = models.ManyToManyField(Task)
     
 class Role(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     role = models.ManyToManyField('self')
 
 class Permission(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     step = models.OneToOneField(Step)
     role = models.ManyToManyField(Role)
     context_constraint = models.ManyToManyField(ContextConstraint)
