@@ -14,4 +14,11 @@
 	<br>
 	<p><a class="btn btn-default" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></p>
 </div>
+<script>
+$( document ).ready(function() {
+    // Handler for .ready() called.
+    $("input").prop('required',true);
+});
+
+</script>
 {% endblock %}

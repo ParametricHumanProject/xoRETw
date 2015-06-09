@@ -3,24 +3,29 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+class Condition(models.Model):
+    user = models.ForeignKey(User)
+    name = models.CharField(max_length=50, unique=True)
+
 class Step(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
     step = models.ManyToManyField('self')
 
-class Condition(models.Model):
-    user = models.ForeignKey(User)
-    name = models.CharField(max_length=50, unique=True)
-
 class Scenario(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
-    step = models.ManyToManyField(Step)
+    steps = models.ManyToManyField(Step)
 
 class Task(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
-    scenario = models.ManyToManyField(Scenario)
+    scenarios = models.ManyToManyField(Scenario)
+
+class WorkProfile(models.Model):
+    user = models.ForeignKey(User)
+    name = models.CharField(max_length=50, unique=True)
+    tasks = models.ManyToManyField(Task)
 
 class Objective(models.Model):
     user = models.ForeignKey(User)
@@ -28,7 +33,7 @@ class Objective(models.Model):
     type = models.CharField(max_length=50)
     conditions = models.ManyToManyField(Condition)
 
-    step = models.ManyToManyField(Step)
+    steps = models.ManyToManyField(Step)
     objective = models.ManyToManyField('self')
     scenarios = models.ManyToManyField(Scenario)
 
@@ -36,30 +41,28 @@ class Objective(models.Model):
 class Obstacle(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
+    type = models.CharField(max_length=50)
     objective = models.ManyToManyField(Objective)
 
+# done
 class ContextConstraint(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
-    condition = models.ManyToManyField(Condition)
-    obstacle = models.ManyToManyField(Obstacle)
-    objective = models.ManyToManyField(Objective)
+    conditions = models.ManyToManyField(Condition)
 
-class WorkProfile(models.Model):
-    user = models.ForeignKey(User)
-    name = models.CharField(max_length=50, unique=True)
-    task = models.ManyToManyField(Task)
-    
+# done    
 class Role(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
     role = models.ManyToManyField('self')
+    work_profile = models.OneToOneField(WorkProfile)
 
+# done
 class Permission(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
     step = models.OneToOneField(Step)
-    role = models.ManyToManyField(Role)
-    context_constraint = models.ManyToManyField(ContextConstraint)
+    roles = models.ManyToManyField(Role)
+    context_constraints = models.ManyToManyField(ContextConstraint)
     
 

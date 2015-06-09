@@ -12,7 +12,12 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', RedirectView.as_view(url='accounts/login', permanent=False), name='index'),
     url(r'^views/dashboard$', views.dashboard, name='dashboard'),
+
     url(r'^views/delete_objective$', views.delete_objective, name='delete_objective'),
     url(r'^views/edit_objective$', views.edit_objective, name='edit_objective'),
+
+    url(r'^views/delete_obstacle$', views.delete_objective, name='delete_objective'),
+    url(r'^views/edit_obstacle$', views.edit_objective, name='edit_objective'),
+
     (r'^accounts/', include('registration.backends.simple.urls')),
 )
