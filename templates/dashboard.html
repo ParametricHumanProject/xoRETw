@@ -504,10 +504,38 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Create Permission</h4>
+        <h4 class="modal-title" id="myModalLabel">Create New Permission</h4>
       </div>
       <div class="modal-body">
-            Add layout and widgets here ...
+        <form>
+            <div class="row">
+                <div class="col-md-9">
+                  <div class="form-group">
+                    <label for="objective_name">Permission Name</label>
+                    <input type="text" class="form-control" id="objective_name" placeholder="Enter permission name" required>
+                    <input type="hidden" id="permission_id" value="">
+                  </div>              
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-9">
+                  <div class="form-group">
+                    <label for="objective_name">Operation Name</label>
+                    <input type="text" class="form-control" id="objective_name" placeholder="Enter operation name" required>
+                    <input type="hidden" id="objective_id" value="">
+                  </div>              
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-9">
+                  <div class="form-group">
+                    <label for="objective_name">Object Name</label>
+                    <input type="text" class="form-control" id="objective_name" placeholder="Enter object name" required>
+                    <input type="hidden" id="objective_id" value="">
+                  </div>              
+                </div>  
+            </div>
+        </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
