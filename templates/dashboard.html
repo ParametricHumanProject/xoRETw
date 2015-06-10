@@ -260,9 +260,9 @@
 </div>
 
 
-<!------------------------------------------------>
-<!--                    Modals                  -->
-<!------------------------------------------------>
+<!-------------------------------------------------->
+<!--                 Modals                       -->
+<!-------------------------------------------------->
 
 <!-- 1. Create Objective Modal -->
 <div class="modal fade" id="objective_modal" tabindex="-1" role="dialog" aria-labelledby="objective_modal_title" aria-hidden="true">
@@ -410,11 +410,21 @@
         <h4 class="modal-title" id="myModalLabel">Create Condition</h4>
       </div>
       <div class="modal-body">
-            Add layout and widgets here ...
+        <form>
+            <div class="row">
+                <div class="col-md-9">
+                  <div class="form-group">
+                    <label for="obstacle_name">Condition Name</label>
+                    <input type="text" class="form-control" id="condition_name" placeholder="Enter condition name" required>
+                    <input type="hidden" id="condition_id" value="">
+                  </div>              
+                </div>  
+            </div>
+        </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-primary">Save</button>
       </div>
     </div>
   </div>
@@ -430,8 +440,37 @@
         <h4 class="modal-title" id="myModalLabel">Create Context Constraint</h4>
       </div>
       <div class="modal-body">
-            Add layout and widgets here ...
-      </div>
+        <form>
+            <div class="row">
+                <div class="col-md-9">
+                  <div class="form-group">
+                    <label for="obstacle_name">Constraint Name</label>
+                    <input type="text" class="form-control" id="obstacle_name" placeholder="Enter constraint name" required>
+                    <input type="hidden" id="obstacle_id" value="">
+                  </div>              
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-9">
+                  <div class="form-group">
+                    <label for="abstract_context_condition2">Available Conditions</label>
+                    <select id="condition_list2" multiple class="form-control">
+                    </select>     
+                    <input id="add_condition2" class="btn btn-default" type="button" value="Link Condition">
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-9">
+                  <div class="form-group">
+                    <label for="condition_list2">Linked Conditions</label>
+                    <select id="condition_list2" multiple class="form-control">
+                    </select>     
+                    <input id="remove_condition2" class="btn btn-default" type="button" disabled="false" value="Unlink Condition">     
+                  </div>
+                </div>  
+            </div>
+        </form>      </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary">Save changes</button>
@@ -484,10 +523,40 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Create Task</h4>
+        <h4 class="modal-title" id="myModalLabel">Create New Task</h4>
       </div>
       <div class="modal-body">
-            Add layout and widgets here ...
+        <form>
+            <div class="row">
+                <div class="col-md-9">
+                  <div class="form-group">
+                    <label for="obstacle_name">Task Name</label>
+                    <input type="text" class="form-control" id="obstacle_name" placeholder="Enter task name" required>
+                    <input type="hidden" id="task_id" value="">
+                  </div>              
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-9">
+                  <div class="form-group">
+                    <label for="abstract_context_condition2">Attached Scenarios</label>
+                    <select id="condition_list2" multiple class="form-control">
+                    </select>     
+                    <input id="add_condition2" class="btn btn-default" type="button" value="Remove Scenario from Task">
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-9">
+                  <div class="form-group">
+                    <label for="condition_list2">Currently Available Scenarios</label>
+                    <select id="condition_list2" multiple class="form-control">
+                    </select>     
+                    <input id="remove_condition2" class="btn btn-default" type="button" disabled="false" value="Add Scenario to Task">     
+                  </div>
+                </div>  
+            </div>
+        </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -503,10 +572,40 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Create Work Profile</h4>
+        <h4 class="modal-title" id="myModalLabel">Create New Work Profile</h4>
       </div>
       <div class="modal-body">
-            Add layout and widgets here ...
+        <form>
+            <div class="row">
+                <div class="col-md-9">
+                  <div class="form-group">
+                    <label for="obstacle_name">Work Profile Name</label>
+                    <input type="text" class="form-control" id="obstacle_name" placeholder="Enter work profile name" required>
+                    <input type="hidden" id="task_id" value="">
+                  </div>              
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-9">
+                  <div class="form-group">
+                    <label for="abstract_context_condition2">Attached Tasks</label>
+                    <select id="condition_list2" multiple class="form-control">
+                    </select>     
+                    <input id="add_condition2" class="btn btn-default" type="button" value="Remove Task from Work Profile">
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-9">
+                  <div class="form-group">
+                    <label for="condition_list2">Currently Available Tasks</label>
+                    <select id="condition_list2" multiple class="form-control">
+                    </select>     
+                    <input id="remove_condition2" class="btn btn-default" type="button" disabled="false" value="Add Task to Work Profile">     
+                  </div>
+                </div>  
+            </div>
+        </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
