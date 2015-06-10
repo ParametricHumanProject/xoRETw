@@ -16,8 +16,8 @@ urlpatterns = patterns('',
     url(r'^views/delete_objective$', views.delete_objective, name='delete_objective'),
     url(r'^views/edit_objective$', views.edit_objective, name='edit_objective'),
 
-    url(r'^views/delete_obstacle$', views.delete_objective, name='delete_objective'),
-    url(r'^views/edit_obstacle$', views.edit_objective, name='edit_objective'),
+    url(r'^views/delete_obstacle$', views.delete_obstacle, name='delete_obstacle'),
+    url(r'^views/edit_obstacle$', views.edit_obstacle, name='edit_obstacle'),
 
     (r'^accounts/', include('registration.backends.simple.urls')),
 )

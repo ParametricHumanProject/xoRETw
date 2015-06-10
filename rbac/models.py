@@ -42,6 +42,7 @@ class Obstacle(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
     type = models.CharField(max_length=50)
+    conditions = models.ManyToManyField(Condition)
     objective = models.ManyToManyField(Objective)
 
 # done

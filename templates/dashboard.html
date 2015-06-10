@@ -660,7 +660,15 @@ var OBJECT_TYPE_TASK = 8
 var OBJECT_TYPE_CONTEXTCONSTRAINT = 9
 
 // common to all
-var dashboard_url = "{% url 'dashboard' %}"
+var url_dashboard = "{% url 'dashboard' %}"
+
+var url_delete_objective = "{% url 'delete_objective' %}"
+var url_edit_objective = "{% url 'edit_objective' %}"
+
+var url_delete_obstacle = "{% url 'delete_obstacle' %}"
+var url_edit_obstacle = "{% url 'edit_obstacle' %}"
+
+
 var mode = 0; // edit mode, common var to all
 
 function flash(selector) {

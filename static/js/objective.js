@@ -4,7 +4,6 @@ $(function() {
     
     // set modal title for objective dialog
     $('#objective_modal').on('show.bs.modal', function(e) {
-        alert(mode);
         if (mode == 1) {
             $('#objective_modal_title').text("Create New Objective"); 
         } else {
@@ -28,7 +27,7 @@ $( '#create_objective_btn' ).click(function() {
 });
 
 $( '#save_objective_btn' ).click(function() {
-    
+    alert('a');
     // validate all fields
     var id = $('#objective_id').val();
     var name = $('#objective_name').val().split(' ').join('_');
@@ -54,15 +53,15 @@ $( '#save_objective_btn' ).click(function() {
 
     // create data
     var objective_data = new Objective(id, name, type, conditions, mode);
-
+    alert('a1');
     // post data
     $.ajax({
         method: "POST",
-        url: dashboard_url,
+        url: url_dashboard,
         dataType: "json",
         data: objective_data
     }).done(function( msg ) {
-        
+        alert('ll')
         var objective_name = msg['objective_name'];
         var created = msg['created'];
         //alert(created);
@@ -71,7 +70,7 @@ $( '#save_objective_btn' ).click(function() {
         
         if (created) {
             $('#objective_modal').modal('toggle');
-            location.reload();            
+            //location.reload();            
         } else {    // created is false
             
             // create new mode
@@ -81,6 +80,7 @@ $( '#save_objective_btn' ).click(function() {
                 $('#objective_modal').modal('toggle');
             }
         }
+        location.reload();            
     });    
 });
 
@@ -198,11 +198,13 @@ function change_select_label(e) {
 
 function delete_objective(id) {
     
-    $('#objective-' + id).hide(1000);
+    // fade out then remove
+    $('#objective-' + id).fadeOut('slow', function(){ $(this).remove(); });    
+
     
     $.ajax({
         method: "POST",
-        url: "{% url 'delete_objective' %}",
+        url: url_delete_objective,
         dataType: "json",
         data: {objective_id: id},
     }).done(function( msg ) {
@@ -219,7 +221,7 @@ function edit_objective_btn(id) {
     // get existing data and populate dialog
     $.ajax({
         method: "GET",
-        url: "{% url 'edit_objective' %}",
+        url: url_edit_objective,
         dataType: "json",
         data: {objective_id: id},
     }).done(function( msg ) {

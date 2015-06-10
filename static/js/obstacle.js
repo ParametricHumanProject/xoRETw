@@ -5,7 +5,6 @@ $(function() {
     
     // set modal title for obstacle dialog
     $('#obstacle_modal').on('show.bs.modal', function(e) {
-        alert(mode);
         if (mode == 1) {
             $('#obstacle_modal_title').text("Create New Obstacle"); 
         } else {
@@ -13,55 +12,55 @@ $(function() {
         }
     })
     
-$( '#save_obstacle_btn' ).click(function() {
-    // validate all fields
-    var id = $('#obstacle_id').val();
-    var name = $('#obstacle_name').val().split(' ').join('_');
+    $( '#save_obstacle_btn' ).click(function() {
+        // validate all fields
+        var id = $('#obstacle_id').val();
+        var name = $('#obstacle_name').val().split(' ').join('_');
 
-    if (!name) {
-        alert('Error: obstacle name cannot be empty.');
-        $("#obstacle_name").focus();
-        $( '#obstacle_name' ).flash();
-        return;
-    }
-    
-    var type = $('#obstacle_type_label').text();
-
-    var conditions = [];
-    $('#condition_list2 option').each(function() {
-        conditions.push($(this).val().split(' ').join('_'));
-    });    
-
-    // create data
-    var obstacle_data = new Obstacle(id, name, type, conditions, mode);
-
-    // post data
-    $.ajax({
-        method: "POST",
-        url: dashboard_url,
-        dataType: "json",
-        data: obstacle_data
-    }).done(function( msg ) {
-        
-        var obstacle_name = msg['obstacle_name'];
-        var created = msg['created'];
-        //alert('created i s '+ created);
-        created = (created === "true");
-        
-        if (created) {
-            $('#obstacle_modal').modal('toggle');
-            location.reload();            
-        } else {    // created is false
-            
-            // create new mode
-            if (mode == 1) {
-                alert('Error - failed to create obstacle: '+ obstacle_name);
-            } else {
-                $('#obstacle_modal').modal('toggle');
-            }
+        if (!name) {
+            alert('Error: obstacle name cannot be empty.');
+            $("#obstacle_name").focus();
+            $( '#obstacle_name' ).flash();
+            return;
         }
+        
+        var type = $('#obstacle_type_label').text();
+
+        var conditions = [];
+        $('#condition_list2 option').each(function() {
+            conditions.push($(this).val().split(' ').join('_'));
+        });    
+
+        // create data
+        var obstacle_data = new Obstacle(id, name, type, conditions, mode);
+
+        // post data
+        $.ajax({
+            method: "POST",
+            url: url_dashboard,
+            dataType: "json",
+            data: obstacle_data
+        }).done(function( msg ) {
+            
+            var obstacle_name = msg['obstacle_name'];
+            var created = msg['created'];
+            created = (created === "true");
+            
+            if (created) {
+                $('#obstacle_modal').modal('toggle');
+                //location.reload();            
+            } else {    // created is false
+                
+                // create new mode
+                if (mode == 1) {
+                    alert('Error - failed to create obstacle: '+ obstacle_name);
+                } else {
+                    $('#obstacle_modal').modal('toggle');
+                }
+            }
+            location.reload();            
+        });    
     });    
-});    
 
 });
 
@@ -76,20 +75,6 @@ $( '#create_obstacle_btn' ).click(function() {
     $('#condition_input2').val('');
     $('#condition_list2').find('option').remove();
 });
-
-
-
-
-function Obstacle(id, name, type, conditions, mode) {
-    this.id = id;
-    this.name = name;
-    this.type = type;
-    this.conditions = conditions;
-    this.mode = mode;
-    this.object_type = OBJECT_TYPE_OBSTACLE;
-    alert(this.object_type);
-
-}
 
 $("#add_condition2").click(function(e){
     
@@ -149,18 +134,23 @@ $("#remove_condition2").click(function(e){
 
 function delete_obstacle(id) {
     
-    $('#obstacle-' + id).hide(1000);
-    
+    // fade out then remove
+    $('#obstacle-' + id).fadeOut('slow', function(){ $(this).remove(); });    
+
     $.ajax({
         method: "POST",
-        url: "{% url 'delete_objective' %}",
+        url: url_delete_obstacle,
         dataType: "json",
-        data: {objective_id: id},
+        data: {obstacle_id: id},
     }).done(function( msg ) {
-        var message = JSON.parse(msg);
+        var deleted = msg['deleted'];
+        deleted = (deleted === "true");
+        if (!deleted) {
+            alert( "Error - failed to delete obstacle" );
+        }
     }).fail(function() {
-        alert( "Error - failed to delete objective" );
-  });    
+        alert( "Error - failed to delete obstacle" );
+  });  
 }
 
 function edit_obstacle(id) {
@@ -170,44 +160,53 @@ function edit_obstacle(id) {
     // get existing data and populate dialog
     $.ajax({
         method: "GET",
-        url: "{% url 'edit_objective' %}",
+        url: url_edit_obstacle,
         dataType: "json",
-        data: {objective_id: id},
+        data: {obstacle_id: id},
     }).done(function( msg ) {
 
         // reset all fields
-        $('#objective_id').val('');
-        $('#objective_name').val('');
-        $('#objective_type_label').text('Select');
-        $('#condition_input').val('');
-        $('#condition_list').find('option').remove();
+        $('#obstacle_id').val('');
+        $('#obstacle_name').val('');
+        $('#obstacle_type_label').text('Avoid');
+        $('#condition_input2').val('');
+        $('#condition_list2').find('option').remove();
         
-        var objective_name = msg['name'];
-        var objective_type = msg['type'];
+        var obstacle_name = msg['name'];
+        var obstacle_type = msg['type'];
         var conditions = msg['conditions'];
 
         // set input values
-        $('#objective_id').val(id); //hidden
-        $('#objective_name').val(objective_name);
-        $('#objective_type_label').text(objective_type);
+        $('#obstacle_id').val(id); //hidden
+        $('#obstacle_name').val(obstacle_name);
+        $('#obstacle_type_label').text(obstacle_type);
 
         var value = ''
         for (var i = 0; i < conditions.length; i++) {
             value = conditions[i];
             var option = '<option value=' + value.split(' ').join('_') + '>' + value + '</option>';
-            $("#condition_list").append(option);
+            $("#condition_list2").append(option);
         }        
 
         if (conditions.length) {
-            $("#remove_condition").prop('disabled', false);
+            $("#remove_condition2").prop('disabled', false);
         } else {
-            $("#remove_condition").prop('disabled', true);
+            $("#remove_condition2").prop('disabled', true);
         }
         
-        $('#objective_modal').modal('show');
+        $('#obstacle_modal').modal('show');
                 
     }).fail(function() {
-        alert( "Error - Edit objective failed." );
+        alert( "Error - Edit obstacle failed." );
   });    
     
+}
+
+function Obstacle(id, name, type, conditions, mode) {
+    this.id = id;
+    this.name = name;
+    this.type = type;
+    this.conditions = conditions;
+    this.mode = mode;
+    this.object_type = OBJECT_TYPE_OBSTACLE;
 }
