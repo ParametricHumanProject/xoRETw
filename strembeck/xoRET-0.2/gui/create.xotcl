@@ -1,0 +1,1865 @@
+# (c) Mark Strembeck
+
+package provide xoRET::GUI::Create 0.1
+package require Tkspline
+package require Tcldot
+
+Class xoRET_GUI::Create
+
+xoRET_GUI::Create instproc init args {
+  my instvar top pm treeobj obj eorc
+  set pm [lindex $args 0]; set obj [lindex $args 1] 
+  set treeobj [lindex $args 2]; set eorc [lindex $args 3]
+  set top [toplevel .[[self class] autoname create%07d] -relief raised -borderwidth 2]
+  wm protocol $top WM_DELETE_WINDOW "[self] destroy"
+  next 
+}
+
+xoRET_GUI::Create instproc destroy args {
+  my instvar top
+  destroy $top
+  next
+}
+
+Class xoRET_GUI::Create::Scenario -superclass xoRET_GUI::Create
+
+xoRET_GUI::Create::Scenario instproc init args {
+  next
+  my instvar pm top leftlistbox graph c nameentry authentry radiovar\
+      zoominfactor zoomoutfactor zoomdepth zoomfont font eorc obj
+  set graph [dotnew digraph]
+  $graph setedgeattributes label "" minlen 1
+  $graph setnodeattributes height 0.3 width 1
+
+  set topmostframe [TitleFrame $top.topmost -text "New Scenario" -ipad 5]
+  # paned window
+  set f [$topmostframe getframe]
+  set pw    [PanedWindow $f.pw -side top]
+  set pane  [$pw add -minsize 380]
+ 
+  # left frame
+  set upperleftframe [TitleFrame $pane.upper -text "Attributes" -ipad 5]
+  set f [$upperleftframe getframe]
+  set lframe [frame $f.lframe]
+  set namelabel [Label $lframe.namel -text "Name:" -anchor w]
+  set authlabel [Label $lframe.authl -text "Author:" -anchor w]
+  pack $authlabel $namelabel -side bottom -expand yes
+  set eframe [frame $f.eframe]
+  set authentry [Entry $eframe.authe -text "" -width 15 -helptext "Enter author name here"\
+		     -background white]
+  set nameentry [Entry $eframe.namee -text "" -width 35 -helptext "Enter scenario name here"\
+		     -background white]
+  pack $authentry $nameentry -side bottom -expand yes -fill x
+  pack $lframe $eframe -side left -expand yes -fill both -padx 2 -pady 1
+  
+  set midleftframe [TitleFrame $pane.mid -text "Currently Available Steps" -ipad 5]
+  set f [$midleftframe getframe]
+  set sw [ScrolledWindow $f.sw]
+  set leftlistbox [ListBox::create $sw.listbox -height 12 -width 8 \
+			    -highlightthickness 0 \
+			    -background white \
+			    -selectmode single \
+			    -multicolumn false]
+  foreach step [lsort -dictionary [$pm getStepList]] {
+    $leftlistbox insert end [$step name] \
+	-text "[$step name]" \
+	-image [Bitmap::get hammer]
+  }
+  $sw setwidget $leftlistbox
+  pack $sw -fill both -expand yes
+
+  set lowerleftframe [TitleFrame $pane.lower -text "Options" -ipad 5]
+  set f [$lowerleftframe getframe]
+  set buttonframe [frame $f.buttonframe]
+  set addframe [frame $buttonframe.add]
+  set addbutton [Button $addframe.add -text "Add selected step" -width 18 \
+		     -height 1 -command "[self] addSelectedStep"]
+  set createbutton [Button $addframe.create -text "Create/Add new step" -width 18 \
+			-height 1 -command "[self] createNewStep"]
+  pack $addbutton $createbutton -side left -fill x -expand yes -padx 3
+  set layoutframe [frame $buttonframe.layout]
+  set layoutbutton [Button $layoutframe.layout -text "Layout scenario graph" -width 18 \
+			-height 1 -command "[self] layout"]
+  set clearbutton [Button $layoutframe.clear -text "Clear graph" -width 18 \
+		       -height 1 -command "[self] clearDialog"]
+  pack $layoutbutton $clearbutton -side left -fill x -expand yes -padx 3
+  set saveframe [frame $buttonframe.save]
+  set savebutton [Button $saveframe.save -text "Save scenario" -width 18 \
+		      -height 1 -command "[self] saveScenario"]
+  set cancelbutton [Button $saveframe.cancel -text "Cancel" -width 18 \
+			-height 1 -command "[self] destroy"]
+  pack $savebutton $cancelbutton -side left -expand yes -fill x -padx 3
+  set sep1 [Separator $buttonframe.sep1 -orient horizontal]
+  set sep2 [Separator $buttonframe.sep2 -orient horizontal]
+  pack $saveframe $sep1 $layoutframe $sep2 $addframe -side bottom -fill x -expand yes -pady 1
+
+  pack $lowerleftframe $midleftframe $upperleftframe -side bottom -fill both -expand yes -padx 2 -pady 3
+
+  set sep3 [Separator $f.sep3 -orient vertical]
+  # the object namesparce is required to access the radiovar variable
+  my requireNamespace
+  set radioframe [frame $f.rdoframe]
+  set editrdo [radiobutton $radioframe.paintrdo -variable [self]::radiovar -indicator off \
+		   -value edit -image pencil -command "[self] setmode"]
+  set selcrdo [radiobutton $radioframe.selcrdo -variable [self]::radiovar -indicator off \
+		   -value select -image pointer -command "[self] setmode"]
+  set zoomrdo [radiobutton $radioframe.zoomrdo -variable [self]::radiovar -indicator off \
+		   -value zoom -image magnify -command "[self] setmode"]
+  pack $zoomrdo $selcrdo $editrdo -side bottom -padx 2 -pady 3
+
+  pack $buttonframe -side left -padx 2 -pady 3
+  pack $sep3 -side left -fill y -padx 2 -pady 3
+  pack $radioframe -side left
+
+  # right frame
+  set pane  [$pw add -minsize 520]
+  set righttitleframe [TitleFrame $pane.title -text "Scenario Description" -ipad 5]
+  set f [$righttitleframe getframe]
+  set canvasframe [frame $f.a]
+  set hscrollframe [frame $f.b]
+  set c [canvas $canvasframe.c \
+	     -relief sunken \
+	     -width 0 \
+	     -background white \
+	     -height 0 \
+	     -borderwidth 0]
+  set hscroll [scrollbar $hscrollframe.hs -orient horiz -relief sunken -command "$c xview"]
+  set vscroll [scrollbar $canvasframe.vs -relief sunken -command "$c yview"]
+  $c configure -xscrollcommand "$hscroll set" -yscrollcommand "$vscroll set" 
+  pack $vscroll -side right -fill y
+  pack $hscroll -side left -expand yes -fill x 
+  pack $c -expand yes -fill both   
+  pack $canvasframe -expand yes -fill both
+  pack $hscrollframe -side bottom -fill x
+  
+  pack $righttitleframe -fill both -expand yes
+
+  # pack top-level frame
+  pack $pw -fill both -expand yes -side bottom
+  pack $topmostframe -side left -fill both -expand yes
+
+  set font "helvetica 11"
+  # initialize zoom factors
+  set zoominfactor 1.11
+  set zoomoutfactor [expr {1.0 / $zoominfactor}]
+  set zoomdepth 1.0
+  set zoomfont $font
+
+  if {$eorc == "edit"} {
+    set dotfile "[pwd]/[string trimleft [self]-dot.dot :]"
+    $pm exportScenarioDotFile [$obj name] $dotfile
+    if {[catch {open $dotfile r} fid]} {
+      xoRET_GUI::Dialog::MsgDialog md "Unable to open dot file: $dotfile" warning Ok
+      return
+    }
+    if {[catch {dotread $fid} graph]} {
+      xoRET_GUI::Dialog::MsgDialog md "Invalid dot file: $dotfile" warning Ok
+      close $fid
+      file delete $dotfile
+      return
+    }
+    close $fid
+    file delete $dotfile
+    [self] layout
+    $topmostframe configure -text "Scenario"
+    $authentry configure -text "[$obj author]"
+    $nameentry configure -text "[split [$obj name] _]"
+    $savebutton configure -command "[self] updateScenario"
+    wm title $top "Edit scenario"
+  } else {
+    wm title $top "Create new scenario"
+  }
+
+  set radiovar edit
+  my setmode
+
+  wm minsize $top 900 520
+#  wm maxsize $top 1500 520
+  wm withdraw $top
+  BWidget::place $top 0 0 center
+  wm geometry $top 900x520+430+320
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Create::Scenario instproc setmode {} {
+  my instvar radiovar c repeat
+  switch $radiovar {
+    "edit" {
+      $c configure -cursor {pencil black}
+      [self] clearSelectedPathElements
+      bind $c <ButtonPress-1> "[self] startNewEdge %x %y"
+      bind $c <B1-Motion> "[self] drawNewEdge %x %y"
+      bind $c <ButtonRelease-1> "[self] completeNewEdge %x %y"
+
+      bind $c <ButtonPress-2> ""
+      
+      bind $c <ButtonPress-3> "[self] deleteGraphElement"
+      bind $c <ButtonRelease-3> ""
+    }
+    "select" {
+      $c configure -cursor {arrow black}
+      bind $c <ButtonPress-1> "[self] startPath %x %y"
+      bind $c <B1-Motion> "[self] extendPath %x %y"
+      bind $c <ButtonRelease-1> "[self] completePath %x %y"
+
+      bind $c <ButtonPress-2> ""
+      
+      bind $c <ButtonPress-3> ""
+      bind $c <ButtonRelease-3> ""
+    }
+    "zoom" {
+      $c configure -cursor {target black}
+      bind $c <ButtonPress-1> "[self] zoom in"
+      bind $c <B1-Motion> ""
+      bind $c <ButtonRelease-1> "catch {after cancel \$[self]::repeat}"
+
+      bind $c <ButtonPress-2> "[self] zoomReset"
+      
+      bind $c <ButtonPress-3> "[self] zoom out"
+      bind $c <ButtonRelease-3> "catch {after cancel \$[self]::repeat}"
+    }
+  }
+}
+
+xoRET_GUI::Create::Scenario instproc zoom {inout} {
+  my instvar c zoominfactor zoomoutfactor zoomdepth zoomfont repeat font graph
+  if {$inout == "in"} {
+    set factor $zoominfactor 
+  } else {
+    set factor $zoomoutfactor
+  }
+  $c scale all 0 0 $factor $factor
+  set zoomdepth [expr {$zoomdepth * $factor}]
+  set zoomfont  [lreplace $font 1 1 [expr int([lindex $font 1] * $zoomdepth)]]
+  foreach n [$graph listnodes] {
+    set height [$n queryattributes height]
+    set width [$n queryattributes width]
+    set height [expr {$height * $factor}]
+    set width [expr {$width * $factor}]
+    $n setattributes fontsize [lindex $zoomfont 1] height $height width $width
+  }
+  foreach e [$graph listedges] {
+    set minlen [$e queryattributes minlen]
+    if {$zoomdepth > 2} {
+      $e setattributes fontsize [lindex $zoomfont 1] minlen 2
+    } else {
+      $e setattributes fontsize [lindex $zoomfont 1] minlen 1      
+    }
+  }
+  my layout
+  set repeat [after 100 "[self] zoom $inout"]
+}
+
+xoRET_GUI::Create::Scenario instproc zoomReset {} {
+  my instvar zoomdepth zoomfont font c graph
+  set zoomdepth [expr 1.0/$zoomdepth]
+  $c scale all 0 0 $zoomdepth $zoomdepth
+  set zoomfont $font
+  foreach n [$graph listnodes] {
+    set height [$n queryattributes height]
+    set width [$n queryattributes width]
+    set height [expr {$height * $zoomdepth}]
+    set width [expr {$width * $zoomdepth}]
+    $n setattributes fontname [lindex $zoomfont 0] \
+ 	fontsize [lindex $zoomfont 1] height $height width $width
+  }
+  foreach e [$graph listedges] {
+    $e setattributes minlen 1 fontsize [lindex $zoomfont 1]
+  }
+  set zoomdepth 1.0
+  my layout
+  $c configure -scrollregion [$c bbox all]
+}
+
+xoRET_GUI::Create::Scenario instproc clearSelectedPathElements {} {
+  my instvar c graph
+  foreach edge [$graph listedges] {
+    $edge setattributes color black
+  }
+  foreach node [$graph listnodes] {
+    $node setattributes fillcolor white
+  }
+  $c dtag selected
+  my layout
+}
+
+xoRET_GUI::Create::Scenario instproc setSelectedPathElement {obj color} {
+  my instvar c
+  if {[string equal -length 4 "node" $obj]} {
+    $obj setattributes style filled fillcolor $color
+  } else {
+    $obj setattributes color $color
+  }
+  $c addtag selected withtag $obj
+}
+
+xoRET_GUI::Create::Scenario instproc getOverlappingObj {x y} {
+  my instvar c
+  foreach item [$c find overlapping $x $y $x $y] {
+    foreach tag [$c gettags $item] {
+      if {[string first "node" $tag] == 1} {
+	return [string range $tag 1 end]
+      }
+    }
+  }
+  return ""
+}
+
+xoRET_GUI::Create::Scenario instproc startPath {x y} {
+  my instvar startobj c pathtail 
+  set x [$c canvasx $x]
+  set y [$c canvasy $y]
+  set obj [my getOverlappingObj $x $y]
+  if {[string length $obj]} {
+    if {[lsearch [$c gettags $obj] selected] == -1
+	|| [string compare [$c itemcget $obj -fill] SkyBlue]} {
+      my clearSelectedPathElements
+      my setSelectedPathElement $obj green2
+    } else {
+      my setSelectedPathElement $obj gold
+    }
+    set startobj [$c create line $x $y $x $y -fill gold -arrow last]
+  } else {
+    # selection start is not over a node
+    my clearSelectedPathElements
+  }
+  set pathtail $obj
+}
+
+xoRET_GUI::Create::Scenario instproc extendPath {x y} {
+  my instvar startobj pathtail c
+  set pos [$c coords $startobj]
+  if {$pathtail != {}} {
+    $c coords $startobj [lindex $pos 0] [lindex $pos 1] [$c canvasx $x] [$c canvasy $y]
+  }
+}
+
+xoRET_GUI::Create::Scenario instproc completePath {x y} {
+  my instvar startobj pathtail c
+  set x [$c canvasx $x]
+  set y [$c canvasy $y]
+  $c delete $startobj 
+  set startobj ""
+  if {[string length $pathtail]} {
+    set obj [my getOverlappingObj $x $y]
+    if {[string equal $pathtail $obj]} {
+      set obj ""
+    }
+    set i 0
+    # if obj is "" we get the spanning tree
+    # else we get the shortest path
+    foreach {n e m} [[self] shortestPath $pathtail $obj] {
+      my setSelectedPathElement $m gold
+      my setSelectedPathElement $e gold
+      incr i
+    }
+    # only if non-zero shortest path
+    if {$i && [string length $obj]} {
+      my setSelectedPathElement $obj SkyBlue
+    }
+  }
+  my layout
+}
+
+xoRET_GUI::Create::Scenario instproc getHeadNode {edge tail} {
+  set nodes [$edge listnodes]
+  set index [lsearch -exact $nodes $tail]
+  return [string trim [lreplace $nodes $index $index]]
+}
+
+# breadth first search for the shortest path;
+# if head parameter is empty for the spanning tree
+xoRET_GUI::Create::Scenario instproc shortestPath {tail {head ""}} {
+  set visited($tail) [list {} {}]
+  set result ""
+  for {set this $tail} {[llength $this]} {set this $nextnode} {
+    set nextnode ""
+    foreach n $this {
+      foreach e [$n listoutedges] {
+	set m [my getHeadNode $e $n]
+	if {![info exists visited($m)]} {
+	  set visited($m) [list $n $e]
+	  lappend nextnode $m
+	}
+	if {[string equal $m $head]} {
+	  # return shortest path
+	  for {set m $head} {[string compare $m $tail]} {set m $n} {
+	    foreach {n e} $visited($m) {break}
+	    lappend result $n $e $m
+	  }
+	  return $result
+	}
+      }
+    }
+  }
+  if {[string equal $head {}]} {
+    # return spanning tree
+    foreach m [array names visited] {
+      foreach {n e} $visited($m) {break}
+      if {[string length $n]} {
+	lappend result $n $e $m
+      }
+    }
+    return $result
+  }
+  return ""
+}
+
+# create new edge in canvas
+xoRET_GUI::Create::Scenario instproc startNewEdge {x y} {
+  my instvar c startobj
+  set startobj ""
+  set x [$c canvasx $x]
+  set y [$c canvasy $y]
+  foreach item [$c find overlapping $x $y $x $y] {
+    foreach tag [$c gettags $item] {
+      if {[string first "node" $tag] == 1} {
+	set item [string range $tag 1 end]
+	set startobj [$c create line $x $y $x $y \
+			  -tag $item -fill red -arrow last]
+      }
+    }
+  }
+}
+
+# extend edge in canvas
+xoRET_GUI::Create::Scenario instproc drawNewEdge {x y} {
+  my instvar c startobj
+  set pos [$c coords $startobj]
+  if {[$c type $startobj] == "line"} {
+    $c coords $startobj [lindex $pos 0] [lindex $pos 1] \
+	[$c canvasx $x] [$c canvasy $y]
+  }
+}
+
+# complete edge construction.
+xoRET_GUI::Create::Scenario instproc completeNewEdge {x y} {
+  my instvar c startobj
+  set x [$c canvasx $x]
+  set y [$c canvasy $y]
+  set tail [lindex [$c gettags $startobj] 0]
+  foreach item [$c find overlapping $x $y $x $y] {
+    foreach tag [$c gettags $item] {
+      set head [string range $tag 1 end]
+      if {[string first "node" $head] == 0} {
+	if {$tail != ""} {
+	  set e [$tail addedge $head]
+	  $c dtag $startobj $tail
+	  $c addtag 1$e withtag $startobj
+	  $c itemconfigure $startobj -fill black
+	}
+	set startobj {}
+	return
+      }
+    }
+  }
+  # if we get here the edge is not terminating on a node
+  $c delete $startobj
+  set startobj {}
+}
+
+xoRET_GUI::Create::Scenario instproc createNewStep {} {
+  my instvar pm treeobj
+  xoRET_GUI::Create::Step [Object autoname create%05d] $pm $treeobj [self]
+}
+
+xoRET_GUI::Create::Scenario instproc deleteGraphElement {} {
+  my instvar c obj
+  set current [string range [lindex [$c gettags current] 0] 1 end]
+  set type [string range $current 0 3]
+  if {$type == "node"} {
+    xoRET_GUI::Dialog::ConfirmDialog cd "Remove step [$current showname] from scenario [$obj name] ?"\
+	"[self] deleteElement $current"
+  } elseif {$type == "edge"} {
+    xoRET_GUI::Create::EdgeDialog [Object autoname edgedlg%05d] $current $c [self]
+  }
+}
+
+xoRET_GUI::Create::Scenario instproc deleteElement {element} {
+  my instvar c
+  if {[string first "node" $element] == 0} {
+    foreach edge [$element listedges] {
+      $c delete 1$edge
+      $c delete 0$edge
+      $edge delete
+    }
+  }
+  $c delete 1$element
+  $c delete 0$element
+  $element delete
+}
+
+xoRET_GUI::Create::Scenario instproc layout {} {
+  my instvar graph c
+  $c delete all
+  $graph layout
+  eval [$graph render]
+  $c configure -scrollregion [$c bbox all]
+}
+
+xoRET_GUI::Create::Scenario instproc clearDialog {} {
+  xoRET_GUI::Dialog::ConfirmDialog cd " Do you really want to clear the scenario graph ?"\
+	"[self] clear"
+}
+
+xoRET_GUI::Create::Scenario instproc clear {} {
+  my instvar graph c
+  
+#  set f [open temp.dot w]
+#  $graph write $f dot
+#  close $f
+
+  $c delete all
+  $graph delete
+  set graph [dotnew digraph]
+}
+
+xoRET_GUI::Create::Scenario instproc update {} {
+  my instvar leftlistbox pm
+  $leftlistbox delete [$leftlistbox items]
+  foreach step [lsort -dictionary [$pm getStepList]] {
+    $leftlistbox insert end [$step name] \
+	-text "[$step name]" \
+	-image [Bitmap::get hammer]
+  }
+}
+
+xoRET_GUI::Create::Scenario instproc addSelectedStep {} {
+  my instvar pm leftlistbox graph c zoomfont
+  set step [$leftlistbox selection get]
+  if {$step != ""} {
+    set node [$graph addnode $step label $step shape box\
+		  fontname helvetica fontsize [lindex $zoomfont 1]]
+#    $c addtag 1$node all
+    my layout
+  }
+}
+
+xoRET_GUI::Create::Scenario instproc addNewStep {step} {
+  my instvar graph
+  $graph addnode $step label $step shape box fontname helvetica fontsize [lindex $zoomfont 1]
+  my layout
+}
+
+xoRET_GUI::Create::Scenario instproc saveScenario {} {
+  my instvar graph nameentry authentry treeobj pm
+  set name [string trim [$nameentry cget -text]]
+  set auth [string trim [$authentry cget -text]]
+  if {$name != ""} {
+    if {$auth != ""} {
+      $pm createScenario "$name" "$auth"
+      # add all nodes/steps
+      foreach node [$graph listnodes] {
+	eval $pm addStepToScenario [split [$node showname] -] [list $name]
+      }
+      # and now the edges
+      foreach node [$graph listnodes] {
+	foreach edge [$node listoutedges] {
+	  set delimiter [expr [string first "->" [$edge showname]] + 2]
+	  set tail [string range [$edge showname] $delimiter end]
+	  set label [lindex [$edge queryattributevalues label] 1]
+	  eval $pm addEdgeToScenario [split [$node showname] -] [split $tail -] [list $name] [list $label]
+	}
+      }
+      $treeobj redrawTree
+      my destroy
+    } else {
+      xoRET_GUI::Dialog::MsgDialog md "You must enter an author in order to create\
+                                       a new scenario." info Ok
+    }
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You must enter a name in order to create a new\
+                                     scenario." info Ok
+  }
+}
+
+xoRET_GUI::Create::Scenario instproc updateScenario {} {
+  my instvar graph nameentry authentry treeobj pm obj
+  $graph setedgeattributes label ""
+  set name [string trim [$nameentry cget -text]]
+  set auth [string trim [$authentry cget -text]]
+  if {$auth != ""} {
+    $pm clearScenario $name
+    $obj author $auth
+    # add all nodes/steps
+    foreach node [$graph listnodes] {
+      eval $pm addStepToScenario [split [$node showname] -] [list $name]
+    }
+    # now the edges
+    foreach node [$graph listnodes] {
+      foreach edge [$node listoutedges] {
+	set delimiter [expr [string first "->" [$edge showname]] + 2]
+	set tail [string range [$edge showname] $delimiter end]
+	set label [lindex [$edge queryattributevalues label] 1]
+	eval $pm addEdgeToScenario [split [$node showname] -] [split $tail -] [list $name] [list $label]
+      }
+    }
+    $treeobj redrawTree
+    my destroy
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You must enter an author in order to create\
+                                       a new scenario." info Ok
+  }
+}
+
+Class xoRET_GUI::Create::EdgeDialog
+
+xoRET_GUI::Create::EdgeDialog instproc init args {
+  next
+  my instvar edge entry c referrer top
+  set edge [lindex $args 0]; set c [lindex $args 1]; set referrer [lindex $args 2]
+  set top [toplevel .[[self class] autoname edgedlg%07d] -relief raised -borderwidth 2]
+  wm protocol $top WM_DELETE_WINDOW "[self] destroy"
+
+  set tf  [TitleFrame $top.tf -text "Edge Label"]
+  set f [$tf getframe]
+  # entries
+  set eframe [frame $f.eframe]
+  set label [Label $eframe.l -text "Label:" -anchor w]
+  set entry [Entry $eframe.e -text "" -width 30 -helptext "Enter edge label here"\
+		 -background white]
+  pack $label $entry -side left -fill x -padx 2 -pady 3
+
+  # buttons
+  set bframe [frame $f.bframe]
+  set delete [Button $bframe.del -text "Delete Edge" \
+                  -height 1 -width 10 -command "$referrer deleteElement $edge; [self] destroy"]
+  set save [Button $bframe.save -text "Save Label" \
+		-height 1 -width 10 -command "[self] saveEdgeLabel; [self] destroy"]
+  set cancel [Button $bframe.cancel -text "Cancel" -height 1 -width 10 -command "[self] destroy"]
+  pack $save $delete $cancel -side left -fill x -padx 2 -pady 3
+  #pack title-frame
+  set sep [Separator  $f.sep -orient horizontal]  
+  pack $bframe $sep $eframe -side bottom -padx 2 -pady 3
+  pack $tf -fill both -expand yes
+
+  wm minsize $top 300 120
+  wm maxsize $top 300 120
+  wm withdraw $top
+  wm title $top "Edge Dialog"
+  BWidget::place $top 0 0 center
+  wm geometry $top 300x120+550+450
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Create::EdgeDialog instproc saveEdgeLabel {} {
+  my instvar entry c edge 
+  set label [string trim [$entry cget -text]]
+  if {$label != ""} {
+    $edge setattributes label $label
+  }
+}
+
+xoRET_GUI::Create::EdgeDialog instproc destroy args {
+  my instvar top referrer
+  $referrer layout
+  destroy $top
+  next
+}
+
+Class xoRET_GUI::Create::Step -superclass xoRET_GUI::Create
+
+xoRET_GUI::Create::Step instproc init args {
+  next
+  my instvar pm top referrer treeobj actore actione targete authore
+  set pm [lindex $args 0]; set treeobj [lindex $args 1]; set referrer [lindex $args 2]
+  
+  set topmostframe [TitleFrame $top.topmost -text "New Step" -ipad 5]
+  
+  set f [$topmostframe getframe]
+  # eframe
+  set eframe [frame $f.eframe]
+  set lframe [frame $eframe.lframe]
+  set actorl [Label $lframe.actrl -text "Actor:" -anchor w]
+  set actionl [Label $lframe.actnl -text "Action:" -anchor w]
+  set targetl [Label $lframe.tgtl -text "Target:" -anchor w]
+  set authorl [Label $lframe.authl -text "Author:" -anchor w]
+  pack $actorl $actionl $targetl $authorl -side top -padx 2 -pady 3
+
+  set entrfr [frame $eframe.entrfr]
+  set actore [Entry $entrfr.actre -text "" -width 25 -helptext "Enter actor name here"]
+  set actione [Entry $entrfr.actne -text "" -width 25 -helptext "Enter action description here"]
+  set targete [Entry $entrfr.tgte -text "" -width 25 -helptext "Enter target name here"]
+  set authore [Entry $entrfr.authe -text "" -width 25 -helptext "Enter author name here"]
+  pack $authore $targete $actione $actore -side bottom -padx 2 -pady 3 -expand yes -fill x
+  # pack eframe
+  pack $lframe $entrfr -side left -fill both -expand yes -padx 2 -pady 3
+
+  # bframe
+  set bframe [frame $f.bframe]
+  set create [Button $bframe.create -text "Create Step" -height 1 -width 10 -command "[self] create"]
+  set cancel [Button $bframe.cancel -text "Cancel" -height 1 -width 10 -command "[self] destroy"]
+  pack $create $cancel -side left -expand yes -fill x -padx 2 -pady 3
+
+  # pack titleframe
+  set sep [Separator  $f.sep -orient horizontal]
+  pack $bframe -side bottom -expand yes -fill both -padx 2 -pady 3
+  pack $sep -side bottom -fill x
+  pack $eframe -side bottom -expand yes -fill both -padx 2 -pady 3
+  
+  # pack top-level frame
+  pack $topmostframe -side left -fill both -expand yes
+
+  wm minsize $top 300 200
+  wm maxsize $top 300 200
+  wm withdraw $top
+  wm title $top "Create new scenario step"
+  BWidget::place $top 0 0 center
+  wm geometry $top 300x200+430+320
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Create::Step instproc create {} {
+  my instvar pm referrer treeobj actore actione targete authore
+  set actor [string trim [$actore cget -text]]
+  set action [string trim [$actione cget -text]]
+  set target [string trim [$targete cget -text]]
+  set author [string trim [$authore cget -text]]
+  if {($actor != "") && ($action != "") && ($target != "") && ($author != "")} {
+    set success [$pm createStep "$actor" "$action" "$target" "$author"]
+    if {$success} {
+      $treeobj redrawTree
+      if {$referrer != ""} {
+	$referrer update
+#	$referrer addNewStep 
+      }
+      my destroy
+    }
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You must enter an actor, an action, a target, \
+                                     and an author in order to create a new step." info Ok
+  }
+}
+
+Class xoRET_GUI::Create::Objective -superclass xoRET_GUI::Create
+
+xoRET_GUI::Create::Objective instproc init args {
+  next
+  my instvar pm top treeobj listbox namee typecombo authore dcce
+  set pm [lindex $args 0]; set treeobj [lindex $args 1]
+  
+  set topmostframe [TitleFrame $top.topmost -text "New Control Objective" -ipad 5]
+  set f [$topmostframe getframe]
+  # left frame
+  set leftframe [frame $f.left]
+  # attribute/entry frame
+  set eframe [TitleFrame $leftframe.eframe -text "Attributes" -ipad 5]
+  set ef [$eframe getframe]
+  set lframe [frame $ef.lframe]
+  set namel [Label $lframe.actrl -text "Name:" -anchor e]
+  set typel [Label $lframe.actnl -text "Type:" -anchor e]
+  set authorl [Label $lframe.authl -text "Author:" -anchor e]
+  pack $namel $typel $authorl -side top -padx 2 -pady 3 
+
+  set entrfr [frame $ef.entrfr]
+  set namee [Entry $entrfr.actre -text "" -width 35 -helptext "Enter name of objective here" \
+		 -background white]
+  set typecombo [ComboBox $entrfr.combo -values "[::Objective getTypeList]" -text "" \
+		     -helptext "Choose an objective-type" \
+		     -editable false \
+		     -width 36 \
+		     -background white]
+  set authore [Entry $entrfr.authe -text "" -width 35 -helptext "Enter author name here"\
+		   -background white]
+  pack $namee $typecombo $authore -side top -padx 2 -pady 3 -fill x
+  # pack eframe
+  pack $lframe $entrfr -side left -fill x -expand yes -padx 2 -pady 3
+
+  # derived cc frame
+  set dccf [TitleFrame $leftframe.dccf -text "Abstract Context Condition" -ipad 5]
+  set df [$dccf getframe]
+  set dccl [Label $df.dccl -text "Name of Abstract Context Condition:" -anchor w]
+  set dcce [Entry $df.dcce -text "" -width 25 \
+		-helptext "Enter name of abstract context condition here" \
+		-background white]
+  set dccadd [Button $df.dccb -text "Add Condition to List" -width 10 -command "[self] addCondition"]
+  pack $dccl $dcce -side top -fill both -padx 2 -pady 3 
+  pack $dccadd -side top -fill both -padx 2 -pady 5
+  
+  # bframe
+  set bframe [TitleFrame $leftframe.bframe -text "Options" -ipad 5]
+  set bf [$bframe getframe]
+  set create [Button $bf.create -text "Create Objective" -height 1 -width 10\
+			 -command "[self] create"]
+  set cancel [Button $bf.cancel -text "Cancel" -height 1 -width 10 -command "[self] destroy"]
+  pack $create $cancel -side left -expand yes -fill x -padx 2 -pady 3
+  # pack left frame
+  pack $bframe $dccf $eframe -side bottom -expand yes -fill both -padx 2 -pady 3
+  
+  # right frame
+  set rightframe [TitleFrame $f.dccfl -text "List of Abstract Context Conditions" -ipad 5]
+  set f [$rightframe getframe]
+  set sw [ScrolledWindow $f.sw -relief sunken -borderwidth 1]
+  set listbox [ListBox::create $sw.lb -height 10 -width 30\
+		   -highlightthickness 0 \
+		   -background white \
+		   -selectmode single \
+		   -multicolumn false]
+  $sw setwidget $listbox
+  pack $sw -fill both -expand yes -pady 3
+  set delete [Button $f.del -text "Remove Condition from List" -width 10 \
+		  -command "[self] removeCondition"]
+  pack $delete -fill x -pady 3
+  
+  # pack titleframe
+  pack $leftframe -side left -fill both -padx 2 
+  pack $rightframe -side left -fill both -padx 2 -pady 3
+  
+  # pack top-level frame
+  pack $topmostframe -side left -fill both -expand yes
+
+  wm minsize $top 650 370
+  wm maxsize $top 650 370
+  wm withdraw $top
+  wm title $top "Create new control objective"
+  BWidget::place $top 0 0 center
+  wm geometry $top 650x370+430+320
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Create::Objective instproc addCondition {} {
+  my instvar listbox dcce
+  set condition [string trim [$dcce cget -text]]
+  if {$condition != ""} {
+    if {![$listbox exists $condition]} {
+      $listbox insert end "[join $condition _]"\
+	  -text "$condition" \
+	  -image [Bitmap::get file]
+      $dcce configure -text ""
+      update idletasks
+    }
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You must enter a condition name before\
+                                     it can be added to the list." info Ok
+  }
+}
+
+xoRET_GUI::Create::Objective instproc removeCondition {} {
+  my instvar listbox
+  set condition [$listbox selection get]
+  if {$condition != ""} {
+    if {[$listbox exists $condition]} {
+      $listbox delete $condition
+      update idletasks
+    }
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You first have to choose a condition the list." info Ok
+  }
+} 
+
+xoRET_GUI::Create::Objective instproc create {} {
+  my instvar pm listbox authore namee typecombo treeobj
+  set name [string trim [$namee cget -text]]
+  set type [string trim [$typecombo cget -text]]
+  set author [string trim [$authore cget -text]]
+  if {($name != "") && ($type != "") && ($author != "")} {
+    $pm createObjective $name $author $type
+    set conditions [$listbox items]
+    if {$conditions != ""} {
+      foreach cond $conditions {
+	$pm addDerivedAbstractContextConditionToObjective "[split $cond _]" "$name"
+      }
+    }
+    $treeobj redrawTree
+    my destroy
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You must enter a name, a type, and an author\
+                                     in order to create a new control objective." info Ok
+  }
+}
+
+Class xoRET_GUI::Create::Obstacle -superclass xoRET_GUI::Create
+
+xoRET_GUI::Create::Obstacle instproc init args {
+  next
+  my instvar pm top treeobj listbox namee typecombo authore dcce
+  set pm [lindex $args 0]; set treeobj [lindex $args 1]
+  
+  set topmostframe [TitleFrame $top.topmost -text "New Obstacle" -ipad 5]
+  set f [$topmostframe getframe]
+  # left frame
+  set leftframe [frame $f.left]
+  # attribute/entry frame
+  set eframe [TitleFrame $leftframe.eframe -text "Attributes" -ipad 5]
+  set ef [$eframe getframe]
+  set lframe [frame $ef.lframe]
+  set namel [Label $lframe.actrl -text "Name:" -anchor e]
+  set typel [Label $lframe.actnl -text "Type:" -anchor e]
+  set authorl [Label $lframe.authl -text "Author:" -anchor e]
+  pack $namel $typel $authorl -side top -padx 2 -pady 3 
+
+  set entrfr [frame $ef.entrfr]
+  set namee [Entry $entrfr.actre -text "" -width 35 -helptext "Enter name of obstacle here" \
+		 -background white]
+  set typecombo [ComboBox $entrfr.combo -values "[::Obstacle getTypeList]" -text "" \
+		     -helptext "Choose an obstacle-type" \
+		     -editable false \
+		     -width 36 \
+		     -background white]
+  set authore [Entry $entrfr.authe -text "" -width 35 -helptext "Enter author name here"\
+		   -background white]
+  pack $namee $typecombo $authore -side top -padx 2 -pady 3 -fill x
+  # pack eframe
+  pack $lframe $entrfr -side left -fill x -expand yes -padx 2 -pady 3
+
+  # derived cc frame
+  set dccf [TitleFrame $leftframe.dccf -text "Abstract Context Condition" -ipad 5]
+  set df [$dccf getframe]
+  set dccl [Label $df.dccl -text "Name of Abstract Context Condition:" -anchor w]
+  set dcce [Entry $df.dcce -text "" -width 25 \
+		-helptext "Enter name of abstract context condition here" \
+		-background white]
+  set dccadd [Button $df.dccb -text "Add Condition to List" -width 10 -command "[self] addCondition"]
+  pack $dccl $dcce -side top -fill both -padx 2 -pady 3 
+  pack $dccadd -side top -fill both -padx 2 -pady 5
+  
+  # bframe
+  set bframe [TitleFrame $leftframe.bframe -text "Options" -ipad 5]
+  set bf [$bframe getframe]
+  set create [Button $bf.create -text "Create Obstacle" -height 1 -width 10\
+			 -command "[self] create"]
+  set cancel [Button $bf.cancel -text "Cancel" -height 1 -width 10 -command "[self] destroy"]
+  pack $create $cancel -side left -expand yes -fill x -padx 2 -pady 3
+  # pack left frame
+  pack $bframe $dccf $eframe -side bottom -expand yes -fill both -padx 2 -pady 3
+  
+  # right frame
+  set rightframe [TitleFrame $f.dccfl -text "List of Abstract Context Conditions" -ipad 5]
+  set f [$rightframe getframe]
+  set sw [ScrolledWindow $f.sw -relief sunken -borderwidth 1]
+  set listbox [ListBox::create $sw.lb -height 10 -width 30\
+		   -highlightthickness 0 \
+		   -background white \
+		   -selectmode single \
+		   -multicolumn false]
+  $sw setwidget $listbox
+  pack $sw -fill both -expand yes -pady 3
+  set delete [Button $f.del -text "Remove Condition from List" -width 10 \
+		  -command "[self] removeCondition"]
+  pack $delete -fill x -pady 3
+  
+  # pack titleframe
+  pack $leftframe -side left -fill both -padx 2 
+  pack $rightframe -side left -fill both -padx 2 -pady 3
+  
+  # pack top-level frame
+  pack $topmostframe -side left -fill both -expand yes
+
+  wm minsize $top 650 370
+  wm maxsize $top 650 370
+  wm withdraw $top
+  wm title $top "Create new obstacle"
+  BWidget::place $top 0 0 center
+  wm geometry $top 650x370+430+320
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Create::Obstacle instproc addCondition {} {
+  my instvar listbox dcce
+  set condition [string trim [$dcce cget -text]]
+  if {$condition != ""} {
+    if {![$listbox exists $condition]} {
+      $listbox insert end "[join $condition _]"\
+	  -text "$condition" \
+	  -image [Bitmap::get file]
+      $dcce configure -text ""
+      update idletasks
+    }
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You must enter a condition name before\
+                                     it can be added to the list." info Ok
+  }
+}
+
+xoRET_GUI::Create::Obstacle instproc removeCondition {} {
+  my instvar listbox
+  set condition [$listbox selection get]
+  if {$condition != ""} {
+    if {[$listbox exists $condition]} {
+      $listbox delete $condition
+      update idletasks
+    }
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You first have to choose a condition." info Ok
+  }
+} 
+
+xoRET_GUI::Create::Obstacle instproc create {} {
+  my instvar pm listbox authore namee typecombo treeobj
+  set name [string trim [$namee cget -text]]
+  set type [string trim [$typecombo cget -text]]
+  set author [string trim [$authore cget -text]]
+  if {($name != "") && ($type != "") && ($author != "")} {
+    $pm createObstacle $name $author $type
+    set conditions [$listbox items]
+    if {$conditions != ""} {
+      foreach cond $conditions {
+	$pm addDerivedAbstractContextConditionToObstacle "[split $cond _]" "$name"
+      }
+    }
+    $treeobj redrawTree
+    my destroy
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You must enter a name, a type, and an author\
+                                     in order to create a new obstacle." info Ok
+  }
+}
+
+Class xoRET_GUI::Create::Task -superclass xoRET_GUI::Create
+
+xoRET_GUI::Create::Task instproc init args {
+  next
+  my instvar pm top treeobj leftlistbox rightlistbox namee authore 
+  set pm [lindex $args 0]; set treeobj [lindex $args 1]
+  
+  set upperframe [frame $top.upper]
+  # upper left frame
+  set upperleftframe [frame $upperframe.leftf]
+  # attribute frame
+  set attframe [TitleFrame $upperleftframe.attf -text "Attributes" -ipad 5]
+  set af [$attframe getframe]
+  set lframe [frame $af.lframe]
+  set namel [Label $lframe.actrl -text "Name:" -anchor e]
+  set authorl [Label $lframe.authl -text "Author:" -anchor e]
+  pack $namel $authorl -side top -padx 2 -pady 3 
+
+  set eframe [frame $af.eframe]
+  set namee [Entry $eframe.actre -text "" -width 35 -helptext "Enter task name here" \
+		 -background white]
+  set authore [Entry $eframe.authe -text "" -width 35 -helptext "Enter author name here"\
+		   -background white]
+  pack $namee $authore -side top -padx 2 -pady 3 -fill x
+  # pack attframe
+  pack $lframe $eframe -side left -padx 2 -pady 3 -fill x
+  # attached scenario list frame
+  set tsframe [TitleFrame $upperleftframe.tsf -text "Attached Scenarios" -ipad 5]
+  set tsf [$tsframe getframe]
+  set sw [ScrolledWindow $tsf.sw -relief sunken -borderwidth 1]
+  set leftlistbox [ListBox::create $sw.lb -height 10 -width 25\
+		   -highlightthickness 0 \
+		   -background white \
+		   -selectmode single \
+		   -multicolumn false]
+  $sw setwidget $leftlistbox
+  pack $sw -fill both -expand yes -pady 3
+  set delete [Button $tsf.del -text "Remove Scenario from Task" -width 10 \
+		  -command "[self] removeScenario"]
+  pack $delete -fill x -pady 3
+  # pack upper left frame
+  pack $attframe -side top -padx 2 -pady 3 -fill x
+  pack $tsframe -side top -padx 2 -pady 3 -fill both
+
+  # upper right frame
+  set upperrightframe [TitleFrame $upperframe.rightf -text "Currently Available Scenarios" -ipad 5]
+  set urf [$upperrightframe getframe]
+  set sw [ScrolledWindow $urf.sw -relief sunken -borderwidth 1]
+  set rightlistbox [ListBox::create $sw.lb -height 10 -width 45\
+		   -highlightthickness 0 \
+		   -background white \
+		   -selectmode single \
+		   -multicolumn false]
+  set scenarios [$pm getScenarioList]
+  if {$scenarios != ""} {
+    foreach s $scenarios {
+      $rightlistbox insert end [$s name] \
+	  -text "[$s name]" \
+	  -image [Bitmap::get film]
+    }
+  }
+  $sw setwidget $rightlistbox
+  pack $sw -fill both -expand yes -pady 3
+  set add [Button $urf.del -text "Add Scenario to Task" -width 10 \
+		  -command "[self] addScenario"]
+  pack $add -fill x -pady 3
+  # pack upper frame
+  pack $upperleftframe -side left -padx 2 
+  pack $upperrightframe -side left -padx 2 -pady 3 -fill both
+
+  # lower frame
+  set lowerframe [TitleFrame $top.lowerf -text "Options" -ipad 5]
+  set lf [$lowerframe getframe]
+  set create [Button $lf.create -text "Create Task" -height 1 -width 10\
+			 -command "[self] create"]
+  set cancel [Button $lf.cancel -text "Cancel" -height 1 -width 10 -command "[self] destroy"]
+  pack $create $cancel -side left -expand yes -fill x -padx 2 -pady 3
+
+  # pack top-level frame
+  pack $upperframe $lowerframe -side top -padx 2 -pady 3 -fill both
+
+  wm minsize $top 685 430
+  wm maxsize $top 685 430
+  wm withdraw $top
+  wm title $top "Create new task"
+  BWidget::place $top 0 0 center
+  wm geometry $top 685x430+430+320
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Create::Task instproc addScenario {} {
+  my instvar leftlistbox rightlistbox
+  set scenario [$rightlistbox selection get]
+  if {$scenario != ""} {
+    if {![$leftlistbox exists $scenario]} {
+      $leftlistbox insert end $scenario \
+	  -text "$scenario" \
+	  -image [Bitmap::get film]
+    }
+    update idletasks
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You have to choose a scenario first." info Ok
+  }
+}
+
+xoRET_GUI::Create::Task instproc removeScenario {} {
+  my instvar leftlistbox 
+  set scenario [$leftlistbox selection get]
+  if {$scenario != ""} {
+    if {[$leftlistbox exists $scenario]} {
+      $leftlistbox delete $scenario
+    }
+    update idletasks
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You have to choose a scenario first." info Ok
+  }
+}
+
+xoRET_GUI::Create::Task instproc create {} {
+  my instvar leftlistbox pm treeobj namee authore
+  set name [string trim [$namee cget -text]]
+  set author [string trim [$authore cget -text]]
+  if {($name != "") && ($author != "")} {
+    set success [$pm createTask "$name" "$author"]
+    if {$success} {
+      set scenarios [$leftlistbox items]
+      if {$scenarios != ""} {
+	foreach s $scenarios {
+	  $pm addScenarioToTask "$s" "$name"
+	}
+      }
+    }
+    $treeobj redrawTree
+    my destroy
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You must enter a name, and an author in\
+                                     order to create a new task." info Ok
+  }
+}
+
+Class xoRET_GUI::Create::Profile -superclass xoRET_GUI::Create
+
+xoRET_GUI::Create::Profile instproc init args {
+  next
+  my instvar pm top treeobj leftlistbox rightlistbox namee authore 
+  set pm [lindex $args 0]; set treeobj [lindex $args 1]
+  
+  set upperframe [frame $top.upper]
+  # upper left frame
+  set upperleftframe [frame $upperframe.leftf]
+  # attribute frame
+  set attframe [TitleFrame $upperleftframe.attf -text "Attributes" -ipad 5]
+  set af [$attframe getframe]
+  set lframe [frame $af.lframe]
+  set namel [Label $lframe.actrl -text "Name:" -anchor e]
+  set authorl [Label $lframe.authl -text "Author:" -anchor e]
+  pack $namel $authorl -side top -padx 2 -pady 3 
+
+  set eframe [frame $af.eframe]
+  set namee [Entry $eframe.actre -text "" -width 35 -helptext "Enter name of work profile here" \
+		 -background white]
+  set authore [Entry $eframe.authe -text "" -width 35 -helptext "Enter author name here"\
+		   -background white]
+  pack $namee $authore -side top -padx 2 -pady 3 -fill x
+  # pack attframe
+  pack $lframe $eframe -side left -padx 2 -pady 3 -fill x
+  # attached scenario list frame
+  set tsframe [TitleFrame $upperleftframe.tsf -text "Attached Tasks" -ipad 5]
+  set tsf [$tsframe getframe]
+  set sw [ScrolledWindow $tsf.sw -relief sunken -borderwidth 1]
+  set leftlistbox [ListBox::create $sw.lb -height 10 -width 25\
+		   -highlightthickness 0 \
+		   -background white \
+		   -selectmode single \
+		   -multicolumn false]
+  $sw setwidget $leftlistbox
+  pack $sw -fill both -expand yes -pady 3
+  set delete [Button $tsf.del -text "Remove Task from Profile" -width 10 \
+		  -command "[self] removeTask"]
+  pack $delete -fill x -pady 3
+  # pack upper left frame
+  pack $attframe -side top -padx 2 -pady 3 -fill x
+  pack $tsframe -side top -padx 2 -pady 3 -fill both
+
+  # upper right frame
+  set upperrightframe [TitleFrame $upperframe.rightf -text "Currently Available Tasks" -ipad 5]
+  set urf [$upperrightframe getframe]
+  set sw [ScrolledWindow $urf.sw -relief sunken -borderwidth 1]
+  set rightlistbox [ListBox::create $sw.lb -height 10 -width 45\
+		   -highlightthickness 0 \
+		   -background white \
+		   -selectmode single \
+		   -multicolumn false]
+  set tasks [$pm getTaskList]
+  if {$tasks != ""} {
+    foreach t $tasks {
+      $rightlistbox insert end [$t name] \
+	  -text "[$t name]" \
+	  -image [Bitmap::get task]
+    }
+  }
+  $sw setwidget $rightlistbox
+  pack $sw -fill both -expand yes -pady 3
+  set add [Button $urf.del -text "Add Task to Profile" -width 10 \
+		  -command "[self] addTask"]
+  pack $add -fill x -pady 3
+  # pack upper frame
+  pack $upperleftframe -side left -padx 2 
+  pack $upperrightframe -side left -padx 2 -pady 3 -fill both
+
+  # lower frame
+  set lowerframe [TitleFrame $top.lowerf -text "Options" -ipad 5]
+  set lf [$lowerframe getframe]
+  set create [Button $lf.create -text "Create Profile" -height 1 -width 10\
+			 -command "[self] create"]
+  set cancel [Button $lf.cancel -text "Cancel" -height 1 -width 10 -command "[self] destroy"]
+  pack $create $cancel -side left -expand yes -fill x -padx 2 -pady 3
+
+  # pack top-level frame
+  pack $upperframe $lowerframe -side top -padx 2 -pady 3 -fill both
+
+  wm minsize $top 685 430
+  wm maxsize $top 685 430
+  wm withdraw $top
+  wm title $top "Create new work profile"
+  BWidget::place $top 0 0 center
+  wm geometry $top 685x430+430+320
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Create::Profile instproc addTask {} {
+  my instvar leftlistbox rightlistbox
+  set task [$rightlistbox selection get]
+  if {$task != ""} {
+    if {![$leftlistbox exists $task]} {
+      $leftlistbox insert end $task \
+	  -text "$task" \
+	  -image [Bitmap::get task]
+    }
+    update idletasks
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You have to choose a task first." info Ok
+  }
+}
+
+xoRET_GUI::Create::Profile instproc removeTask {} {
+  my instvar leftlistbox 
+  set task [$leftlistbox selection get]
+  if {$task != ""} {
+    if {[$leftlistbox exists $task]} {
+      $leftlistbox delete $task
+    }
+    update idletasks
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You have to choose a task first." info Ok
+  }
+}
+
+xoRET_GUI::Create::Profile instproc create {} {
+  my instvar leftlistbox pm treeobj namee authore
+  set name [string trim [$namee cget -text]]
+  set author [string trim [$authore cget -text]]
+  if {($name != "") && ($author != "")} {
+    set success [$pm createWorkProfile "$name" "$author"]
+    if {$success} {
+      set tasks [$leftlistbox items]
+      if {$tasks != ""} {
+	foreach t $tasks {
+	  $pm addTaskToWorkProfile "$t" "$name"
+	}
+      }
+    }
+    $treeobj redrawTree
+    my destroy
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You must enter a name, and an author in\
+                                     order to create a new work profile." info Ok
+  }
+}
+
+Class xoRET_GUI::Create::DerivePerms -superclass xoRET_GUI::Create
+
+xoRET_GUI::Create::DerivePerms instproc init args {
+  next
+  my instvar top pm treeobj count
+
+  set f [frame $top.frame]
+  set max [llength [::Step info instances]]
+  my requireNamespace
+  set count 0
+  set pb [ProgressBar $f.pb -background white -foreground blue -height 15 -width 20 \
+	      -type normal -maximum $max -variable [self]::count]
+  set bf [frame $f.bf]
+  set ok [Button $bf.ok -text "Derive Permissions" \
+		-height 1 -command "[self] derive"]
+  set cancel [Button $bf.cancel -text "Cancel" \
+		-height 1 -command "[self] destroy"]
+  set sep [Separator  $f.sep -orient horizontal]
+  pack $ok $cancel -side left -fill x -padx 3 -expand yes
+  pack $bf $sep $pb -side bottom -padx 2 -pady 3 -fill x -expand yes
+  pack $f -fill both -expand yes
+
+  wm minsize $top 300 80
+  wm maxsize $top 300 80
+  wm withdraw $top
+  wm title $top "Derive Permissions from Steps"
+  BWidget::place $top 0 0 center
+  wm geometry $top 300x80+550+450
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Create::DerivePerms instproc derive {} {
+  my instvar pm count treeobj
+  foreach s [$pm getStepList] {
+    $pm derivePermissionFromStep [$s actor] [$s action] [$s target]
+    incr count
+  }
+  xoRET_GUI::Dialog::MsgDialog md "Permission derivation completed" info Ok
+  $treeobj redrawTree
+  my destroy
+}
+
+Class xoRET_GUI::Create::DeriveRoles -superclass xoRET_GUI::Create
+
+xoRET_GUI::Create::DeriveRoles instproc init args {
+  next
+  my instvar top pm count
+
+  set f [frame $top.frame]
+  set max [expr [llength [::Step info instances]] + [llength [::WorkProfile info instances]] + 1]
+  my requireNamespace
+  set count 0
+  set pb [ProgressBar $f.pb -background white -foreground blue -height 15 -width 20 \
+	      -type normal -maximum $max -variable [self]::count]
+  set bf [frame $f.bf]
+  set ok [Button $bf.ok -text "Derive Roles" \
+		-height 1 -command "[self] derive"]
+  set cancel [Button $bf.cancel -text "Cancel" \
+		-height 1 -command "[self] destroy"]
+  set sep [Separator  $f.sep -orient horizontal]
+  pack $ok $cancel -side left -fill x -padx 3 -expand yes
+  pack $bf $sep $pb -side bottom -padx 2 -pady 3 -fill x -expand yes
+  pack $f -fill both -expand yes
+
+  wm minsize $top 300 80
+  wm maxsize $top 300 80
+  wm withdraw $top
+  wm title $top "Derive Roles"
+  BWidget::place $top 0 0 center
+  wm geometry $top 300x80+550+450
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Create::DeriveRoles instproc derive {} {
+  my instvar pm treeobj count
+  # first derive the permissions
+  foreach s [$pm getStepList] {
+    $pm derivePermissionFromStep [$s actor] [$s action] [$s target]
+    incr count
+  }
+  # now create roles 
+  foreach w [$pm getWorkProfileList] {
+    $pm deriveRoleFromWorkProfile [$w name]
+    incr count
+  }
+  # now build the role hierarchy
+  $pm buildRoleHierarchy
+  incr count
+  xoRET_GUI::Dialog::MsgDialog md "Role derivation completed" info Ok
+  $treeobj redrawTree
+  my destroy
+}
+
+Class xoRET_GUI::Create::DeriveCCs -superclass xoRET_GUI::Create
+
+xoRET_GUI::Create::DeriveCCs instproc init args {
+  next
+  my instvar top pm count
+
+  set f [frame $top.frame]
+  set max [expr [llength [::Obstacle info instances]] + [llength [::Objective info instances]]]
+  my requireNamespace
+  set count 0
+  set pb [ProgressBar $f.pb -background white -foreground blue -height 15 -width 20 \
+	      -type normal -maximum $max -variable [self]::count]
+  set bf [frame $f.bf]
+  set ok [Button $bf.ok -text "Derive Context Constraints" \
+		-height 1 -command "[self] derive"]
+  set cancel [Button $bf.cancel -text "Cancel" \
+		-height 1 -command "[self] destroy"]
+  set sep [Separator  $f.sep -orient horizontal]
+  pack $ok $cancel -side left -fill x -padx 3 -expand yes
+  pack $bf $sep $pb -side bottom -padx 2 -pady 3 -fill x -expand yes
+  pack $f -fill both -expand yes
+
+  wm minsize $top 300 80
+  wm maxsize $top 300 80
+  wm withdraw $top
+  wm title $top "Derive Context Constraints"
+  BWidget::place $top 0 0 center
+  wm geometry $top 300x80+550+450
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Create::DeriveCCs instproc derive {} {
+  my instvar pm treeobj count
+  # first derive the permissions
+  foreach s [$pm getStepList] {
+    $pm derivePermissionFromStep [$s actor] [$s action] [$s target]
+    incr count
+  }
+  # now derive the context constraints
+  foreach obj [$pm getObjectiveList] {
+    $pm deriveCCFromObjective [$obj name]
+    incr count
+  }
+  foreach obs [$pm getObstacleList] {
+    $pm deriveCCFromObstacle [$obs name]
+    incr count
+  }
+  xoRET_GUI::Dialog::MsgDialog md "Context Constraint derivation completed" info Ok
+  $treeobj redrawTree
+  my destroy
+}
+
+Class xoRET_GUI::Create::Role -superclass xoRET_GUI::Create
+
+xoRET_GUI::Create::Role instproc init args {
+  next
+  my instvar top pm entry leftlistbox upperrightlistbox lowerrightlistbox
+
+  # left frame
+  set ltf [TitleFrame $top.ltf -text "Currently Available Roles" -ipad 5]
+  set f  [$ltf getframe] 
+  set sw [ScrolledWindow $f.sw]
+  set leftlistbox [ListBox::create $sw.lb -height 10 -width 20 \
+		       -highlightthickness 0 \
+		       -background white \
+		       -selectmode single \
+		       -multicolumn false]      
+  foreach r [lsort -dictionary [$pm getRoleList]] {
+    $leftlistbox insert end [$r name] \
+	-text "[$r name]" \
+	-image [Bitmap::get facemask] 
+  }
+  $sw setwidget $leftlistbox
+  pack $sw -fill both -expand yes
+
+  # right frame
+  set rtopf [frame $top.rtopf]
+  set upperrighttitleframe [TitleFrame $rtopf.tf2 -text "Junior-Roles of new Role" -ipad 5]
+  set f [$upperrighttitleframe getframe]
+  set sw [ScrolledWindow $f.sw]
+  set upperrightlistbox [ListBox::create $sw.lb -height 10 -width 20 \
+			     -highlightthickness 0 \
+			     -background white \
+			     -selectmode single \
+			     -multicolumn false]
+  $sw setwidget $upperrightlistbox
+  pack $sw -fill both -expand yes
+
+  set lowerrighttitleframe [TitleFrame $rtopf.tf3 -text "Senior-Roles of new Role" -ipad 5]
+  set f [$lowerrighttitleframe getframe]
+  set sw [ScrolledWindow $f.sw]
+  set lowerrightlistbox [ListBox::create $sw.lb -height 10 -width 20 \
+			     -highlightthickness 0 \
+			     -background white \
+			     -selectmode single \
+			     -multicolumn false]
+  $sw setwidget $lowerrightlistbox
+  pack $sw -fill both -expand yes
+
+  pack $lowerrighttitleframe $upperrighttitleframe -side bottom -fill both -expand yes
+
+  # middle frame
+  set mf  [TitleFrame $top.mf -text "Options"]
+  set f [$mf getframe]
+  set eframe [frame $f.eframe]
+  set entry [Entry $eframe.entry -width 15 -text "" -helptext "Enter new role name here"]
+  set label [Label $eframe.label -text "New Role Name:"]
+  pack $label $entry -side left -fill x -padx 2 -pady 3 -expand yes
+
+  set jbframe [frame $f.jbframe]
+  set addjunbutton  [Button $jbframe.addjunbutton -text ">> Add Junior-Role >>" -width 20 \
+			 -height 1 -command "[self] addJunior"]
+  set remjunbutton  [Button $jbframe.remjunbutton -text "<< Remove Junior-Role <<" -width 20 \
+			 -height 1 -command "[self] removeJunior"]
+  pack $remjunbutton $addjunbutton -side bottom -pady 5
+
+  set sbframe [frame $f.sbframe]
+  set addsenbutton [Button $sbframe.addsenbutton -text ">> Add Senior-Role >>" -width 20 \
+			 -height 1 -command "[self] addSenior"]
+  set remsenbutton  [Button $sbframe.remsenbutton -text "<< Remove Senior-Role <<" -width 20 \
+			 -height 1 -command "[self] removeSenior"]
+  pack $remsenbutton $addsenbutton -side bottom -pady 5
+  
+  set placeholder [frame $f.ph -height 40]
+  set sep1 [Separator  $f.sep1 -orient horizontal]
+  set sep2 [Separator  $f.sep2 -orient horizontal]
+  set create [Button $f.create -text "Create Role" -height 1 -width 16 -command "[self] create"]
+  set cancel [Button $f.cancel -text "Cancel" -height 1 -width 16 -command "[self] destroy"]
+
+  pack $cancel $create -side bottom -pady 5
+  pack $sep1 -side bottom -fill x -pady 5
+  pack $sbframe $placeholder $jbframe -side bottom -pady 5
+  pack $sep2 -side bottom -fill x -pady 5
+  pack $eframe -side bottom -pady 15
+
+  # pack toplevel-frame
+  pack $ltf $mf $rtopf -side left -fill both -padx 1 -pady 3 -expand yes
+
+  wm minsize $top 650 420
+  wm withdraw $top
+  wm title $top "Create New Role"
+
+  BWidget::place $top 0 0 center
+  wm geometry $top 650x420+330+320
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Create::Role instproc addJunior {} {
+  my instvar leftlistbox upperrightlistbox
+  set junior [$leftlistbox selection get]
+  if {$junior != ""} {
+    if {![$upperrightlistbox exists $junior]} {
+      $upperrightlistbox insert end $junior \
+	  -text "$junior" \
+	  -image [Bitmap::get facemask]
+      update idletasks
+    }
+  }
+}
+
+xoRET_GUI::Create::Role instproc removeJunior {} {
+  my instvar upperrightlistbox
+  set junior [$upperrightlistbox selection get]
+  if {[$upperrightlistbox exists $junior]} {
+    $upperrightlistbox delete $junior
+    update idletasks
+  }
+}
+
+xoRET_GUI::Create::Role instproc addSenior {} {
+  my instvar leftlistbox lowerrightlistbox
+  set senior [$leftlistbox selection get]
+  if {$senior != ""} {
+    if {![$lowerrightlistbox exists $senior]} {
+      $lowerrightlistbox insert end $senior \
+	  -text "$senior" \
+	  -image [Bitmap::get facemask]
+      update idletasks
+    }
+  }
+}
+
+xoRET_GUI::Create::Role instproc removeSenior {} {
+  my instvar lowerrightlistbox
+  set senior [$lowerrightlistbox selection get]
+  if {[$lowerrightlistbox exists $senior]} {
+    $lowerrightlistbox delete $senior
+    update idletasks
+  }
+}
+
+xoRET_GUI::Create::Role instproc create {} {
+  my instvar pm treeobj entry lowerrightlistbox upperrightlistbox 
+  set new [string trim [$entry cget -text]]
+  if {$new != ""} {
+    set junior [$upperrightlistbox items]
+    set senior [$lowerrightlistbox items]
+    set success [$pm createRole $new $junior $senior]
+    if {$success} {
+      $treeobj redrawTree
+      my destroy
+    }
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You must enter a name in order to create a new role." info Ok
+  }
+}
+
+Class xoRET_GUI::Create::Perm -superclass xoRET_GUI::Create
+
+xoRET_GUI::Create::Perm instproc init args {
+ next
+  my instvar top pm opentry objentry
+  
+  set tf  [TitleFrame $top.tf -text "Options"]
+  set f [$tf getframe]
+  # entries
+  set etopf [frame $f.etopf]
+  set eframe [frame $etopf.eframe]
+  set opentry [Entry $eframe.opentry -width 15 -text "" -helptext "Enter operation name here"]
+  set objentry [Entry $eframe.objentry -width 15 -text "" -helptext "Enter object name here"]
+  pack $objentry $opentry -side bottom -fill x -padx 2 -pady 3 -expand yes
+  # labels
+  set lframe [frame $etopf.lframe]
+  set oplabel [Label $lframe.label1 -text "Operation:" -anchor e]
+  set objlabel [Label $lframe.label2 -text "Object:" -anchor e]
+  pack $objlabel $oplabel -side bottom -fill x -padx 2 -pady 3 -expand yes
+  pack $lframe $eframe -side left -fill both -padx 3 -pady 5 -expand yes
+  # buttons
+  set create [Button $f.create -text "Create Permission" \
+		  -height 1 -width 16 -command "[self] create"]
+  set cancel [Button $f.cancel -text "Cancel" -height 1 -width 16 -command "[self] destroy"]
+
+  set sep [Separator  $f.sep -orient horizontal]
+  #pack title-frame and toplevel-frame
+  pack $cancel $create -side bottom -pady 3
+  pack $sep -side bottom -fill x -pady 3
+  pack $etopf -side bottom -pady 3
+  pack $tf -fill both -expand yes
+  wm minsize $top 240 180
+  wm maxsize $top 240 180
+  wm withdraw $top
+  wm title $top "Create New Permission"
+
+  BWidget::place $top 0 0 center
+  wm geometry $top 240x170+550+450
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Create::Perm instproc create {} {
+  my instvar pm treeobj opentry objentry
+  set op [string trim [$opentry cget -text]]
+  set obj [string trim [$objentry cget -text]]
+  if {($op != "") && ($obj != "")} {
+    set success [$pm createPermission "$op $obj"]
+    if {$success} {
+      $treeobj redrawTree
+      my destroy
+    }
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You must enter an operation/object pair \
+                                      in order to create a new permission." info Ok
+  }
+}
+
+Class xoRET_GUI::Create::CC -superclass xoRET_GUI::Create
+
+xoRET_GUI::Create::CC instproc init args {
+  next
+  my instvar top pm entry leftlistbox rightlistbox obj
+  
+  # left frame
+  set ltf [TitleFrame $top.ltf -text "Available Conditions" -ipad 5]
+  set f  [$ltf getframe] 
+  set sw [ScrolledWindow $f.sw]
+  set leftlistbox [ListBox::create $sw.lb -height 10 -width 20 \
+		       -highlightthickness 0 \
+		       -background white \
+		       -selectmode single \
+		       -multicolumn false]
+  set condlist [$pm getConditionList]
+  if {$condlist != ""} {
+    foreach cond [lsort -dictionary $condlist] {
+      $leftlistbox insert end [$cond name] \
+	  -text "[$cond name]" \
+	  -image [Bitmap::get condition] 
+    }
+  }
+  $sw setwidget $leftlistbox
+  pack $sw -fill both -expand yes
+
+  # right frame
+  set rtf [TitleFrame $top.tf2 -text "Linked Conditions" -ipad 5]
+  set f [$rtf getframe]
+  set sw [ScrolledWindow $f.sw]
+  set rightlistbox [ListBox::create $sw.lb -height 10 -width 20 \
+			-highlightthickness 0 \
+			-background white \
+			-selectmode single \
+			-multicolumn false]
+  $sw setwidget $rightlistbox
+  pack $sw -fill both -expand yes
+
+  # middle frame
+  set mf  [TitleFrame $top.mf -text "Options"]
+  set f [$mf getframe]
+  set eframe [frame $f.eframe]
+  set entry [Entry $eframe.entry -width 15 -text "" -helptext "Enter new constraint name here"]
+  set label [Label $eframe.label -text "Constraint Name:"]
+  pack $label $entry -side left -fill x -padx 2 -pady 3 -expand yes
+
+  set bframe [frame $f.bframe]
+  set linkbutton  [Button $bframe.linkbutton -text "Link Condition" -width 22 \
+			 -height 1 -command "[self] addCondition"]
+  set unlinkbutton  [Button $bframe.unlinkbutton -text "Unlink Condition" -width 22 \
+			 -height 1 -command "[self] removeCondition"]
+  pack $unlinkbutton $linkbutton -side bottom -pady 5
+  
+  set placeholder [frame $f.ph -height 40]
+  set sep1 [Separator  $f.sep1 -orient horizontal]
+  set sep2 [Separator  $f.sep2 -orient horizontal]
+  set create [Button $f.create -text "Create Context Constraint" -height 1 -width 22 -command "[self] create"]
+  set cancel [Button $f.cancel -text "Cancel" -height 1 -width 22 -command "[self] destroy"]
+
+  pack $cancel $create -side bottom -pady 5
+  pack $sep1 -side bottom -fill x -pady 5
+  pack $placeholder $bframe -side bottom -pady 5
+  pack $sep2 -side bottom -fill x -pady 5
+  pack $eframe -side bottom -pady 15
+
+
+  # pack toplevel-frame
+  pack $ltf $mf $rtf -side left -fill both -padx 1 -pady 3 -expand yes
+
+  wm minsize $top 660 330
+  wm maxsize $top 800 330
+  wm withdraw $top
+  wm title $top "Create New Context Constraint"
+
+  BWidget::place $top 0 0 center
+  wm geometry $top 660x330+320+320
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Create::CC instproc addCondition {} {
+  my instvar pm entry leftlistbox rightlistbox
+  set cond [$leftlistbox selection get]
+  if {(![$rightlistbox exists $cond]) && ($cond != "")} {
+    $rightlistbox insert end $cond \
+	-text "$cond" \
+	-image [Bitmap::get condition]
+    update idletasks
+  }
+}
+
+xoRET_GUI::Create::CC instproc removeCondition {} {
+  my instvar pm entry rightlistbox
+  set cond [$rightlistbox selection get]
+  if {[$rightlistbox exists $cond]} {
+    $rightlistbox delete $cond
+    update idletasks
+  }
+}
+
+xoRET_GUI::Create::CC instproc create {} {
+  my instvar pm treeobj entry leftlistbox rightlistbox
+  set name [string trim [$entry cget -text]]
+  if {($name != "")} {
+    set success [$pm createContextConstraint $name]
+    if {$success} {
+      set conds [$rightlistbox items]
+      if {$conds != ""} {
+	foreach c $conds {
+	  $pm linkConditionToContextConstraint $c $name
+	} 
+      } else {
+	  xoRET_GUI::Dialog::MsgDialog md "Context Constraint <<$name>> created\
+                                            without Condition links. A Context Constraint\
+                                            without Conditions is always true." info Ok
+      }
+      $treeobj redrawTree
+      my destroy
+    }
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You must enter a name in order\
+                                      to create a new Subject." info Ok
+  }
+}
+
+Class xoRET_GUI::Create::Condition -superclass xoRET_GUI::Create
+
+xoRET_GUI::Create::Condition instproc init args {
+ next
+  my instvar top pm namee authore
+  
+  set tf  [TitleFrame $top.tf -text "Options"]
+  set f [$tf getframe]
+  # entries
+  set upperframe [frame $f.upper]
+  set eframe [frame $upperframe.eframe]
+  set namee [Entry $eframe.nentry -width 15 -text "" -helptext "Enter condition name here"]
+  set authore [Entry $eframe.aentry -width 15 -text "" -helptext "Enter author name here"]
+  pack $namee $authore -side top -fill x -padx 2 -pady 3 -expand yes
+  set lframe [frame $upperframe.lframe]
+  set nlabel [Label $lframe.nlabel -text "Condition Name:" -anchor e]
+  set alabel [Label $lframe.alabel -text "Author Name:" -anchor e]
+  pack $nlabel $alabel -side top -padx 2 -pady 3
+  pack $lframe $eframe -side left -padx 2 -expand yes
+  # buttons
+  set create [Button $f.create -text "Create Condition" \
+		  -height 1 -width 16 -command "[self] create"]
+  set cancel [Button $f.cancel -text "Cancel" -height 1 -width 16 -command "[self] destroy"]
+
+  set sep [Separator  $f.sep -orient horizontal]
+  #pack title-frame and toplevel-frame
+  pack $cancel $create -side bottom -pady 3
+  pack $sep -side bottom -fill x -pady 5
+  pack $upperframe -side bottom -pady 1
+  pack $tf -fill both -expand yes
+  wm minsize $top 250 170
+  wm maxsize $top 250 170
+  wm withdraw $top
+  wm title $top "Create New Condition"
+
+  BWidget::place $top 0 0 center
+  wm geometry $top 250x170+550+450
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Create::Condition instproc create {} {
+  my instvar pm treeobj namee authore
+  set name [string trim [$namee cget -text]]
+  set author [string trim [$authore cget -text]]
+  if {($name != "") && ($author != "")} {
+    set success [$pm createCondition $name $author]
+    if {$success} {
+      $treeobj redrawTree
+      my destroy
+    }
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You must enter a condition name and an author\
+                                     in order to create a new Condition." info Ok
+  }
+}

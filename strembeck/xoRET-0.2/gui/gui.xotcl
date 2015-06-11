@@ -1,0 +1,201 @@
+# (c) Mark Strembeck
+
+package provide xoRET::GUI 0.1.2
+
+Class xoRET_GUI 
+
+package require -exact xoRET::GUI::Tree 0.2
+package require -exact xoRET::GUI::CMenu 0.1
+# package require -exact xoRET::GUI::Assignment 0.2
+# package require -exact xoRET::GUI::Constraints 0.2
+package require -exact xoRET::GUI::Dialog 0.2
+package require -exact xoRET::GUI::Create 0.1
+package require -exact xoRET::GUI::Edit 0.1
+package require -exact xoRET::GUI::Traces 0.1
+# package require -exact xoRET::GUI::Review 0.2
+# package require -exact xoRET::GUI::Rename 0.2
+# package require -exact xoRET::GUI::Graph 0.2
+package require -exact xoRET::GUI::ImExport 0.2.1
+
+package require -exact mclistbox 1.02
+namespace import -force mclistbox::*
+package require -exact BWidget 1.4.1
+
+xoRET_GUI instproc init args {
+  my instvar mainframe toolbar pm
+  set pm [lindex $args 0]
+  set toolbar 1
+  wm minsize . 750 500
+  wm withdraw .
+  wm protocol . WM_DELETE_WINDOW "[self] destroy; exit"
+  wm title . "xoRET - xoRBAC Role Engineering Tool"
+  update idletasks
+#  SelectFont::loadfont
+  my requireNamespace
+  set mainframe .mainframe
+
+  # Menu description
+  set descmenu [list {&File} all file 0 \
+		    [my buildMenu command {E&xit} {} Exit {} -command exit] \
+		    {&Options} all options 0 \
+		    [my buildMenu checkbutton {Show &Toolbar} {all option} {Show/hide toolbar} {} \
+			 -variable [self]::toolbar \
+			 -command  "$mainframe showtoolbar 0 $[self]::toolbar"]
+	       ]
+  
+  set mainframe [MainFrame .mainframe -menu $descmenu]
+  set frame [$mainframe getframe]
+  set tree [eval xoRET_GUI::Tree mytree $frame $pm]
+  # toolbar creation
+  set tb  [$mainframe addtoolbar]
+  set bbox [ButtonBox $tb.bbox1 -spacing 0 -padx 1 -pady 1]
+  $bbox add -image [Bitmap::get fileimport] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Import xoRET XML/RDF-File" \
+      -command "xoRET_GUI::ImExport [Object autoname imexport%05d] $pm $tree Import"
+  $bbox add -image [Bitmap::get fileexport] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Export xoRET XML/RDF File" \
+      -command "xoRET_GUI::ImExport [Object autoname imexport%05d] $pm $tree Export"
+  $bbox add -image [Bitmap::get fileexport2] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Export xoRBAC compatible XML/RDF File" \
+      -command "xoRET_GUI::ImExport [Object autoname imexport%05d] $pm $tree {xoRBAC Export}"
+  $bbox add -image [Bitmap::get reload] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Reload xoRET Tree" -command "$tree redrawTree"
+  $bbox add -image [Bitmap::get expand] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Expand xoRET Tree" -command "$tree expandDirs"
+  $bbox add -image [Bitmap::get collapse] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Collapse xoRET Tree" -command "$tree collapseDirs"
+
+  pack $bbox -side left -anchor w
+  set sep [Separator $tb.sep -orient vertical]
+  pack $sep -side left -fill y -padx 4 -anchor w
+
+  set bbox2 [ButtonBox $tb.bbox2 -spacing 0 -padx 1 -pady 1]
+  $bbox2 add -image [Bitmap::get goal] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Create new Control Objective" \
+      -command "xoRET_GUI::Create::Objective [Object autoname createobj%05d] $pm $tree"
+  $bbox2 add -image [Bitmap::get dynamite] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Create new Obstacle" \
+      -command "xoRET_GUI::Create::Obstacle [Object autoname createobs%05d] $pm $tree"
+  $bbox2 add -image [Bitmap::get condition] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Create new Condition" \
+      -command "xoRET_GUI::Create::Condition [Object autoname crco%05d] $pm {} $tree"
+  $bbox2 add -image [Bitmap::get constraint] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Create new Context Constraint" \
+      -command "xoRET_GUI::Create::CC [Object autoname crcc%05d] $pm {} $tree"
+  $bbox2 add -image [Bitmap::get film] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Create new Scenario" \
+      -command "xoRET_GUI::Create::Scenario [Object autoname create%05d] $pm {} $tree"
+  $bbox2 add -image [Bitmap::get key] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Create new Permission" \
+      -command "xoRET_GUI::Create::Perm [Object autoname createp%05d] $pm {} $tree"
+  $bbox2 add -image [Bitmap::get task] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Create new Task" \
+      -command "xoRET_GUI::Create::Task [Object autoname createt%05d] $pm $tree"
+  $bbox2 add -image [Bitmap::get profile] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Create new Work Profile" \
+      -command "xoRET_GUI::Create::Profile [Object autoname createwp%05d] $pm $tree"
+  $bbox2 add -image [Bitmap::get facemask] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Create new Role" \
+      -command "xoRET_GUI::Create::Role [Object autoname create%05d] $pm {} $tree"
+  pack $bbox2 -side left -anchor w
+
+  set sep2 [Separator $tb.sep2 -orient vertical]
+  pack $sep2 -side left -fill y -padx 4 -anchor w
+
+  set bbox3 [ButtonBox $tb.bbox3 -spacing 0 -padx 1 -pady 1]
+  $bbox3 add -image [Bitmap::get trace] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Define traceability links" \
+      -command "xoRET_GUI::Traces::Create [Object autoname traces%05d] $pm $tree"
+  $bbox3 add -image [Bitmap::get hierarchy] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Introspect trace relations" \
+      -command "xoRET_GUI::Traces::Introspect [Object autoname introspect%05d] $pm"
+  $bbox3 add -image [Bitmap::get deriveperm] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Derive Permissions from Steps" \
+      -command "xoRET_GUI::Create::DerivePerms [Object autoname derivep%05d] $pm {} $tree"
+  $bbox3 add -image [Bitmap::get derivecc] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Derive Context Constraints" \
+      -command "xoRET_GUI::Create::DeriveCCs [Object autoname derivecc%05d] $pm {} $tree"
+  $bbox3 add -image [Bitmap::get deriverole] \
+      -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+      -helptext "Derive Roles from Work Profiles" \
+      -command "xoRET_GUI::Create::DeriveRoles [Object autoname deriver%05d] $pm {} $tree"
+#   $bbox3 add -image [Bitmap::get folder] \
+#       -highlightthickness 0 -takefocus 0 -relief link -borderwidth 1 -padx 1 -pady 1 \
+#       -helptext "Create new Context Constraint" \
+#       -command "xoRET_GUI::Create::CC [xoRET_GUI::Create::CC autoname cccr%05d] $pm $tree"
+
+  pack $bbox3 -side left -anchor w
+
+  $mainframe addindicator -text " ver.0.2 "
+
+  pack $mainframe -fill both -expand yes
+  update idletasks
+  BWidget::place . 0 0 center
+  wm geometry . 750x500+270+250
+  wm deiconify .
+  raise .
+  focus -force .
+}
+
+xoRET_GUI instproc destroy args {
+  destroy .
+  next 
+}
+
+xoRET_GUI instproc buildMenu {type name {tags ""} {description ""} {accelerator ""} args} {
+  set m [list $type $name $tags $description $accelerator]
+  foreach {option value} $args {
+    lappend m $option $value
+  }
+  return [list $m]
+}
+
+image create bitmap pointer -background [. cget -background] -data "
+#define pointer_width 24
+#define pointer_height 24
+static char pointer_bits[] = {
+ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x08,0x00,0x00,0x0e,
+ 0x00,0x80,0x07,0x00,0xe0,0x07,0x00,0xf8,0x03,0x00,0xfe,0x03,0x80,0xff,0x01,
+ 0xe0,0xff,0x01,0x00,0xfc,0x00,0x00,0xfe,0x00,0x00,0x7f,0x00,0x80,0x77,0x00,
+ 0xc0,0x33,0x00,0xe0,0x31,0x00,0xf0,0x10,0x00,0x78,0x10,0x00,0x3c,0x00,0x00,
+ 0x18,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+"
+image create bitmap magnify -background [. cget -background] -data "
+#define magnify_width 24
+#define magnify_height 24
+static unsigned char magnigy_bits[] = {
+ 0x00,0x00,0x00,0x00,0x00,0x00,0x80,0x07,0x00,0x60,0x18,0x00,0x90,0x27,0x00,
+ 0x48,0x48,0x00,0x28,0x50,0x00,0x14,0xa0,0x00,0x14,0xa0,0x00,0x14,0xa0,0x00,
+ 0x14,0xa0,0x00,0x14,0xa0,0x00,0x28,0x50,0x00,0x48,0x48,0x00,0x90,0xe7,0x00,
+ 0x60,0xf8,0x01,0x80,0xe7,0x03,0x00,0xc0,0x07,0x00,0x80,0x0f,0x00,0x00,0x1f,
+ 0x00,0x00,0x1e,0x00,0x00,0x0c,0x00,0x00,0x00,0x00,0x00,0x00};
+"
+image create bitmap pencil -background [. cget -background] -data "
+#define pencil_width 24
+#define pencil_height 24
+static char pencil_bits[] = {
+ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xc0,0x00,0x00,0xe0,0x01,0x00,
+ 0x30,0x03,0x00,0x98,0x07,0x00,0xf0,0x0c,0x00,0x60,0x18,0x00,0xc0,0x30,0x00,
+ 0x80,0x61,0x00,0x00,0xc3,0x00,0x00,0x86,0x01,0x00,0x0c,0x03,0x00,0x18,0x06,
+ 0x00,0x30,0x07,0x00,0xe0,0x0f,0x00,0xc0,0x0f,0x00,0x80,0x1f,0x00,0x00,0x1e,
+ 0x00,0x00,0x18,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+"

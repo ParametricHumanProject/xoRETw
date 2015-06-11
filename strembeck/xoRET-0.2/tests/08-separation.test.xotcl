@@ -1,0 +1,123 @@
+
+#### Role SSD Constraints
+
+TestCase RoleSeparation\
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createRole roleB
+      m createRole roleC
+      m createRole roleE
+      m createRole roleF
+      m createRole roleD {roleB roleC} {roleE roleF}
+      m createRole roleA {} {roleB roleC}
+      m createRole roleM
+      m createRole roleN
+      m createPermission permA
+      m permRoleAssign permA roleA
+      m createPermission permB
+      m permRoleAssign permB roleB
+      m createPermission permC
+      m permRoleAssign permC roleC
+      m createPermission permD
+      m permRoleAssign permD roleD
+      m createPermission permM
+    } \
+    -cleanupScript { 
+      m destroy
+    } \
+    -order {RoleSeparation::RoleSetSuccess RoleSeparation::RoleSetFail\
+		RoleSeparation::RoleGetSuccess RoleSeparation::RoleGetSuccess2\
+		RoleSeparation::RoleUnsetSuccess RoleSeparation::RoleUnsetFail\
+		RoleSeparation::RoleGetEmpty RoleSeparation::RoleSetFail2\
+		RoleSeparation::RoleSetFail3 RoleSeparation::RoleSetFail4\
+		RoleSeparation::RoleSetFail5 RoleSeparation::RoleSetSuccess2\
+		RoleSeparation::RoleGetSuccess3
+    } 
+
+TestScenario RoleSeparation::RoleSetSuccess \
+    -testScript {
+      m setSSDRoleConstraint roleA roleM
+    } \
+    -testResult {1}
+
+TestScenario RoleSeparation::RoleSetFail \
+    -testScript {
+      m setSSDRoleConstraint roleA roleM
+    } \
+    -testResult {0}
+
+TestScenario RoleSeparation::RoleGetSuccess \
+    -testScript {
+      m getSSDRoleConstraints roleA
+    } \
+    -testResult {::m::roles::roleM}
+
+TestScenario RoleSeparation::RoleGetSuccess2 \
+    -testScript {
+      m getSSDRoleConstraints roleM
+    } \
+    -testResult {::m::roles::roleA ::m::roles::roleB\
+		     ::m::roles::roleC ::m::roles::roleD\
+		     ::m::roles::roleE ::m::roles::roleF}
+
+TestScenario RoleSeparation::RoleUnsetSuccess \
+    -testScript {
+      m unsetSSDRoleConstraint roleM roleA
+    } \
+    -testResult {1} \
+    -postconditionScript {
+      my lequal [m getSSDRoleConstraints roleM] ""
+    }
+
+TestScenario RoleSeparation::RoleUnsetFail \
+    -testScript {
+      m unsetSSDRoleConstraint roleM roleA
+    } \
+    -testResult {0}
+
+TestScenario RoleSeparation::RoleGetEmpty \
+    -testScript {
+      m getSSDRoleConstraints roleA
+    } \
+    -testResult {}
+
+TestScenario RoleSeparation::RoleSetFail2 \
+    -testScript {
+      m setSSDRoleConstraint roleA roleD
+    } \
+    -testResult {0}
+
+TestScenario RoleSeparation::RoleSetFail3 \
+    -testScript {
+      m setSSDRoleConstraint roleA roleA
+    } \
+    -testResult {0}
+
+TestScenario RoleSeparation::RoleSetFail4 \
+    -testScript {
+      m setSSDRoleConstraint roleA roleE
+    } \
+    -testResult {0}
+
+TestScenario RoleSeparation::RoleSetFail5 \
+    -testScript {
+      m setSSDRoleConstraint roleF roleA
+    } \
+    -testResult {0}
+
+TestScenario RoleSeparation::RoleSetSuccess2 \
+    -testScript {
+      m setSSDRoleConstraint roleD roleM
+    } \
+    -testResult {1} \
+    -postconditionScript {
+      my lequal [m getSSDRoleConstraints roleD] ::m::roles::roleM
+    }
+
+TestScenario RoleSeparation::RoleGetSuccess3 \
+    -testScript {
+      m getSSDRoleConstraints roleM
+    } \
+    -testResult {::m::roles::roleD ::m::roles::roleE ::m::roles::roleF}
+

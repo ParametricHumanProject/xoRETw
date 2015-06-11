@@ -1,0 +1,270 @@
+
+######## Role Introspection
+
+TestCase RoleIntrospectionRH \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createRole roleB
+      m createRole roleC
+      m createRole roleE
+      m createRole roleF
+      m createRole roleD {roleB roleC} {roleE roleF}
+      m createRole roleA {} {roleB roleC}
+      m createPermission permA
+      m permRoleAssign permA roleA
+      m createPermission permB
+      m permRoleAssign permB roleB
+      m createPermission permC
+      m permRoleAssign permC roleC
+      m createPermission permD
+      m permRoleAssign permD roleD
+      m createPermission permE
+      m permRoleAssign permE roleE
+      m createPermission permF
+      m permRoleAssign permF roleF
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {RoleIntrospectionRH::RoleJuniorDirect RoleIntrospectionRH::RoleJuniorDirect2\
+		RoleIntrospectionRH::RoleJuniorDirect3 RoleIntrospectionRH::RoleJuniorTransitive\
+		RoleIntrospectionRH::RoleJuniorTransitive2 RoleIntrospectionRH::RoleJuniorTransitive2\
+		RoleIntrospectionRH::RoleJuniorTransitive4 RoleIntrospectionRH::RoleJuniorAll\
+		RoleIntrospectionRH::RoleJuniorAll2 RoleIntrospectionRH::RoleJuniorAll3\
+		RoleIntrospectionRH::RoleSeniorTransitive RoleIntrospectionRH::RoleSeniorTransitive2\
+		RoleIntrospectionRH::RoleSeniorTransitive3 RoleIntrospectionRH::RoleSeniorTransitive4\
+		RoleIntrospectionRH::RoleSeniorAll RoleIntrospectionRH::RoleSeniorAll2\
+		RoleIntrospectionRH::RoleSeniorAll3 RoleIntrospectionRH::RolePermTransitive\
+		RoleIntrospectionRH::RolePermTransitive2 RoleIntrospectionRH::RolePermTransitive3\
+		RoleIntrospectionRH::RolePermTransitive4 RoleIntrospectionRH::RolePermAll\
+		RoleIntrospectionRH::RolePermAll2 RoleIntrospectionRH::RolePermAll3
+    }
+
+TestScenario RoleIntrospectionRH::RoleJuniorDirect \
+    -testScript {
+      m getDirectJuniorRoles roleA      
+    } \
+    -testResult {}
+
+TestScenario RoleIntrospectionRH::RoleJuniorDirect2 \
+    -testScript {
+      m getDirectJuniorRoles roleB
+    } \
+    -testResult {::m::roles::roleA}
+
+TestScenario RoleIntrospectionRH::RoleJuniorDirect3 \
+    -testScript {
+      m getDirectJuniorRoles roleD
+    } \
+    -testResult {::m::roles::roleB ::m::roles::roleC}
+
+TestScenario RoleIntrospectionRH::RoleJuniorTransitive \
+    -testScript {
+      m getTransitiveJuniorRoles roleA
+    } \
+    -testResult {}
+
+TestScenario RoleIntrospectionRH::RoleJuniorTransitive2 \
+    -testScript {
+      m getTransitiveJuniorRoles roleB
+    } \
+    -testResult {}
+
+TestScenario RoleIntrospectionRH::RoleJuniorTransitive3 \
+    -testScript {
+      m getTransitiveJuniorRoles roleD
+    } \
+    -testResult {::m::roles::roleA}
+
+TestScenario RoleIntrospectionRH::RoleJuniorTransitive4 \
+    -testScript {
+      m getTransitiveJuniorRoles roleF
+    } \
+    -testResult {::m::roles::roleA ::m::roles::roleB ::m::roles::roleC}
+
+TestScenario RoleIntrospectionRH::RoleJuniorAll \
+    -testScript {
+      m getAllJuniorRoles roleA
+    } \
+    -testResult {}
+
+TestScenario RoleIntrospectionRH::RoleJuniorAll2 \
+    -testScript {
+      m getAllJuniorRoles roleC
+    } \
+    -testResult {::m::roles::roleA}
+
+TestScenario RoleIntrospectionRH::RoleJuniorAll3 \
+    -testScript {
+      m getAllJuniorRoles roleF
+    } \
+    -testResult {::m::roles::roleA ::m::roles::roleB\
+		     ::m::roles::roleC ::m::roles::roleD}
+
+TestScenario RoleIntrospectionRH::RoleSeniorTransitive \
+    -testScript {
+      m getTransitiveSeniorRoles roleF
+    } \
+    -testResult {}
+
+TestScenario RoleIntrospectionRH::RoleSeniorTransitive2 \
+    -testScript {
+      m getTransitiveSeniorRoles roleD
+    } \
+    -testResult {}
+
+TestScenario RoleIntrospectionRH::RoleSeniorTransitive3 \
+    -testScript {
+      m getTransitiveSeniorRoles roleB
+    } \
+    -testResult {::m::roles::roleE ::m::roles::roleF}
+
+TestScenario RoleIntrospectionRH::RoleSeniorTransitive4 \
+    -testScript {
+      m getTransitiveSeniorRoles roleA
+    } \
+    -testResult {::m::roles::roleD ::m::roles::roleE ::m::roles::roleF}
+
+TestScenario RoleIntrospectionRH::RoleSeniorAll \
+    -testScript {
+      m getAllSeniorRoles roleE
+    } \
+    -testResult {}
+
+TestScenario RoleIntrospectionRH::RoleSeniorAll2 \
+    -testScript {
+      m getAllSeniorRoles roleD
+    } \
+    -testResult {::m::roles::roleE ::m::roles::roleF}
+
+TestScenario RoleIntrospectionRH::RoleSeniorAll3 \
+    -testScript {
+      m getAllSeniorRoles roleA
+    } \
+    -testResult {::m::roles::roleB ::m::roles::roleC ::m::roles::roleD\
+		     ::m::roles::roleE ::m::roles::roleF}
+
+TestScenario RoleIntrospectionRH::RolePermTransitive \
+    -testScript {
+      m getAllPermsTransitivelyAssignedToRole roleA
+    } \
+    -testResult {}
+
+TestScenario RoleIntrospectionRH::RolePermTransitive2 \
+    -testScript {
+      m getAllPermsTransitivelyAssignedToRole roleD
+    } \
+    -testResult {::m::permissions::permA ::m::permissions::permB ::m::permissions::permC}
+
+TestScenario RoleIntrospectionRH::RolePermTransitive3 \
+    -testScript {
+      m createPermission permX
+      m permRoleAssign permX roleC
+      m getAllPermsTransitivelyAssignedToRole roleD
+    } \
+    -testResult {::m::permissions::permA ::m::permissions::permB\
+		     ::m::permissions::permC ::m::permissions::permX} \
+    -cleanupScript {m deletePermission permX}
+    
+
+TestScenario RoleIntrospectionRH::RolePermTransitive4 \
+    -testScript {
+      m getAllPermsTransitivelyAssignedToRole roleE
+    } \
+    -testResult {::m::permissions::permA ::m::permissions::permB \
+		     ::m::permissions::permC ::m::permissions::permD}
+
+TestScenario RoleIntrospectionRH::RolePermAll \
+    -testScript {
+      m getAllPermsAssignedToRole roleA
+    } \
+    -testResult {::m::permissions::permA}
+
+TestScenario RoleIntrospectionRH::RolePermAll2 \
+    -testScript {
+      m getAllPermsAssignedToRole roleD
+    } \
+    -testResult {::m::permissions::permA ::m::permissions::permB\
+		   ::m::permissions::permC ::m::permissions::permD}
+
+TestScenario RoleIntrospectionRH::RolePermAll3 \
+    -testScript {
+      m getAllPermsAssignedToRole roleF
+    } \
+    -testResult {::m::permissions::permA ::m::permissions::permB\
+		   ::m::permissions::permC ::m::permissions::permD ::m::permissions::permF}
+
+#### Permission Introspection
+
+TestCase PermIntrospectionRH \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createRole roleB
+      m createRole roleC
+      m createRole roleE
+      m createRole roleF
+      m createRole roleD {roleB roleC} {roleE roleF}
+      m createRole roleA {} {roleB roleC}
+      m createPermission permA
+      m permRoleAssign permA roleA
+      m createPermission permB
+      m permRoleAssign permB roleB
+      m createPermission permC
+      m permRoleAssign permC roleC
+      m createPermission permD
+      m permRoleAssign permD roleD
+      m createPermission permE
+      m permRoleAssign permE roleE
+      m createPermission permF
+      m permRoleAssign permF roleF
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {PermIntrospectionRH::PermRoleTransitive PermIntrospectionRH::PermRoleTransitive2\
+		PermIntrospectionRH::PermRoleTransitive3 PermIntrospectionRH::PermRoleAll\
+		PermIntrospectionRH::PermRoleAll2 PermIntrospectionRH::PermRoleAll3
+    }
+
+
+TestScenario PermIntrospectionRH::PermRoleTransitive \
+    -testScript {
+      m getAllRolesTransitivelyOwningPerm permA
+    } \
+    -testResult {::m::roles::roleB ::m::roles::roleC \
+		   ::m::roles::roleD ::m::roles::roleE ::m::roles::roleF}
+
+TestScenario PermIntrospectionRH::PermRoleTransitive2 \
+    -testScript {
+      m getAllRolesTransitivelyOwningPerm permC
+    } \
+    -testResult {::m::roles::roleD ::m::roles::roleE ::m::roles::roleF}
+
+TestScenario PermIntrospectionRH::PermRoleTransitive3 \
+    -testScript {
+      m getAllRolesTransitivelyOwningPerm permE
+    } \
+    -testResult {}
+
+TestScenario PermIntrospectionRH::PermRoleAll \
+    -testScript {
+      m getAllRolesOwningPerm permA
+    } \
+    -testResult {::m::roles::roleA ::m::roles::roleB ::m::roles::roleC \
+		   ::m::roles::roleD ::m::roles::roleE ::m::roles::roleF}
+
+TestScenario PermIntrospectionRH::PermRoleAll2 \
+    -testScript {
+      m getAllRolesOwningPerm permC
+    } \
+    -testResult {::m::roles::roleC ::m::roles::roleD \
+		     ::m::roles::roleE ::m::roles::roleF}
+
+TestScenario PermIntrospectionRH::PermRoleAll3 \
+    -testScript {
+      m getAllRolesOwningPerm permE
+    } \
+    -testResult {::m::roles::roleE}
+

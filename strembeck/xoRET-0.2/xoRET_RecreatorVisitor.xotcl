@@ -1,0 +1,447 @@
+package provide xoRET::Recreator 0.2
+
+package require xotcl::package
+package require xotcl::trace
+package require xotcl::rdf::parser
+package require xotcl::rdf::recreatorVisitor
+package require xotcl::xml::printVisitor
+
+Class xoRET_RecreatorVisitor -superclass NodeTreeVisitor -parameter {parent}
+
+@ Class xoRET_RecreatorVisitor {
+  Author "Mark Strembeck"
+  Version "0.2"
+}
+
+xoRET_RecreatorVisitor instproc interpretAll args {
+  next
+}
+
+xoRET_RecreatorVisitor instproc interpretNodeTree node {
+  $node accept [self]
+}
+
+xoRET_RecreatorVisitor instproc visit obj {
+  # name of the corresponding Manager instance
+  my instvar parent
+  # generate "empty" goal, scenario, step, etc. objects
+  set subj [$obj getSubject] 
+  switch $subj {
+    "xoRET::objectives" {
+      if {[lsearch -exact [$obj array names attributes] "resource"] != -1} {
+	set obj [string trimleft [$obj set attributes(resource)] \#]
+	$parent createObjective $obj
+      }
+    }
+    "xoRET::obstacles" {
+      if {[lsearch -exact [$obj array names attributes] "resource"] != -1} {
+	set obst [string trimleft [$obj set attributes(resource)] \#]
+	$parent createObstacle $obst
+      }
+    }
+    "xoRET::permissions" {
+      if {[lsearch -exact [$obj array names attributes] "resource"] != -1} {
+	set perm [string trimleft [$obj set attributes(resource)] \#]
+	$parent createPermission $perm
+      }
+    }
+    "xoRET::scenarios" {
+      if {[lsearch -exact [$obj array names attributes] "resource"] != -1} {
+	set scenario [string trimleft [$obj set attributes(resource)] \#]
+	$parent createScenario $scenario
+      }
+    }
+    "xoRET::steps" {
+      if {[lsearch -exact [$obj array names attributes] "resource"] != -1} {
+	set step [subst -nocommands -novariables [string trimleft [$obj set attributes(resource)] \#]]
+	eval $parent createStep [split $step -]
+      }
+    }
+    "xoRET::tasks" {
+      if {[lsearch -exact [$obj array names attributes] "resource"] != -1} {
+	set task [string trimleft [$obj set attributes(resource)] \#]
+	$parent createTask $task
+      }
+    }
+    "xoRET::profiles" {
+      if {[lsearch -exact [$obj array names attributes] "resource"] != -1} {
+	set wp [string trimleft [$obj set attributes(resource)] \#]
+	$parent createWorkProfile $wp
+      }
+    }
+    "xoRET::roles" {
+      if {[lsearch -exact [$obj array names attributes] "resource"] != -1} {
+	set rolename [string trimleft [$obj set attributes(resource)] \#]
+	$parent createRole $rolename
+      }
+    }
+    "xoRET::constraints" {
+      if {[lsearch -exact [$obj array names attributes] "resource"] != -1} {
+	set constname [string trimleft [$obj set attributes(resource)] \#]
+	$parent createContextConstraint $constname
+      }      
+    }
+    "xoRET::conditions" {
+      if {[lsearch -exact [$obj array names attributes] "resource"] != -1} {
+	set condname [string trimleft [$obj set attributes(resource)] \#]
+	$parent createCondition $condname
+      }
+    }
+    default {
+      # add role-role-relations, constraints, subject-role assignement etc.
+      set current [subst -nocommands -novariables [string trimleft $subj \#]]
+      if {[$parent existObjective [set parent]::objectives::$current]} {
+	switch [$obj content] {
+	  "re:type" { 
+	    [set parent]::objectives::$current type [$obj getPCdataList]
+	  }
+	  "re:author" {
+	    eval set author [$obj getPCdataList]
+	    [set parent]::objectives::$current author $author
+	  }
+	  "re:modified" {
+	    eval set modified [$obj getPCdataList]
+	    [set parent]::objectives::$current last_modified $modified
+	  }
+	  "re:abstract_condition" {
+	    eval set condition [$obj getPCdataList]
+	    $parent addDerivedAbstractContextConditionToObjective $condition $current
+	  }
+	  "re:trace" {
+	    foreach o [[$obj info children] info children] {
+	      switch [$o content] {
+		"tracetype" {
+		  set tracetype [$o getPCdataList]
+		}
+		"targettype" {
+		  set targettype [$o getPCdataList]
+		}
+		"target" {
+		  eval set target [$o getPCdataList]
+		  set target [string trimleft $target \#]
+		}
+	      }
+	    }
+	    $parent addTraceRelation Objective $current $tracetype $targettype $target
+	  }
+	}
+      } elseif {[$parent existObstacle [set parent]::obstacles::$current]} {
+	switch [$obj content] {
+	  "re:type" { 
+	    [set parent]::obstacles::$current type [$obj getPCdataList]
+	  }
+	  "re:author" {
+	    eval set author [$obj getPCdataList]
+	    [set parent]::obstacles::$current author $author
+	  }
+	  "re:modified" {
+	    eval set modified [$obj getPCdataList]
+	    [set parent]::obstacles::$current last_modified $modified
+	  }
+	  "re:abstract_condition" {
+	    eval set condition [$obj getPCdataList]
+	    $parent addDerivedAbstractContextConditionToObstacle $condition $current
+	  }
+	  "re:trace" {
+	    foreach o [[$obj info children] info children] {
+	      switch [$o content] {
+		"tracetype" {
+		  set tracetype [$o getPCdataList]
+		}
+		"targettype" {
+		  set targettype [$o getPCdataList]
+		}
+		"target" {
+		  eval set target [$o getPCdataList]
+		  set target [string trimleft $target \#]
+		}
+	      }
+	    }
+	    $parent addTraceRelation Obstacle $current $tracetype $targettype $target
+	  }
+	}
+      }  elseif {[$parent existPermission ${parent}::permissions::$current]} {
+	switch [$obj content] {
+	  "re:operation" {
+	    eval set operation [$obj getPCdataList]
+	    ${parent}::permissions::$current operation $operation
+	  }
+	  "re:object" {
+	    ${parent}::permissions::$current object [$obj getPCdataList]
+	  }
+	  "re:minOwnerCardinality" {
+	    $parent setPermMinCardinality $current [$obj getPCdataList]
+	  }
+	  "re:maxOwnerCardinality" {
+	    $parent setPermMaxCardinality $current [$obj getPCdataList]
+	  }
+	  "re:ssdconstraint" {
+	    set mutlexcl [string trimleft [$obj set attributes(rdf:resource)] \#]
+	    $parent setSSDPermConstraint $current $mutlexcl
+	  }
+	  "re:trace" {
+	    foreach o [[$obj info children] info children] {
+	      switch [$o content] {
+		"tracetype" {
+		  set tracetype [$o getPCdataList]
+		}
+		"targettype" {
+		  set targettype [$o getPCdataList]
+		}
+		"target" {
+		  eval set target [$o getPCdataList]
+		  set target [string trimleft $target \#]
+		}
+	      }
+	    }
+	    $parent addTraceRelation Permission $current $tracetype $targettype $target
+	  }
+	}
+      } elseif {[$parent existScenario [set parent]::scenarios::$current]} {
+	switch [$obj content] {
+	  "re:author" {
+	    eval set author [$obj getPCdataList]
+	    [set parent]::scenarios::$current author "$author"
+	  }
+	  "re:modified" {
+	    eval set modified [$obj getPCdataList]
+	    [set parent]::scenarios::$current last_modified $modified
+	  }
+	  "re:node" {
+	    set node [string trimleft [$obj set attributes(rdf:resource)] \#]
+	    eval $parent addStepToScenario [split $node -] [list $current]
+	  }
+	  "re:edge" {
+	    eval set edge [$obj getPCdataList]
+	    set label [lindex $edge 2]
+	    eval $parent addEdgeToScenario [split [lindex $edge 0] -]\
+		[split [lindex $edge 1] -] [list $current] [list $label]
+	  }
+	  "re:trace" {
+	    foreach o [[$obj info children] info children] {
+	      switch [$o content] {
+		"tracetype" {
+		  set tracetype [$o getPCdataList]
+		}
+		"targettype" {
+		  set targettype [$o getPCdataList]
+		}
+		"target" {
+		  eval set target [$o getPCdataList]
+		  set target [string trimleft $target \#]
+		}
+	      }
+	    }
+	    $parent addTraceRelation Scenario $current $tracetype $targettype $target
+	  }
+	}
+      } elseif {[$parent existStep [set parent]::steps::$current]} {
+	switch [$obj content] {
+	  "re:author" {
+	    eval set author [$obj getPCdataList]
+	    [set parent]::steps::$current author $author
+	  }
+	  "re:modified" {
+	    eval set modified [$obj getPCdataList]
+	    [set parent]::steps::$current last_modified $modified
+	  }
+	  "re:trace" {
+	    foreach o [[$obj info children] info children] {
+	      switch [$o content] {
+		"tracetype" {
+		  set tracetype [$o getPCdataList]
+		}
+		"targettype" {
+		  set targettype [$o getPCdataList]
+		}
+		"target" {
+		  eval set target [$o getPCdataList]
+		  set target [string trimleft $target \#]
+		}
+	      }
+	    }
+	    $parent addTraceRelation Step $current $tracetype $targettype $target
+	  }
+	}
+      } elseif {[$parent existTask [set parent]::tasks::$current]} {
+	switch [$obj content] {
+	  "re:author" {
+	    eval set author [$obj getPCdataList]
+	    [set parent]::tasks::$current author $author
+	  }
+	  "re:modified" {
+	    eval set modified [$obj getPCdataList]
+	    [set parent]::tasks::$current last_modified $modified
+	  }
+	  "re:scenario" {
+	    set scenario [string trimleft [$obj set attributes(rdf:resource)] \#]
+	    $parent addScenarioToTask $scenario $current
+	  }
+	  "re:trace" {
+	    foreach o [[$obj info children] info children] {
+	      switch [$o content] {
+		"tracetype" {
+		  set tracetype [$o getPCdataList]
+		}
+		"targettype" {
+		  set targettype [$o getPCdataList]
+		}
+		"target" {
+		  eval set target [$o getPCdataList]
+		  set target [string trimleft $target \#]
+		}
+	      }
+	    }
+	    $parent addTraceRelation Task $current $tracetype $targettype $target
+	  }
+	}
+      } elseif {[$parent existWorkProfile [set parent]::profiles::$current]} {
+	switch [$obj content] {
+	  "re:author" {
+	    eval set author [$obj getPCdataList]
+	    [set parent]::profiles::$current author $author
+	  }
+	  "re:modified" {
+	    eval set modified [$obj getPCdataList]
+	    [set parent]::profiles::$current last_modified $modified
+	  }
+	  "re:task" {
+	    set task [string trimleft [$obj set attributes(rdf:resource)] \#]
+	    $parent addTaskToWorkProfile $task $current
+	  }
+	  "re:trace" {
+	    foreach o [[$obj info children] info children] {
+	      switch [$o content] {
+		"tracetype" {
+		  set tracetype [$o getPCdataList]
+		}
+		"targettype" {
+		  set targettype [$o getPCdataList]
+		}
+		"target" {
+		  eval set target [$o getPCdataList]
+		  set target [string trimleft $target \#]
+		}
+	      }
+	    }
+	    $parent addTraceRelation WorkProfile $current $tracetype $targettype $target
+	  }
+	}
+      }  elseif {[$parent existRole [set parent]::roles::$current]} {
+	switch [$obj content] {
+	  "re:author" {
+	    eval set author [$obj getPCdataList]
+	    [set parent]::roles::$current author $author
+	  }
+	  "re:modified" {
+	    eval set modified [$obj getPCdataList]
+	    [set parent]::roles::$current last_modified $modified
+	  }
+	  "re:mincardinality" { 
+	    set number [$obj getPCdataList]
+	    $parent setRoleMinCardinality $current $number 
+	  }
+	  "re:maxcardinality" {
+	    set number [$obj getPCdataList] 
+	    $parent setRoleMaxCardinality $current $number 
+	  }
+	  "re:juniorRole" {
+	    set junior [string trimleft [$obj set attributes(rdf:resource)] \#]
+	    $parent addJuniorRoleRelation $current $junior
+	  }
+	  "re:seniorRole" {
+	    set senior [string trimleft [$obj set attributes(rdf:resource)] \#]
+	    $parent addSeniorRoleRelation $current $senior
+	  }
+	  "re:staticallyMutualExclusiveRole" {
+	    set mutlexcl [string trimleft [$obj set attributes(rdf:resource)] \#]
+	    $parent setSSDRoleConstraint $current $mutlexcl
+	  }
+	  "re:permission" {
+	    set perm [string trimleft [$obj set attributes(rdf:resource)] \#]
+	    $parent permRoleAssign $perm $current
+	  }
+	  "re:trace" {
+	    foreach o [[$obj info children] info children] {
+	      switch [$o content] {
+		"tracetype" {
+		  set tracetype [$o getPCdataList]
+		}
+		"targettype" {
+		  set targettype [$o getPCdataList]
+		}
+		"target" {
+		  eval set target [$o getPCdataList]
+		  set target [string trimleft $target \#]
+		}
+	      }
+	    }
+	    $parent addTraceRelation Role $current $tracetype $targettype $target
+	  }
+	}
+      } elseif {[$parent existCondition [set parent]::conditions::$current]} {
+	switch [$obj content] {
+	  "re:author" {
+	    eval set author [$obj getPCdataList]
+	    [set parent]::conditions::$current author $author
+	  }
+	  "re:modified" {
+	    eval set modified [$obj getPCdataList]
+	    [set parent]::conditions::$current last_modified $modified
+	  }
+	  "re:trace" {
+	    foreach o [[$obj info children] info children] {
+	      switch [$o content] {
+		"tracetype" {
+		  set tracetype [$o getPCdataList]
+		}
+		"targettype" {
+		  set targettype [$o getPCdataList]
+		}
+		"target" {
+		  eval set target [$o getPCdataList]
+		  set target [string trimleft $target \#]
+		}
+	      }
+	    }
+	    $parent addTraceRelation Condition $current $tracetype $targettype $target
+	  }
+	}
+      }  elseif {[$parent existContextConstraint [set parent]::constraints::$current]} {
+	switch [$obj content] {
+	  "re:author" {
+	    eval set author [$obj getPCdataList]
+	    [set parent]::constraints::$current author $author
+	  }
+	  "re:modified" {
+	    eval set modified [$obj getPCdataList]
+	    [set parent]::constraints::$current last_modified $modified
+	  }
+	   "re:condition" {
+	    set condition [string trimleft [$obj set attributes(rdf:resource)] \#]
+	    $parent linkConditionToContextConstraint $condition $current
+	  }
+	  "re:trace" {
+	    foreach o [[$obj info children] info children] {
+	      switch [$o content] {
+		"tracetype" {
+		  set tracetype [$o getPCdataList]
+		}
+		"targettype" {
+		  set targettype [$o getPCdataList]
+		}
+		"target" {
+		  eval set target [$o getPCdataList]
+		  set target [string trimleft $target \#]
+		}
+	      }
+	    }
+	    $parent addTraceRelation ContextConstraint $current $tracetype $targettype $target
+	  }
+	}
+      } 
+    }
+  }
+}
+
+

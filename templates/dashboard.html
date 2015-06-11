@@ -41,9 +41,8 @@
 				<div class="btn-group" role="group" aria-label="...">
                     <button id="create_objective_btn" type="button" class="btn btn-default" title='Create Objective' data-toggle="modal" data-target="#objective_modal"><img src="{% static 'img/goal.gif' %}" align="absmiddle"></button>
                     <button id="create_obstacle_btn" type="button" class="btn btn-default" title='Create Obstacle' data-toggle="modal" data-target="#obstacle_modal"><img src="{% static 'img/dynamite.gif' %}" align="absmiddle"></button>
+                    <button id="create_condition_btn" type="button" class="btn btn-default" title='Create Condition' data-toggle="modal" data-target="#condition_modal"><img src="{% static 'img/condition.gif' %}" align="absmiddle"></button>
                     
-                    
-                    <button type="button" class="btn btn-default" title='Create Condition' data-toggle="modal" data-target="#create_condition_modal"><img src="{% static 'img/condition.gif' %}" align="absmiddle"></button>
                     <button type="button" class="btn btn-default" title='Create Context Constraint' data-toggle="modal" data-target="#create_constraint_modal"><img src="{% static 'img/constraint.gif' %}" align="absmiddle"></button>
                     <button type="button" class="btn btn-default" title='Create Scenario' data-toggle="modal" data-target="#create_scenario_modal"><img src="{% static 'img/film.gif' %}" align="absmiddle"></button>
                     <button type="button" class="btn btn-default" title='Create Permission' data-toggle="modal" data-target="#create_permission_modal"><img src="{% static 'img/key.gif' %}" align="absmiddle"></button>
@@ -71,7 +70,6 @@
                 {% else %}
                     <li role="presentation"><a href="{% url 'dashboard' %}?object_type=1">Objectives</a></li>
                 {% endif %}
-
 
                 {% if object_type == 2 %}  
                     <li role="presentation" class="active"><a href="{% url 'dashboard' %}?object_type=2">Obstacles</a></li>
@@ -134,6 +132,7 @@
         <div class="col-md-12">
             <div class="border_one" style="height:67vh; overflow: auto">
 
+                <!-- OBJECT_TYPE_OBJECTIVE -->
                 {% if object_type == 1 %}
                     <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
                     <thead>
@@ -162,6 +161,7 @@
                     </table>
                 {% endif %}
 
+                <!-- OBJECT_TYPE_OBSTACLE -->
                 {% if object_type == 2 %}  
                     <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
                     <thead>
@@ -190,26 +190,33 @@
                     </table>
                 {% endif %}
                 
+                <!-- OBJECT_TYPE_CONDITION -->
                 {% if object_type == 3 %}  
-                    <br>
-                    <p>Placeholder for Conditions</p>
-                    <ul>
-                      <li>Test data 1</li>
-                      <li>Test data 2</li>
-                      <li>Test data 3</li>
-                      <li>Test data 4</li>
-                      <li>Test data 5</li>
-                      <li>Test data 6</li>
-                      <li>Test data 7</li>
-                      <li>Test data 8</li>
-                      <li>Test data 9</li>
-                      <li>Test data 10</li>
-                      <li>Test data 11</li>
-                      <li>Test data 12</li>
-                      <li>Test data 13</li>
-                      <li>Test data 14</li>
-                      <li>Test data 15</li>
-                    </ul>                
+                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <thead>
+                    <tr>
+                    <th class="col-md-1">#</th>
+                    <th class="col-md-3">Condition</th>
+                    <th class="col-md-8">&nbsp;</th> <!-- toolbar: edit/remove -->
+                    </tr>
+                    </thead>
+                    <tbody>
+                    
+                    {% for condition in conditions %}
+                        <tr id='condition-{{condition.id}}'>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td data-toggle="context" data-target="#context-menu">{{condition.name}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a class="btn" onclick="edit_condition({{condition.id}});" href="#" role="button" title='Edit condition'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                                <a class="btn" onclick="delete_condition({{condition.id}});" href="#" role="button" title='Delete condition'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                            </div>                
+                        </td>
+                        </tr>
+                    {% endfor %}
+                    
+                    </tbody>
+                    </table>
                 {% endif %}
 
                 {% if object_type == 4 %}  
@@ -402,19 +409,19 @@
 
 
 <!-- 3. Create Condition Modal -->
-<div class="modal fade" id="create_condition_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="condition_modal" tabindex="-1" role="dialog" aria-labelledby="condition_modal_title" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Create Condition</h4>
+        <h4 class="modal-title" id="condition_modal_title"></h4>
       </div>
       <div class="modal-body">
         <form>
             <div class="row">
                 <div class="col-md-9">
                   <div class="form-group">
-                    <label for="obstacle_name">Condition Name</label>
+                    <label for="condition_name">Condition Name</label>
                     <input type="text" class="form-control" id="condition_name" placeholder="Enter condition name" required>
                     <input type="hidden" id="condition_id" value="">
                   </div>              
@@ -424,7 +431,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save</button>
+        <button id="save_condition_btn" type="button" class="btn btn-primary">Save</button>
       </div>
     </div>
   </div>
@@ -775,16 +782,32 @@
 
 {% block scripts %}
 <script>
+// onready
+$(function() {
 
-var OBJECT_TYPE_OBJECTIVE = 1
-var OBJECT_TYPE_OBSTACLE = 2
-var OBJECT_TYPE_CONDITION = 3
-var OBJECT_TYPE_PERMISSION = 4
-var OBJECT_TYPE_ROLE = 5
-var OBJECT_TYPE_STEP = 6
-var OBJECT_TYPE_SCENARIO = 7
-var OBJECT_TYPE_TASK = 8
-var OBJECT_TYPE_CONTEXTCONSTRAINT = 9
+});
+
+// obstacle
+$( '#create_obstacle_btn' ).click(function() {
+
+    // set to new mode
+    mode = 1;
+    
+    // reset all fields
+    $('#obstacle_name').val('');
+    $('#condition_input2').val('');
+    $('#condition_list2').find('option').remove();
+});
+
+var OBJECT_TYPE_OBJECTIVE = '1'
+var OBJECT_TYPE_OBSTACLE = '2'
+var OBJECT_TYPE_CONDITION = Number(3)
+var OBJECT_TYPE_PERMISSION = '4'
+var OBJECT_TYPE_ROLE = '5'
+var OBJECT_TYPE_STEP = '6'
+var OBJECT_TYPE_SCENARIO = '7'
+var OBJECT_TYPE_TASK = '8'
+var OBJECT_TYPE_CONTEXTCONSTRAINT = '9'
 
 // common to all
 var url_dashboard = "{% url 'dashboard' %}"
@@ -795,6 +818,8 @@ var url_edit_objective = "{% url 'edit_objective' %}"
 var url_delete_obstacle = "{% url 'delete_obstacle' %}"
 var url_edit_obstacle = "{% url 'edit_obstacle' %}"
 
+var url_delete_condition = "{% url 'delete_condition' %}"
+var url_edit_condition = "{% url 'edit_condition' %}"
 
 var mode = 0; // edit mode, common var to all
 

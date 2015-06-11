@@ -1,0 +1,230 @@
+package provide xoRET::Object 0.1.1
+
+Class xoRETObject -parameter {name author last_modified}
+
+@ Class xoRETObject {
+  Author "(c) Mark Strembeck"
+  Version "0.1.1"
+}
+
+xoRETObject abstract instproc exportRDF {filename}
+xoRETObject abstract instproc getAttributes {}
+#xoRETObject abstract instproc appendToTailoredTraceDotFile {filename {totypes "all"} {tracetypes "all"}}
+
+xoRETObject instproc init args {
+  my updateModifyDate
+  my set pm [[[self] info parent] info parent]
+  my log NORMAL "Created new [[self] info class] Object [self]"
+  next
+}
+
+xoRETObject instproc updateModifyDate {} {
+  my last_modified [clock format [clock seconds]]
+}
+
+### tracetype: identifies the type of the trace-relation (e.g. refine, generalize, conflict, ...)
+### targettype: identifies the type of the target (e.g. objective, obstacle, task, ...)
+### target: a fully-qualified object-id of the associated trace target
+xoRETObject instproc addTrace {tracetype targettype target} {
+  my instvar [set targettype] pm
+  if {![my existTrace $tracetype $targettype $target]} {
+    if {[info exists [set targettype]($tracetype)]} {
+      set current [set [set targettype]($tracetype)]
+      set new [lsort -unique [lappend current $target]]
+      set [set targettype]($tracetype) $new
+      my addArrayToTraceList [set targettype]
+      my log NORMAL "[self] [self proc], $tracetype trace to $targettype <<$target>> added."
+      return 1 
+    } else {
+      lappend [set targettype]($tracetype) $target
+      my addArrayToTraceList [set targettype]
+      my log NORMAL "[self] [self proc], $tracetype trace to $targettype <<$target>> added."
+      return 1
+    }
+  } else {
+    if {![set ${pm}::importinprogress]} {
+      my log INFO "[self] [self proc] INFO, trace <<$tracetype $targettype $target>> already exists."
+    }
+    return 0
+  }
+}
+
+xoRETObject instproc existTrace {tracetype targettype target} {
+  set traces [my getAllTraces]
+  set trace [list [string trim [[self] info class] :] [my name] $tracetype $targettype [$target name]]
+  if {[lsearch -exact $traces $trace] != -1} {
+    return 1
+  }
+  return 0
+}
+
+### tracetype: identifies the type of the trace-relation (e.g. refine, generalize, conflict, ...)
+### targettype: identifies the type of the target (e.g. objective, obstacle, task, ...)
+### target: a fully-qualified object-id of the associated trace target
+xoRETObject instproc removeTrace {tracetype targettype target} {
+  my instvar [set targettype]
+  if {[info exists [set targettype]($tracetype)]} {
+    set current [set [set targettype]($tracetype)]
+    if {[lsearch -exact $current $target] != -1} {
+      set index [lsearch -exact $current $target]
+      set new [lreplace $current $index $index]
+      set [set targettype]($tracetype) $new
+      my log NORMAL "[self] [self proc], $tracetype trace to $targettype <<$target>> removed."
+      return 1
+    } else {
+      my log FAILED "[self] [self proc] FAILED, $tracetype trace to $targettype\
+                          <<$target>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, no $tracetype traces to $targettype instances defined."
+    return 0
+  }
+}
+
+xoRETObject instproc addArrayToTraceList {arrayname} {
+  my instvar traces
+  lappend traces $arrayname
+  set traces [lsort -unique $traces]
+}
+
+
+# The method below removes each trace link pointing from [self] 
+# to a specific target object. This method is invoked by the 
+# destroy method only (i.e. only if an object is deleted from
+# the system). 
+xoRETObject instproc removeEachTraceTo {target} {
+  my instvar traces
+   if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	set list [set [set targettype]($tracetype)] 
+	if {[lsearch -exact $list $target] != -1} {
+	  my removeTrace $tracetype $targettype $target
+	}
+      }
+    }
+  }
+  my log NORMAL "[self] [self proc], all traces to <<$target>> removed from <<[self]>>."
+}
+
+xoRETObject instproc getAllTraceTargets {tracetype targettype} {
+  my instvar [set targettype]
+  set targets ""
+  if {[info exists [set targettype]($tracetype)]} {
+    set targets [set [set targettype]($tracetype)]
+  }
+  return $targets
+}
+
+xoRETObject instproc getAllTraces {} {
+  my instvar traces
+  set tracelist ""
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  lappend tracelist "[list [string trim [[self] info class] :] \
+                                   [my name] $tracetype $targettype [$target name]]"
+	}
+      }
+    }
+  }
+  return $tracelist
+}
+
+xoRETObject instproc appendToTailoredTraceDotFile {filename {totypes "all"} {tracetypes "all"} args} {
+  set file [open $filename a]
+  puts $file "\t \"[my name]\" \[shape=[lindex $args 0] fontname=helvetica fontsize=11\];"
+  set traces [my getAllTraces]
+  if {$totypes == "all"} {
+    if {$tracetypes == "all"} {
+      foreach t $traces {
+	puts $file "\t \"[my name]\" -> \"[lindex $t 4]\" \[label=\"[lindex $t 2]\"\];"
+      }
+    } else {
+      foreach t $traces {
+	if {[lsearch -exact $tracetypes [lindex $t 2]] != -1} {
+	  puts $file "\t \"[my name]\" -> \"[lindex $t 4]\" \[label=\"[lindex $t 2]\"\];"
+	}
+      }
+    }
+  } else {
+    if {$tracetypes == "all"} {
+      foreach t $traces {
+	if {[lsearch -exact $totypes [lindex $t 3]] != -1} {
+	  puts $file "\t \"[my name]\" -> \"[lindex $t 4]\" \[label=\"[lindex $t 2]\"\];"
+	}
+      }
+    } else {
+      foreach t $traces {
+	if {([lsearch -exact $tracetypes [lindex $t 2]] != -1) &&
+	    ([lsearch -exact $totypes [lindex $t 3]] != -1)} {
+	  puts $file "\t \"[my name]\" -> \"[lindex $t 4]\" \[label=\"[lindex $t 2]\"\];"
+	}
+      }
+    }
+  }
+  close $file
+}
+
+xoRETObject instproc log {type message} {
+  my instvar pm
+  puts stderr "$message"
+  if {[$pm guiActive]} {
+    switch $type {
+      FAILED {
+        $pm bgerror $message warning Ok
+      }
+      INFO {
+        $pm bgerror $message info Ok
+      }
+    }
+  }
+  if {![$pm loggingOn]} { 
+    return 
+  }
+  set file [open xoRET_MAIN_LOG a+]   
+  puts $file "[clock format [clock seconds]] -> $message"
+  close $file
+  switch $type {    
+    FAILED {
+      set file [open xoRET_FAILED_LOG a+]	    
+      puts $file "[clock format [clock seconds]] -> $message"
+      close $file
+    }
+    EXCEPTION {
+      set file [open xoRET_EXCEPTION_LOG a+]	    
+      puts $file "[clock format [clock seconds]] -> $message"
+      close $file
+    }
+    ABBORTED {
+      set file [open xoRET_ABBORTED_LOG a+]	    
+      puts $file "[clock format [clock seconds]] -> $message"
+      close $file
+    }
+    NORMAL {
+      set file [open xoRET_NORMAL_LOG a+]	    
+      puts $file "[clock format [clock seconds]] -> $message"
+      close $file
+    }
+  }
+}
+
+xoRETObject instproc destroy args {
+  my instvar traces
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      [self] instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  $target removeEachTraceTo [self]
+	}
+      }
+    }
+  }
+  my log NORMAL "[self] [self proc], [[self] info class] object <<[self]>> deleted."
+  next
+}

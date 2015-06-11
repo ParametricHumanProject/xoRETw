@@ -1,0 +1,195 @@
+
+TestCase Derivation \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createStep a a a
+      m createStep b b b
+      m createStep c c c
+      m createStep d d d
+      m createStep e e e
+      m createStep f f f
+      m createStep g g g
+      m createScenario ScenA
+      m addStepToScenario a a a ScenA
+      m addStepToScenario b b b ScenA
+      m createScenario ScenB
+      m addStepToScenario b b b ScenB
+      m addStepToScenario c c c ScenB
+      m createScenario ScenC
+      m addStepToScenario c c c ScenC
+      m addStepToScenario d d d ScenC
+      m createScenario ScenD
+      m addStepToScenario d d d ScenD
+      m addStepToScenario e e e ScenD
+      m addStepToScenario f f f ScenD
+      m createTask TaskA
+      m addScenarioToTask ScenA TaskA
+      m addScenarioToTask ScenB TaskA
+      m createTask TaskB
+      m addScenarioToTask ScenC TaskB
+      m addScenarioToTask ScenD TaskB
+      m createWorkProfile ProfileA
+      m addTaskToWorkProfile TaskA ProfileA
+      m createWorkProfile ProfileB
+      m addTaskToWorkProfile TaskB ProfileB
+      m createWorkProfile ProfileC
+      m addTaskToWorkProfile TaskA ProfileC
+      m addTaskToWorkProfile TaskB ProfileC
+      m createObjective ObjA
+      m createObjective ObjB
+      m addDerivedAbstractContextConditionToObjective "obja condition" ObjA
+      m addDerivedAbstractContextConditionToObjective "objb condition" ObjB
+      m createObstacle ObsA
+      m createObstacle ObsB
+      m addDerivedAbstractContextConditionToObstacle "obsa condition" ObsA
+      m addDerivedAbstractContextConditionToObstacle "obsb condition" ObsB
+      m addTraceRelation Objective ObjA fullfilled-by Scenario ScenA
+      m addTraceRelation Objective ObjB fullfilled-by Scenario ScenB
+      m addTraceRelation Obstacle ObsA impedes Objective ObjA
+      m addTraceRelation Obstacle ObsB impedes Objective ObjB
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {Derivation::PermFromStepFail Derivation::PermFromStepSuccess\
+		Derivation::CCFromObjectiveFail Derivation::CCFromObjectiveSuccess\
+		Derivation::CCFromObjectiveSuccess2 Derivation::CCFromObstacleFail\
+		Derivation::CCFromObstacleSuccess Derivation::CCFromObstacleSuccess2\
+		Derivation::RoleFromWPFail Derivation::RoleFromWPSuccess\
+		Derivation::RoleFromWPSuccess2 Derivation::RoleFromWPSuccess3		
+    }
+
+TestScenario Derivation::PermFromStepFail \
+    -testScript {
+      m derivePermissionFromStep x x x
+    } \
+    -testResult {0} \
+    -postconditionScript {
+      my lequal [m getPermissionList] ""
+    }
+
+TestScenario Derivation::PermFromStepSuccess \
+    -testScript {
+      foreach s [m getStepList] {
+	m derivePermissionFromStep [$s actor] [$s action] [$s target]
+      }
+    } \
+    -testResult {} \
+    -postconditionScript {
+      my lequal [m getPermissionList] {::m::permissions::a_a ::m::permissions::b_b\
+					   ::m::permissions::c_c ::m::permissions::d_d\
+					   ::m::permissions::e_e ::m::permissions::f_f\
+					   ::m::permissions::g_g}
+    }
+
+TestScenario Derivation::CCFromObjectiveFail \
+    -testScript {
+      m deriveCCFromObjective ObjX
+    } \
+    -testResult {0}
+
+TestScenario Derivation::CCFromObjectiveSuccess \
+    -testScript {
+      m deriveCCFromObjective ObjA
+    } \
+    -testResult {1} \
+    -postconditionScript {
+      set l [concat [m getContextConstraintList] [m getConditionList]]
+      my lequal $l {::m::constraints::Achieve_ObjA ::m::conditions::obja_condition}
+    }
+
+TestScenario Derivation::CCFromObjectiveSuccess2 \
+    -testScript {
+      m deriveCCFromObjective ObjB
+    } \
+    -testResult {1} \
+    -postconditionScript {
+      set l [concat [m getContextConstraintList] [m getConditionList]]
+      my lequal $l {::m::constraints::Achieve_ObjA ::m::constraints::Achieve_ObjB\
+			::m::conditions::obja_condition ::m::conditions::objb_condition}
+    }
+
+TestScenario Derivation::CCFromObstacleFail \
+    -testScript {
+      m deriveCCFromObstacle ObsX
+    } \
+    -testResult {0}
+
+TestScenario Derivation::CCFromObstacleSuccess \
+    -testScript {
+      m deriveCCFromObstacle ObsA
+    } \
+    -testResult {1} \
+    -postconditionScript {
+      set l [concat [m getContextConstraintList] [m getConditionList]]
+      my lequal $l {::m::constraints::Achieve_ObjA ::m::constraints::Achieve_ObjB\
+			::m::constraints::Avoid_ObsA ::m::conditions::obja_condition\
+			::m::conditions::objb_condition	::m::conditions::obsa_condition}
+    }
+
+TestScenario Derivation::CCFromObstacleSuccess2 \
+    -testScript {
+      m deriveCCFromObstacle ObsB
+    } \
+    -testResult {1} \
+    -postconditionScript {
+      set l [concat [m getContextConstraintList] [m getConditionList]]
+      my lequal $l {::m::constraints::Achieve_ObjA ::m::constraints::Achieve_ObjB\
+			::m::constraints::Avoid_ObsA ::m::constraints::Avoid_ObsB\
+			::m::conditions::obja_condition ::m::conditions::objb_condition\
+			::m::conditions::obsa_condition ::m::conditions::obsb_condition}
+    }
+
+TestScenario Derivation::RoleFromWPFail \
+    -testScript {
+      m deriveRoleFromWorkProfile ProfileX
+    } \
+    -testResult {0}
+
+TestScenario Derivation::RoleFromWPSuccess \
+    -testScript {
+      m deriveRoleFromWorkProfile ProfileA
+    } \
+    -testResult {1} \
+    -postconditionScript {
+      foreach r [m getRoleList] {
+	lappend l $r
+	set l [concat $l [$r getAllPerms]]
+      }
+      my lequal $l {::m::roles::Role_ProfileA ::m::permissions::a_a ::m::permissions::b_b\
+		      ::m::permissions::c_c}
+    }
+
+TestScenario Derivation::RoleFromWPSuccess2 \
+    -testScript {
+      m deriveRoleFromWorkProfile ProfileB
+    } \
+    -testResult {1} \
+    -postconditionScript {
+      foreach r [m getRoleList] {
+	lappend l $r
+	set l [concat $l [$r getAllPerms]]
+      }
+      my lequal $l {::m::roles::Role_ProfileA ::m::permissions::a_a ::m::permissions::b_b\
+			::m::permissions::c_c ::m::roles::Role_ProfileB ::m::permissions::c_c\
+			::m::permissions::d_d ::m::permissions::e_e ::m::permissions::f_f}
+    }
+
+TestScenario Derivation::RoleFromWPSuccess3 \
+    -testScript {
+      m deriveRoleFromWorkProfile ProfileC
+    } \
+    -testResult {1} \
+    -postconditionScript {
+      foreach r [m getRoleList] {
+	lappend l $r
+	set l [concat $l [$r getAllPerms]]
+      }
+      my lequal $l {::m::roles::Role_ProfileA ::m::permissions::a_a ::m::permissions::b_b\
+			::m::permissions::c_c ::m::roles::Role_ProfileB ::m::permissions::c_c\
+			::m::permissions::d_d ::m::permissions::e_e ::m::permissions::f_f\
+			::m::roles::Role_ProfileC ::m::permissions::a_a ::m::permissions::b_b\
+			::m::permissions::c_c ::m::permissions::d_d ::m::permissions::e_e\
+			::m::permissions::f_f}
+    }

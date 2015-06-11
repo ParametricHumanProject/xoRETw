@@ -1,0 +1,439 @@
+######## Perm-to-Role
+
+TestCase P2RAssignment \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createRole roleA
+      m createPermission permA
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {P2RAssignment::Perm2RoleSuccess P2RAssignment::Perm2RoleFail\
+		P2RAssignment::Perm2RoleFail2  P2RAssignment::Perm2RoleFail3\
+		P2RAssignment::PermRoleRevokeFail P2RAssignment::PermRoleRevokeFail2\
+		P2RAssignment::PermRoleRevokeSuccess P2RAssignment::PermRoleRevokeFail3
+    }
+
+TestScenario P2RAssignment::Perm2RoleSuccess \
+    -testScript {
+      m permRoleAssign permA roleA
+    } \
+    -testResult {1}
+
+TestScenario P2RAssignment::Perm2RoleFail \
+    -testScript {
+      m permRoleAssign permA roleA
+    } \
+    -testResult {0}
+
+TestScenario P2RAssignment::Perm2RoleFail2 \
+    -testScript {
+      m permRoleAssign permX roleA
+    } \
+    -testResult {0}
+
+TestScenario P2RAssignment::Perm2RoleFail3 \
+    -testScript {
+      m permRoleAssign permA roleB
+    } \
+    -testResult {0}
+
+TestScenario P2RAssignment::PermRoleRevokeFail \
+    -testScript {
+      m permRoleRevoke permX roleA
+    } \
+    -testResult {0}
+
+TestScenario P2RAssignment::PermRoleRevokeFail2 \
+    -testScript {
+      m permRoleRevoke permA roleX
+    } \
+    -testResult {0}
+
+TestScenario P2RAssignment::PermRoleRevokeSuccess \
+    -testScript {
+      m permRoleRevoke permA roleA
+    } \
+    -testResult {1}
+
+TestScenario P2RAssignment::PermRoleRevokeFail3 \
+    -testScript {
+      m permRoleRevoke permA roleA
+    } \
+    -testResult {0}
+
+######## Condition-to-CC
+
+TestCase C2CCAssignment \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createContextConstraint ccA
+      m createCondition condA
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {C2CCAssignment::Cond2CCSuccess  C2CCAssignment::Cond2CCFail\
+		C2CCAssignment::Cond2CCFail2  C2CCAssignment::Cond2CCFail3\
+		C2CCAssignment::CondCCUnlinkFail C2CCAssignment::CondCCUnlinkFail2\
+		C2CCAssignment::CondCCUnlinkSuccess C2CCAssignment::CondCCUnlinkFail3
+    }
+
+TestScenario C2CCAssignment::Cond2CCSuccess \
+    -testScript {
+      m linkConditionToContextConstraint condA ccA
+    } \
+    -testResult {1}
+
+TestScenario C2CCAssignment::Cond2CCFail \
+    -testScript {
+      m linkConditionToContextConstraint condA ccA
+    } \
+    -testResult {0}
+
+TestScenario C2CCAssignment::Cond2CCFail2 \
+    -testScript {
+      m linkConditionToContextConstraint condX ccA
+    } \
+    -testResult {0}
+
+TestScenario C2CCAssignment::Cond2CCFail3 \
+    -testScript {
+      m linkConditionToContextConstraint condA ccX
+    } \
+    -testResult {0}
+
+TestScenario C2CCAssignment::CondCCUnlinkFail \
+    -testScript {
+      m unlinkConditionFromContextConstraint condX ccA
+    } \
+    -testResult {0}
+
+TestScenario C2CCAssignment::CondCCUnlinkFail2 \
+    -testScript {
+      m unlinkConditionFromContextConstraint condA ccX
+    } \
+    -testResult {0}
+
+TestScenario C2CCAssignment::CondCCUnlinkSuccess \
+    -testScript {
+      m unlinkConditionFromContextConstraint condA ccA
+    } \
+    -testResult {1}
+
+TestScenario C2CCAssignment::CondCCUnlinkFail3 \
+    -testScript {
+      m unlinkConditionFromContextConstraint condA ccA
+    } \
+    -testResult {0}
+
+######## CC-to-Perm
+
+TestCase CC2PAssignment \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createPermission permA
+      m createContextConstraint ccA
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {CC2PAssignment::CC2PermSuccess  CC2PAssignment::CC2PermFail\
+		CC2PAssignment::CC2PermFail2  CC2PAssignment::CC2PermFail3\
+		CC2PAssignment::CCPermUnlinkFail  CC2PAssignment::CCPermUnlinkFail2\
+		CC2PAssignment::CCPermUnlinkSuccess  CC2PAssignment::CCPermUnlinkFail3
+    }
+
+TestScenario CC2PAssignment::CC2PermSuccess \
+    -testScript {
+      m linkContextConstraintToPerm ccA permA
+    } \
+    -testResult {1}
+
+TestScenario CC2PAssignment::CC2PermFail \
+    -testScript {
+      m linkContextConstraintToPerm ccA permA
+    } \
+    -testResult {0}
+
+TestScenario CC2PAssignment::CC2PermFail2 \
+    -testScript {
+      m linkContextConstraintToPerm ccX permA
+    } \
+    -testResult {0}
+
+TestScenario CC2PAssignment::CC2PermFail3 \
+    -testScript {
+      m linkContextConstraintToPerm ccA permX
+    } \
+    -testResult {0}
+
+TestScenario CC2PAssignment::CCPermUnlinkFail \
+    -testScript {
+      m unlinkContextConstraintFromPerm ccX permA
+    } \
+    -testResult {0}
+
+TestScenario CC2PAssignment::CCPermUnlinkFail2 \
+    -testScript {
+      m unlinkContextConstraintFromPerm ccA permX
+    } \
+    -testResult {0}
+
+TestScenario CC2PAssignment::CCPermUnlinkSuccess \
+    -testScript {
+      m unlinkContextConstraintFromPerm ccA permA
+    } \
+    -testResult {1}
+
+TestScenario CC2PAssignment::CCPermUnlinkFail3 \
+    -testScript {
+      m unlinkContextConstraintFromPerm ccA permA
+    } \
+    -testResult {0}
+
+#### Step to Scenario
+
+TestCase Step2ScenAssignment \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createStep actor1 action1 target1 
+      m createStep actor2 action2 target2 
+      m createStep actor3 action3 target3
+      m createScenario ScenA
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {Step2ScenAssignment::Step2ScenSuccess  Step2ScenAssignment::Step2ScenFail\
+		Step2ScenAssignment::Step2ScenFail2  Step2ScenAssignment::Step2ScenFail3\
+		Step2ScenAssignment::StepScenUnlinkFail  Step2ScenAssignment::StepScenUnlinkFail2\
+		Step2ScenAssignment::StepScenUnlinkSuccess  Step2ScenAssignment::StepScenUnlinkFail3\
+		Step2ScenAssignment::GetList
+    }
+
+TestScenario Step2ScenAssignment::Step2ScenSuccess \
+    -testScript {
+      m addStepToScenario actor1 action1 target1 ScenA
+    } \
+    -testResult {1} \
+    -postconditionScript {
+      my lequal [m getStepListOfScenario ScenA] {::m::steps::actor1-action1-target1}
+    }
+
+TestScenario Step2ScenAssignment::Step2ScenFail \
+    -testScript {
+      m addStepToScenario actor1 action1 target1 ScenA
+    } \
+    -testResult {0}
+
+TestScenario Step2ScenAssignment::Step2ScenFail2 \
+    -testScript {
+      m addStepToScenario xx yy zz ScenA
+    } \
+    -testResult {0}
+
+TestScenario Step2ScenAssignment::Step2ScenFail3 \
+    -testScript {
+      m addStepToScenario actor1 action1 target1 ScenX
+    } \
+    -testResult {0}
+
+TestScenario Step2ScenAssignment::StepScenUnlinkFail \
+    -testScript {
+      m removeStepFromScenario xx yy zz ScenA
+    } \
+    -testResult {0}
+
+TestScenario Step2ScenAssignment::StepScenUnlinkFail2 \
+    -testScript {
+      m removeStepFromScenario actor1 action1 target1 ScenX
+    } \
+    -testResult {0}
+
+TestScenario Step2ScenAssignment::StepScenUnlinkSuccess \
+    -testScript {
+      m removeStepFromScenario actor1 action1 target1 ScenA
+    } \
+    -testResult {1}
+
+TestScenario Step2ScenAssignment::StepScenUnlinkFail3 \
+    -testScript {
+      m removeStepFromScenario actor1 action1 target1 ScenA
+    } \
+    -testResult {0}
+
+TestScenario Step2ScenAssignment::GetList \
+    -testScript {
+      m addStepToScenario actor1 action1 target1 ScenA
+      m addStepToScenario actor2 action2 target2 ScenA
+      m addStepToScenario actor3 action3 target3 ScenA
+      m getStepListOfScenario ScenA
+    } \
+    -testResult {::m::steps::actor1-action1-target1 ::m::steps::actor2-action2-target2\
+		   ::m::steps::actor3-action3-target3
+    }
+
+#### Scenario to Task
+
+TestCase Scen2TaskAssignment \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createScenario ScenA
+      m createScenario ScenB
+      m createScenario ScenC
+      m createTask TaskA
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {Scen2TaskAssignment::Scen2TaskSuccess  Scen2TaskAssignment::Scen2TaskFail\
+		Scen2TaskAssignment::Scen2TaskFail2  Scen2TaskAssignment::Scen2TaskFail3\
+		Scen2TaskAssignment::ScenTaskUnlinkFail  Scen2TaskAssignment::ScenTaskUnlinkFail2\
+		Scen2TaskAssignment::ScenTaskUnlinkSuccess  Scen2TaskAssignment::ScenTaskUnlinkFail3\
+		Scen2TaskAssignment::GetList
+    }
+
+TestScenario Scen2TaskAssignment::Scen2TaskSuccess \
+    -testScript {
+      m addScenarioToTask ScenA TaskA
+    } \
+    -testResult {1}
+
+TestScenario Scen2TaskAssignment::Scen2TaskFail \
+    -testScript {
+      m addScenarioToTask ScenA TaskA
+    } \
+    -testResult {0}
+
+TestScenario Scen2TaskAssignment::Scen2TaskFail2 \
+    -testScript {
+      m addScenarioToTask ScenX TaskA
+    } \
+    -testResult {0}
+
+TestScenario Scen2TaskAssignment::Scen2TaskFail3 \
+    -testScript {
+      m addScenarioToTask ScenA TaskX
+     } \
+    -testResult {0}
+
+TestScenario Scen2TaskAssignment::ScenTaskUnlinkFail \
+    -testScript {
+      m removeScenarioFromTask ScenX TaskA
+    } \
+    -testResult {0}
+
+TestScenario Scen2TaskAssignment::ScenTaskUnlinkFail2 \
+    -testScript {
+      m removeScenarioFromTask ScenA TaskX
+    } \
+    -testResult {0}
+
+TestScenario Scen2TaskAssignment::ScenTaskUnlinkSuccess \
+    -testScript {
+      m removeScenarioFromTask ScenA TaskA
+    } \
+    -testResult {1}
+
+TestScenario Scen2TaskAssignment::ScenTaskUnlinkFail3 \
+    -testScript {
+      m removeScenarioFromTask ScenA TaskA
+    } \
+    -testResult {0}
+
+TestScenario Scen2TaskAssignment::GetList \
+    -testScript {
+      m addScenarioToTask ScenA TaskA
+      m addScenarioToTask ScenB TaskA
+      m addScenarioToTask ScenC TaskA
+      m getScenarioListOfTask TaskA
+    } \
+    -testResult {::m::scenarios::ScenA ::m::scenarios::ScenB ::m::scenarios::ScenC
+    }
+
+### Task to WorkProfile
+
+TestCase Task2WPAssignment \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createTask TaskA
+      m createTask TaskB
+      m createTask TaskC
+      m createWorkProfile ProfileA
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {Task2WPAssignment::Task2WPSuccess  Task2WPAssignment::Task2WPFail\
+		Task2WPAssignment::Task2WPFail2  Task2WPAssignment::Task2WPFail3\
+		Task2WPAssignment::TaskWPUnlinkFail  Task2WPAssignment::TaskWPUnlinkFail2\
+		Task2WPAssignment::TaskWPUnlinkSuccess  Task2WPAssignment::TaskWPUnlinkFail3\
+		Task2WPAssignment::GetList
+    }
+
+TestScenario Task2WPAssignment::Task2WPSuccess \
+    -testScript {
+      m addTaskToWorkProfile TaskA ProfileA
+    } \
+    -testResult {1}
+
+TestScenario Task2WPAssignment::Task2WPFail \
+    -testScript {
+      m addTaskToWorkProfile TaskA ProfileA
+    } \
+    -testResult {0}
+
+TestScenario Task2WPAssignment::Task2WPFail2 \
+    -testScript {
+      m addTaskToWorkProfile TaskX ProfileA
+    } \
+    -testResult {0}
+
+TestScenario Task2WPAssignment::Task2WPFail3 \
+    -testScript {
+      m addTaskToWorkProfile TaskA ProfileX
+    } \
+    -testResult {0}
+
+TestScenario Task2WPAssignment::TaskWPUnlinkFail \
+    -testScript {
+      m removeTaskFromWorkProfile TaskX ProfileA
+    } \
+    -testResult {0}
+
+TestScenario Task2WPAssignment::TaskWPUnlinkFail2 \
+    -testScript {
+      m removeTaskFromWorkProfile TaskA ProfileX
+    } \
+    -testResult {0}
+
+TestScenario Task2WPAssignment::TaskWPUnlinkSuccess \
+    -testScript {
+      m removeTaskFromWorkProfile TaskA ProfileA
+    } \
+    -testResult {1}
+
+TestScenario Task2WPAssignment::TaskWPUnlinkFail3 \
+    -testScript {
+      m removeTaskFromWorkProfile TaskA ProfileA
+    } \
+    -testResult {0}
+
+TestScenario Task2WPAssignment::GetList \
+    -testScript {
+      m addTaskToWorkProfile TaskA ProfileA
+      m addTaskToWorkProfile TaskB ProfileA
+      m addTaskToWorkProfile TaskC ProfileA
+      m getTaskListOfWorkProfile ProfileA
+    } \
+    -testResult {::m::tasks::TaskA ::m::tasks::TaskB ::m::tasks::TaskC
+    }
+

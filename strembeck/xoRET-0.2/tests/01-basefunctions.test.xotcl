@@ -1,0 +1,679 @@
+#### Role Base Functions
+
+TestCase RoleBaseFunctions \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {RoleBaseFunctions::RoleExistFail RoleBaseFunctions::RoleCreateSuccess \
+		RoleBaseFunctions::RoleCreateFail RoleBaseFunctions::RoleExistSuccess \
+		RoleBaseFunctions::RoleDeleteSuccess RoleBaseFunctions::RoleDeleteFail \
+		RoleBaseFunctions::RoleGetList
+    }
+
+TestScenario RoleBaseFunctions::RoleExistFail \
+    -testScript {
+      m existRole ::m::roles::RoleA
+    } \
+    -testResult {0}
+
+TestScenario RoleBaseFunctions::RoleCreateSuccess \
+    -testScript {
+      m createRole RoleA
+    } \
+    -testResult {1}
+
+TestScenario RoleBaseFunctions::RoleCreateFail \
+    -testScript {
+      m createRole RoleA
+    } \
+    -testResult {0}
+
+TestScenario RoleBaseFunctions::RoleExistSuccess \
+    -testScript {
+      m existRole ::m::roles::RoleA
+    } \
+    -testResult {1}
+    
+TestScenario RoleBaseFunctions::RoleDeleteSuccess \
+    -testScript {
+      m deleteRole RoleA
+    } \
+    -testResult {1}
+
+TestScenario RoleBaseFunctions::RoleDeleteFail \
+    -testScript {
+      m deleteRole RoleA
+    } \
+    -testResult {0} \
+    -postconditionScript {
+      my lequal [m existRole ::m::roles::RoleA] 0
+    }
+
+TestScenario RoleBaseFunctions::RoleGetList \
+    -testScript {
+      m createRole X
+      m createRole A
+      m createRole Z
+      m createRole B
+      m createRole M
+      m getRoleList
+    } \
+    -testResult {::m::roles::A ::m::roles::B ::m::roles::M \
+		     ::m::roles::X ::m::roles::Z
+    }
+
+#### Permission Base Functions
+
+TestCase PermBaseFunctions \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {PermBaseFunctions::PermExistFail PermBaseFunctions::PermCreateSuccess \
+		PermBaseFunctions::PermCreateFail PermBaseFunctions::PermExistSuccess \
+		PermBaseFunctions::PermDeleteSuccess PermBaseFunctions::PermDeleteFail \
+		PermBaseFunctions::PermGetList
+    }
+
+TestScenario PermBaseFunctions::PermExistFail \
+    -testScript {
+      m existPermission ::m::permissions::PermA
+    } \
+    -testResult {0}
+
+TestScenario PermBaseFunctions::PermCreateSuccess \
+    -testScript {
+      m createPermission PermA
+    } \
+    -testResult {1}
+
+TestScenario PermBaseFunctions::PermCreateFail \
+    -testScript {
+      m createPermission PermA
+    } \
+    -testResult {0}
+
+TestScenario PermBaseFunctions::PermExistSuccess \
+    -testScript {
+      m existPermission ::m::permissions::PermA      
+    } \
+    -testResult {1}
+
+TestScenario PermBaseFunctions::PermDeleteSuccess \
+    -testScript {
+      m deletePermission PermA
+    } \
+    -testResult {1}
+
+TestScenario PermBaseFunctions::PermDeleteFail \
+    -testScript {
+      m deletePermission PermA
+    } \
+    -testResult {0} \
+    -postconditionScript {
+      my lequal [m existPermission ::m::permissions::PermA] 0
+    }
+
+TestScenario PermBaseFunctions::PermGetList \
+    -testScript {
+      m createPermission X
+      m createPermission A
+      m createPermission Z
+      m createPermission B
+      m createPermission M
+      m getPermissionList
+    } \
+    -testResult {::m::permissions::A ::m::permissions::B ::m::permissions::M \
+		     ::m::permissions::X ::m::permissions::Z
+    }
+
+#### Objective Base Funtions
+
+TestCase ObjBaseFunctions \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {ObjBaseFunctions::ObjExistFail ObjBaseFunctions::ObjCreateSuccess \
+		ObjBaseFunctions::ObjCreateFail ObjBaseFunctions::ObjExistSuccess \
+		ObjBaseFunctions::ObjDeleteSuccess ObjBaseFunctions::ObjDeleteFail \
+		ObjBaseFunctions::ObjGetList
+    }
+
+TestScenario ObjBaseFunctions::ObjExistFail \
+    -testScript {
+      m existObjective ::m::objectives::ObjA
+    } \
+    -testResult {0}
+
+TestScenario ObjBaseFunctions::ObjCreateSuccess \
+    -testScript {
+      m createObjective ObjA
+    } \
+    -testResult {1}
+
+TestScenario ObjBaseFunctions::ObjCreateFail \
+    -testScript {
+      m createObjective ObjA
+    } \
+    -testResult {0}
+
+TestScenario ObjBaseFunctions::ObjExistSuccess \
+    -testScript {
+      m existObjective ::m::objectives::ObjA
+    } \
+    -testResult {1}
+
+TestScenario ObjBaseFunctions::ObjDeleteSuccess \
+    -testScript {
+      m deleteObjective ObjA
+    } \
+    -testResult {1}
+
+TestScenario ObjBaseFunctions::ObjDeleteFail \
+    -testScript {
+      m deleteObjective ObjA
+    } \
+    -testResult {0} \
+    -postconditionScript {
+      my lequal [m existObjective ::m::objectives::ObjA] 0
+    }
+
+TestScenario ObjBaseFunctions::ObjGetList \
+    -testScript {
+      m createObjective X
+      m createObjective A
+      m createObjective Z
+      m createObjective B
+      m createObjective M
+      m getObjectiveList
+    } \
+    -testResult {::m::objectives::A ::m::objectives::B ::m::objectives::M \
+		     ::m::objectives::X ::m::objectives::Z
+    }
+
+#### Obstacle Base Functions
+
+TestCase ObsBaseFunctions \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {ObsBaseFunctions::ObsExistFail ObsBaseFunctions::ObsCreateSuccess \
+		ObsBaseFunctions::ObsCreateFail	ObsBaseFunctions::ObsExistSuccess \
+		ObsBaseFunctions::ObsDeleteSuccess ObsBaseFunctions::ObsDeleteFail \
+		ObsBaseFunctions::ObsGetList
+    }
+
+TestScenario ObsBaseFunctions::ObsExistFail \
+    -testScript {
+      m existObstacle ::m::obstacles::ObsA
+    } \
+    -testResult {0}
+
+TestScenario ObsBaseFunctions::ObsCreateSuccess \
+    -testScript {
+      m createObstacle ObsA
+    } \
+    -testResult {1}
+
+TestScenario ObsBaseFunctions::ObsCreateFail \
+    -testScript {
+      m createObstacle ObsA
+    } \
+    -testResult {0}
+
+TestScenario ObsBaseFunctions::ObsExistSuccess \
+    -testScript {
+      m existObstacle ::m::obstacles::ObsA
+    } \
+    -testResult {1}
+
+TestScenario ObsBaseFunctions::ObsDeleteSuccess \
+    -testScript {
+      m deleteObstacle ObsA
+    } \
+    -testResult {1}
+
+TestScenario ObsBaseFunctions::ObsDeleteFail \
+    -testScript {
+      m deleteObstacle ObsA
+    } \
+    -testResult {0} \
+    -postconditionScript {
+      my lequal [m existObstacle ::m::obstacles::ObsA] 0
+    }
+
+TestScenario ObsBaseFunctions::ObsGetList \
+    -testScript {
+      m createObstacle X
+      m createObstacle A
+      m createObstacle Z
+      m createObstacle B
+      m createObstacle M
+      m getObstacleList
+    } \
+    -testResult {::m::obstacles::A ::m::obstacles::B ::m::obstacles::M \
+		     ::m::obstacles::X ::m::obstacles::Z
+    }
+
+#### Scenario Base Functions
+
+TestCase ScenBaseFunctions \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {ScenBaseFunctions::ScenExistFail ScenBaseFunctions::ScenCreateSuccess \
+		ScenBaseFunctions::ScenCreateFail ScenBaseFunctions::ScenExistSuccess \
+		ScenBaseFunctions::ScenDeleteSuccess ScenBaseFunctions::ScenDeleteFail \
+		ScenBaseFunctions::ScenGetList
+    }
+
+TestScenario ScenBaseFunctions::ScenExistFail \
+    -testScript {
+      m existScenario ::m::scenarios::ScenA
+    } \
+    -testResult {0}
+
+TestScenario ScenBaseFunctions::ScenCreateSuccess \
+    -testScript {
+      m createScenario ScenA
+    } \
+    -testResult {1}
+
+TestScenario ScenBaseFunctions::ScenCreateFail \
+    -testScript {
+      m createScenario ScenA
+    } \
+    -testResult {0}
+
+TestScenario ScenBaseFunctions::ScenExistSuccess \
+    -testScript {
+      m existScenario ::m::scenarios::ScenA
+    } \
+    -testResult {1}
+
+TestScenario ScenBaseFunctions::ScenDeleteSuccess \
+    -testScript {
+      m deleteScenario ScenA
+    } \
+    -testResult {1}
+
+TestScenario ScenBaseFunctions::ScenDeleteFail \
+    -testScript {
+      m deleteScenario ScenA
+    } \
+    -testResult {0} \
+    -postconditionScript {
+      my lequal [m existScenario ::m::scenarios::ScenA] 0
+    }
+
+TestScenario ScenBaseFunctions::ScenGetList \
+    -testScript {
+      m createScenario X
+      m createScenario A
+      m createScenario Z
+      m createScenario B
+      m createScenario M
+      m getScenarioList
+    } \
+    -testResult {::m::scenarios::A ::m::scenarios::B ::m::scenarios::M \
+		     ::m::scenarios::X ::m::scenarios::Z
+    }
+
+#### Step Base Functions 
+
+TestCase StepBaseFunctions \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {StepBaseFunctions::StepExistFail StepBaseFunctions::StepCreateSuccess \
+		StepBaseFunctions::StepCreateFail StepBaseFunctions::StepExistSuccess \
+		StepBaseFunctions::StepDeleteSuccess StepBaseFunctions::StepDeleteFail \
+		StepBaseFunctions::StepGetList
+    }
+
+TestScenario StepBaseFunctions::StepExistFail \
+    -testScript {
+      m existStep ::m::steps::actor-action-target
+    } \
+    -testResult {0}
+
+TestScenario StepBaseFunctions::StepCreateSuccess \
+    -testScript {
+      m createStep actor action target
+    } \
+    -testResult {1}
+
+TestScenario StepBaseFunctions::StepCreateFail \
+    -testScript {
+      m createStep actor action target
+    } \
+    -testResult {0}
+
+TestScenario StepBaseFunctions::StepExistSuccess \
+    -testScript {
+      m existStep ::m::steps::actor-action-target
+    } \
+    -testResult {1}
+
+TestScenario StepBaseFunctions::StepDeleteSuccess \
+    -testScript {
+      m deleteStep actor-action-target
+    } \
+    -testResult {1}
+
+TestScenario StepBaseFunctions::StepDeleteFail \
+    -testScript {
+      m deleteStep actor-action-target
+    } \
+    -testResult {0} \
+    -postconditionScript {
+      my lequal [m existStep ::m::steps::actor-action-target] 0
+    }
+
+TestScenario StepBaseFunctions::StepGetList \
+    -testScript {
+      m createStep x1 x1 x1
+      m createStep a1 a1 a1
+      m createStep z1 z1 z1
+      m createStep b1 b1 b1
+      m createStep m1 m1 m1
+      m getStepList
+    } \
+    -testResult {::m::steps::a1-a1-a1 ::m::steps::b1-b1-b1 ::m::steps::m1-m1-m1 \
+		     ::m::steps::x1-x1-x1 ::m::steps::z1-z1-z1
+    }
+
+#### Task Base Functions
+
+TestCase TaskBaseFunctions \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {TaskBaseFunctions::TaskExistFail TaskBaseFunctions::TaskCreateSuccess \
+		TaskBaseFunctions::TaskCreateFail TaskBaseFunctions::TaskExistSuccess \
+		TaskBaseFunctions::TaskDeleteSuccess TaskBaseFunctions::TaskDeleteFail \
+		TaskBaseFunctions::TaskGetList
+    }
+
+TestScenario TaskBaseFunctions::TaskExistFail \
+    -testScript {
+      m existTask ::m::tasks::TaskA
+    } \
+    -testResult {0}
+
+TestScenario TaskBaseFunctions::TaskCreateSuccess \
+    -testScript {
+      m createTask TaskA
+    } \
+    -testResult {1}
+
+TestScenario TaskBaseFunctions::TaskCreateFail \
+    -testScript {
+      m createTask TaskA
+    } \
+    -testResult {0}
+
+TestScenario TaskBaseFunctions::TaskExistSuccess \
+    -testScript {
+      m existTask ::m::tasks::TaskA
+    } \
+    -testResult {1}
+
+TestScenario TaskBaseFunctions::TaskDeleteSuccess \
+    -testScript {
+      m deleteTask TaskA
+    } \
+    -testResult {1}
+
+TestScenario TaskBaseFunctions::TaskDeleteFail \
+    -testScript {
+      m deleteTask TaskA
+    } \
+    -testResult {0} \
+    -postconditionScript {
+      my lequal [m existTask ::m::tasks::TaskA] 0
+    }
+
+TestScenario TaskBaseFunctions::TaskGetList \
+    -testScript {
+      m createTask X
+      m createTask A
+      m createTask Z
+      m createTask B
+      m createTask M
+      m getTaskList
+    } \
+    -testResult {::m::tasks::A ::m::tasks::B ::m::tasks::M \
+		     ::m::tasks::X ::m::tasks::Z
+    }
+
+#### WorkProfile Base Functions
+
+TestCase WPBaseFunctions \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {WPBaseFunctions::WPExistFail WPBaseFunctions::WPCreateSuccess \
+		WPBaseFunctions::WPCreateFail WPBaseFunctions::WPExistSuccess \
+		WPBaseFunctions::WPDeleteSuccess WPBaseFunctions::WPDeleteFail \
+		WPBaseFunctions::WPGetList
+    }
+
+TestScenario WPBaseFunctions::WPExistFail \
+    -testScript {
+      m existWorkProfile ::m::profiles::ProfileA
+    } \
+    -testResult {0}
+
+TestScenario WPBaseFunctions::WPCreateSuccess \
+    -testScript {
+      m createWorkProfile ProfileA
+    } \
+    -testResult {1}
+
+TestScenario WPBaseFunctions::WPCreateFail \
+    -testScript {
+      m createWorkProfile ProfileA
+    } \
+    -testResult {0}
+
+TestScenario WPBaseFunctions::WPExistSuccess \
+    -testScript {
+      m existWorkProfile ::m::profiles::ProfileA
+    } \
+    -testResult {1}
+
+TestScenario WPBaseFunctions::WPDeleteSuccess \
+    -testScript {
+      m deleteWorkProfile ProfileA
+    } \
+    -testResult {1}
+
+TestScenario WPBaseFunctions::WPDeleteFail \
+    -testScript {
+      m deleteWorkProfile ProfileA
+    } \
+    -testResult {0} \
+    -postconditionScript {
+      my lequal [m existWorkProfile ::m::profiles::ProfileA] 0
+    }
+
+TestScenario WPBaseFunctions::WPGetList \
+    -testScript {
+      m createWorkProfile X
+      m createWorkProfile A
+      m createWorkProfile Z
+      m createWorkProfile B
+      m createWorkProfile M
+      m getWorkProfileList
+    } \
+    -testResult {::m::profiles::A ::m::profiles::B ::m::profiles::M \
+		     ::m::profiles::X ::m::profiles::Z
+    }
+
+#### ContextConstraint Basic Functions
+
+TestCase CCBaseFunctions \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {CCBaseFunctions::CCExistFail CCBaseFunctions::CCCreateSuccess \
+		CCBaseFunctions::CCCreateFail CCBaseFunctions::CCExistSuccess \
+		CCBaseFunctions::CCDeleteSuccess CCBaseFunctions::CCDeleteFail \
+		CCBaseFunctions::CCGetList
+    }
+
+TestScenario CCBaseFunctions::CCExistFail \
+    -testScript {
+      m existContextConstraint ::m::constraints::ConstA
+    } \
+    -testResult {0}
+
+TestScenario CCBaseFunctions::CCCreateSuccess \
+    -testScript {
+      m createContextConstraint ConstA
+    } \
+    -testResult {1}
+
+TestScenario CCBaseFunctions::CCCreateFail \
+    -testScript {
+      m createContextConstraint ConstA
+    } \
+    -testResult {0}
+
+TestScenario CCBaseFunctions::CCExistSuccess \
+    -testScript {
+      m existContextConstraint ::m::constraints::ConstA
+    } \
+    -testResult {1}
+
+TestScenario CCBaseFunctions::CCDeleteSuccess \
+    -testScript {
+      m deleteContextConstraint ConstA
+    } \
+    -testResult {1}
+
+TestScenario CCBaseFunctions::CCDeleteFail \
+    -testScript {
+      m deleteContextConstraint ConstA
+    } \
+    -testResult {0} \
+    -postconditionScript {
+      my lequal [m existContextConstraint ::m::constraints::ConstA] 0
+    }
+
+TestScenario CCBaseFunctions::CCGetList \
+    -testScript {
+      m createContextConstraint X
+      m createContextConstraint A
+      m createContextConstraint Z
+      m createContextConstraint B
+      m createContextConstraint M
+      m getContextConstraintList
+    } \
+    -testResult {::m::constraints::A ::m::constraints::B ::m::constraints::M \
+		     ::m::constraints::X ::m::constraints::Z
+    }
+
+#### Condition Base Functions
+
+TestCase CondBaseFunctions \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {CondBaseFunctions::CondExistFail CondBaseFunctions::CondCreateSuccess \
+		CondBaseFunctions::CondCreateFail CondBaseFunctions::CondExistSuccess \
+		CondBaseFunctions::CondDeleteSuccess CondBaseFunctions::CondDeleteFail \
+		CondBaseFunctions::CondGetList
+    }
+
+TestScenario CondBaseFunctions::CondExistFail \
+    -testScript {
+      m existCondition ::m::conditions::CondA
+    } \
+    -testResult {0}
+
+TestScenario CondBaseFunctions::CondCreateSuccess \
+    -testScript {
+      m createCondition CondA
+    } \
+    -testResult {1}
+
+TestScenario CondBaseFunctions::CondCreateFail \
+    -testScript {
+      m createCondition CondA
+    } \
+    -testResult {0}
+
+TestScenario CondBaseFunctions::CondExistSuccess \
+    -testScript {
+      m existCondition ::m::conditions::CondA
+    } \
+    -testResult {1}
+
+TestScenario CondBaseFunctions::CondDeleteSuccess \
+    -testScript {
+      m deleteCondition CondA
+    } \
+    -testResult {1}
+
+TestScenario CondBaseFunctions::CondDeleteFail \
+    -testScript {
+      m deleteCondition CondA
+    } \
+    -testResult {0} \
+    -postconditionScript {
+      my lequal [m existCondition ::m::conditions::CondA] 0
+    }
+
+TestScenario CondBaseFunctions::CondGetList \
+    -testScript {
+      m createCondition X
+      m createCondition A
+      m createCondition Z
+      m createCondition B
+      m createCondition M
+      m getConditionList
+    } \
+    -testResult {::m::conditions::A ::m::conditions::B ::m::conditions::M \
+		     ::m::conditions::X ::m::conditions::Z
+    }

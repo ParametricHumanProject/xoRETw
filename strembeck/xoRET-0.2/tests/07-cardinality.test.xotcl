@@ -1,0 +1,412 @@
+
+#### permission cardinalities
+
+TestCase PermCardinality\
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createRole roleB
+      m createRole roleC
+      m createRole roleE
+      m createRole roleF
+      m createRole roleD {roleB roleC} {roleE roleF}
+      m createRole roleA {} {roleB roleC}
+      m createPermission permA
+    } \
+    -cleanupScript { 
+      m destroy
+    } \
+    -order {PermCardinality::PermMinGetUndefined PermCardinality::PermMinSetSuccess\
+		PermCardinality::PermMinSetFail PermCardinality::PermMinGetSuccess\
+		PermCardinality::PermMinGetFail PermCardinality::PermMinUnsetSuccess\
+		PermCardinality::PermMinGetUndefined2 PermCardinality::PermMinUnsetFail\
+		\
+		PermCardinality::PermMaxGetUndefined\
+		PermCardinality::PermMaxSetSuccess PermCardinality::PermMaxSetFail\
+		PermCardinality::PermMaxGetSuccess PermCardinality::PermMaxGetFail\
+		PermCardinality::PermMaxUnsetSuccess PermCardinality::PermMaxGetUndefined2\
+		PermCardinality::PermMaxUnsetFail\
+		\
+		PermCardinality::PermMinSetSuccess2 PermCardinality::PermMaxSetSuccess2\
+		PermCardinality::PermMinSetFail2 PermCardinality::PermMaxSetFail2\
+		\
+		PermCardinality::PermMaxRoleAssignSuccess PermCardinality::PermMaxRoleAssignFail\
+		PermCardinality::PermMinRoleRevokeSuccess PermCardinality::PermMinRoleRevokeFail
+    }
+
+TestScenario PermCardinality::PermMinGetUndefined \
+    -testScript {
+      m getPermMinCardinality permA
+    } \
+    -testResult {-1}
+
+TestScenario PermCardinality::PermMinSetSuccess \
+    -testScript {
+      m setPermMinCardinality permA 2
+    } \
+    -testResult {1}
+
+TestScenario PermCardinality::PermMinSetFail \
+    -testScript {
+      m setPermMinCardinality permX 3
+    } \
+    -testResult {0}
+
+TestScenario PermCardinality::PermMinGetSuccess \
+    -testScript {
+      m getPermMinCardinality permA
+    } \
+    -testResult {2}
+
+TestScenario PermCardinality::PermMinGetFail \
+    -testScript {
+      m getPermMinCardinality permX
+    } \
+    -testResult {}
+
+TestScenario PermCardinality::PermMinUnsetSuccess \
+    -testScript {
+      m unsetPermMinCardinality permA
+    } \
+    -testResult {1}
+
+TestScenario PermCardinality::PermMinGetUndefined2 \
+    -testScript {
+      m getPermMinCardinality permA
+    } \
+    -testResult {-1}
+
+TestScenario PermCardinality::PermMinUnsetFail \
+    -testScript {
+      m unsetPermMinCardinality permX
+    } \
+    -testResult {0}
+
+###
+
+TestScenario PermCardinality::PermMaxGetUndefined \
+    -testScript {
+      m getPermMaxCardinality permA
+    } \
+    -testResult {-1}
+
+TestScenario PermCardinality::PermMaxSetSuccess \
+    -testScript {
+      m setPermMaxCardinality permA 2
+    } \
+    -testResult {1}
+
+TestScenario PermCardinality::PermMaxSetFail \
+    -testScript {
+      m setPermMaxCardinality permX 3
+    } \
+    -testResult {0}
+
+TestScenario PermCardinality::PermMaxGetSuccess \
+    -testScript {
+      m getPermMaxCardinality permA
+    } \
+    -testResult {2}
+
+TestScenario PermCardinality::PermMaxGetFail \
+    -testScript {
+      m getPermMaxCardinality permX
+    } \
+    -testResult {}
+
+TestScenario PermCardinality::PermMaxUnsetSuccess \
+    -testScript {
+      m unsetPermMaxCardinality permA
+    } \
+    -testResult {1}
+
+TestScenario PermCardinality::PermMaxGetUndefined2 \
+    -testScript {
+      m getPermMaxCardinality permA
+    } \
+    -testResult {-1}
+
+TestScenario PermCardinality::PermMaxUnsetFail \
+    -testScript {
+      m unsetPermMaxCardinality permX
+    } \
+    -testResult {0}
+
+###
+
+TestScenario PermCardinality::PermMinSetSuccess2 \
+    -testScript {
+      m setPermMaxCardinality permA 3
+      m setPermMinCardinality permA 3
+    } \
+    -testResult {1} \
+    -cleanupScript {
+      m unsetPermMinCardinality permA
+      m unsetPermMaxCardinality permA
+    }
+
+TestScenario PermCardinality::PermMaxSetSuccess2 \
+    -testScript {
+      m setPermMinCardinality permA 3
+      m setPermMaxCardinality permA 3
+    } \
+    -testResult {1} \
+    -cleanupScript {
+      m unsetPermMinCardinality permA
+      m unsetPermMaxCardinality permA
+    }
+
+TestScenario PermCardinality::PermMinSetFail2 \
+    -testScript {
+      m setPermMaxCardinality permA 3
+      m setPermMinCardinality permA 4
+    } \
+    -testResult {0} \
+    -cleanupScript {
+      m unsetPermMinCardinality permA
+      m unsetPermMaxCardinality permA
+    }
+
+TestScenario PermCardinality::PermMaxSetFail2 \
+    -testScript {
+      m setPermMinCardinality permA 5
+      m setPermMaxCardinality permA 4
+    } \
+    -testResult {0} \
+    -cleanupScript {
+      m unsetPermMinCardinality permA
+      m unsetPermMaxCardinality permA
+    }
+
+###
+
+TestScenario PermCardinality::PermMaxRoleAssignSuccess \
+    -testScript {
+      m setPermMaxCardinality permA 3
+      m createRole roleM
+      m createRole roleN
+      m permRoleAssign permA roleA
+      m permRoleAssign permA roleM
+      m permRoleAssign permA roleN
+    } \
+    -testResult {1} \
+    -postconditionScript {
+      my lequal [m getAllRolesDirectlyOwningPerm permA]\
+	  [list ::m::roles::roleA ::m::roles::roleM ::m::roles::roleN]
+    }
+
+TestScenario PermCardinality::PermMaxRoleAssignFail \
+    -testScript {
+      m createRole roleX
+      m permRoleAssign permA roleX
+    } \
+    -testResult {0} \
+    -postconditionScript {
+      my lequal [m getAllRolesDirectlyOwningPerm permA]\
+	  [list ::m::roles::roleA ::m::roles::roleM ::m::roles::roleN]
+    } \
+    -cleanupScript {m deleteRole roleX}
+
+TestScenario PermCardinality::PermMinRoleRevokeSuccess \
+    -testScript {
+      m setPermMinCardinality permA 2
+      m permRoleRevoke permA roleN
+    } \
+    -testResult {1} \
+    -postconditionScript {
+      my lequal [m getAllRolesDirectlyOwningPerm permA]\
+	  [list ::m::roles::roleA ::m::roles::roleM]
+    }
+
+TestScenario PermCardinality::PermMinRoleRevokeFail \
+    -testScript {
+      m permRoleRevoke permA roleM
+    } \
+    -testResult {0} \
+    -postconditionScript {
+      my lequal [m getAllRolesDirectlyOwningPerm permA]\
+	  [list ::m::roles::roleA ::m::roles::roleM]
+    } \
+    -cleanupScript {
+      m unsetPermMinCardinality permA
+      m unsetPermMaxCardinality permA
+      m permRoleRevoke permA roleA
+      m deleteRole roleM
+      m deleteRole roleN
+    }
+
+#### role cardinalities
+
+TestCase RoleCardinality\
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createRole roleB
+      m createRole roleC
+      m createRole roleE
+      m createRole roleF
+      m createRole roleD {roleB roleC} {roleE roleF}
+      m createRole roleA {} {roleB roleC}
+    } \
+    -cleanupScript { 
+      m destroy
+    } \
+    -order {RoleCardinality::RoleMinGetUndefined RoleCardinality::RoleMinSetSuccess\
+		RoleCardinality::RoleMinSetFail RoleCardinality::RoleMinGetSuccess\
+		RoleCardinality::RoleMinGetFail RoleCardinality::RoleMinUnsetSuccess\
+		RoleCardinality::RoleMinGetUndefined2 RoleCardinality::RoleMinUnsetFail\
+		\
+		RoleCardinality::RoleMaxGetUndefined RoleCardinality::RoleMaxSetSuccess\
+		RoleCardinality::RoleMaxSetFail RoleCardinality::RoleMaxGetSuccess\
+		RoleCardinality::RoleMaxGetFail RoleCardinality::RoleMaxUnsetSuccess\
+		RoleCardinality::RoleMaxGetUndefined2 RoleCardinality::RoleMaxUnsetFail\
+		\
+		RoleCardinality::RoleMinSetSuccess2 RoleCardinality::RoleMaxSetSuccess2\
+		RoleCardinality::RoleMinSetFail2 RoleCardinality::RoleMaxSetFail2
+    }
+
+
+
+TestScenario RoleCardinality::RoleMinGetUndefined \
+    -testScript {
+      m getRoleMinCardinality roleA
+    } \
+    -testResult {-1}
+
+TestScenario RoleCardinality::RoleMinSetSuccess \
+    -testScript {
+      m setRoleMinCardinality roleA 2
+    } \
+    -testResult {1}
+
+TestScenario RoleCardinality::RoleMinSetFail \
+    -testScript {
+      m setRoleMinCardinality roleX 3
+    } \
+    -testResult {0}
+
+TestScenario RoleCardinality::RoleMinGetSuccess \
+    -testScript {
+      m getRoleMinCardinality roleA
+    } \
+    -testResult {2}
+
+TestScenario RoleCardinality::RoleMinGetFail \
+    -testScript {
+      m getRoleMinCardinality roleX
+    } \
+    -testResult {}
+
+TestScenario RoleCardinality::RoleMinUnsetSuccess \
+    -testScript {
+      m unsetRoleMinCardinality roleA
+    } \
+    -testResult {1}
+
+TestScenario RoleCardinality::RoleMinGetUndefined2 \
+    -testScript {
+      m getRoleMinCardinality roleA
+    } \
+    -testResult {-1}
+
+TestScenario RoleCardinality::RoleMinUnsetFail \
+    -testScript {
+      m unsetRoleMinCardinality roleX
+    } \
+    -testResult {0}
+
+###
+
+TestScenario RoleCardinality::RoleMaxGetUndefined \
+    -testScript {
+      m getRoleMaxCardinality roleA
+    } \
+    -testResult {-1}
+
+TestScenario RoleCardinality::RoleMaxSetSuccess \
+    -testScript {
+      m setRoleMaxCardinality roleA 3
+    } \
+    -testResult {1}
+
+TestScenario RoleCardinality::RoleMaxSetFail \
+    -testScript {
+      m setRoleMaxCardinality roleX 4
+    } \
+    -testResult {0}
+
+TestScenario RoleCardinality::RoleMaxGetSuccess \
+    -testScript {
+      m getRoleMaxCardinality roleA
+    } \
+    -testResult {3}
+
+TestScenario RoleCardinality::RoleMaxGetFail \
+    -testScript {
+      m getRoleMaxCardinality roleX
+    } \
+    -testResult {}
+
+TestScenario RoleCardinality::RoleMaxUnsetSuccess \
+    -testScript {
+      m unsetRoleMaxCardinality roleA
+    } \
+    -testResult {1}
+
+TestScenario RoleCardinality::RoleMaxGetUndefined2 \
+    -testScript {
+      m getRoleMaxCardinality roleA
+    } \
+    -testResult {-1}
+
+TestScenario RoleCardinality::RoleMaxUnsetFail \
+    -testScript {
+      m unsetRoleMaxCardinality roleX
+    } \
+    -testResult {0}
+
+###
+
+TestScenario RoleCardinality::RoleMinSetSuccess2 \
+    -testScript {
+      m setRoleMaxCardinality roleA 3
+      m setRoleMinCardinality roleA 3
+    } \
+    -testResult {1} \
+    -cleanupScript {
+      m unsetRoleMaxCardinality roleA
+      m unsetRoleMinCardinality roleA
+    }
+
+TestScenario RoleCardinality::RoleMaxSetSuccess2 \
+    -testScript {
+      m setRoleMinCardinality roleA 3
+      m setRoleMaxCardinality roleA 3
+    } \
+    -testResult {1} \
+    -cleanupScript {
+      m unsetRoleMaxCardinality roleA
+      m unsetRoleMinCardinality roleA
+    }
+
+TestScenario RoleCardinality::RoleMinSetFail2 \
+    -testScript {
+      m setRoleMaxCardinality roleA 3
+      m setRoleMinCardinality roleA 4
+    } \
+    -testResult {0} \
+    -cleanupScript {
+      m unsetRoleMaxCardinality roleA
+      m unsetRoleMinCardinality roleA
+    }
+
+TestScenario RoleCardinality::RoleMaxSetFail2 \
+    -testScript {
+      m setRoleMinCardinality roleA 4
+      m setRoleMaxCardinality roleA 3
+    } \
+    -testResult {0} \
+    -cleanupScript {
+      m unsetRoleMaxCardinality roleA
+      m unsetRoleMinCardinality roleA
+    }

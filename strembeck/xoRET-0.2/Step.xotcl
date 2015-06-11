@@ -1,0 +1,68 @@
+package provide xoRET::Step 0.1.1
+
+Class Step -superclass xoRETObject -parameter {actor action target}
+
+@ Class Step {
+  Author "Mark Strembeck"
+  Version "0.1.1"
+}
+
+Step instproc init args {
+  next
+}
+
+Step instproc exportRDF {fileName} {
+  my instvar traces
+  set file [open $fileName a+]
+  puts $file "  <STEP rdf:ID='\#[my name]'>"
+  if {[my author] != ""} {
+    puts $file "    <re:author>[my author]</re:author>"
+  }
+  puts $file "    <re:actor>[my actor]</re:actor>"
+  puts $file "    <re:action>[my action]</re:action>"
+  puts $file "    <re:target>[my target]</re:target>"
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  puts $file "    <re:trace tracetype='$tracetype' targettype='$targettype'\
+                                     target='\#[$target name]'/>"
+ 	}
+      }
+    }
+  }
+  puts $file "    <re:modified>[[self] last_modified]</re:modified>"
+  puts $file "  </STEP>\n"
+  close $file 
+}
+
+Step instproc getAttributes {} {
+  my instvar traces
+  lappend all "[list Name: [my name]]"
+  lappend all "[list Actor: [my actor]]"
+  lappend all "[list Action: [my action]]"
+  lappend all "[list Target: [my target]]"
+  lappend all "[list Author: [my author]]"
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  lappend all "[list Trace: [list [string trimleft [[self] info class] :] \
+                                    <<[my name]>> $tracetype $targettype <<[$target name]>>]]"
+	}
+      }
+    }
+  }
+  lappend all "[list [list Last Modified:] [my last_modified]]"
+  return $all
+}
+
+Step instproc appendToTailoredTraceDotFile {filename {totypes "all"} {tracetypes "all"}} {
+  next $filename $totypes $tracetypes box
+}
+
+Step instproc destroy args {
+  next
+}

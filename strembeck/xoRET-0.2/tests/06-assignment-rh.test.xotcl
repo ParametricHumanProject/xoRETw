@@ -1,0 +1,37 @@
+TestCase AssignmentRH\
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createRole roleB
+      m createRole roleC
+      m createRole roleE
+      m createRole roleF
+      m createRole roleD {roleB roleC} {roleE roleF}
+      m createRole roleA {} {roleB roleC}
+      m createPermission permA
+    } \
+    -cleanupScript { 
+      m destroy
+    } \
+    -order { AssignmentRH::permRoleFail }
+
+TestScenario AssignmentRH::permRoleFail \
+    -testScript {
+      m permRoleAssign permA roleA 
+      m permRoleAssign permA roleD 
+    } \
+    -testResult {0} \
+    -postconditionScript {
+      my lequal [m getAllPermsDirectlyAssignedToRole roleD] ""
+    } \
+    -cleanupScript {
+      m permRoleRevoke permA roleA
+    }
+
+# TestScenario AssignmentRH::permRoleFail2 \
+#     -testScript {
+#       m permRoleAssign permA roleD 
+#       m permRoleAssign permA roleA 
+#     } \
+#     -testResult {0}
+

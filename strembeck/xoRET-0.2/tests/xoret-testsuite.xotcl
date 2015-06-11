@@ -1,0 +1,26 @@
+set auto_path ".. ../lib/ $auto_path"
+package require sbrtest 0.2
+
+# eliminate dublicate list elements while retaining element order
+proc luniqueorder {list} {
+  set nl ""
+  while {$list != ""} {
+    set l [lindex $list 0]
+    set list [lreplace $list 0 0]
+    if {[lsearch $nl $l] == -1} {
+      lappend nl $l
+    }
+  }
+  return $nl
+}
+
+set files [lsort -dictionary [glob -directory [pwd] *.test.xotcl]]
+foreach f $files {
+  if {[file isfile $f]} {
+    source $f
+    set o [join [lappend o [TestCase info instances]]]
+  }
+}
+TestSuite xoRETTestSuite -detailedReport 1 -order [luniqueorder $o]
+xoRETTestSuite runAllTestCases
+#puts "\n+++++++++ $files ++++++++++++\n"

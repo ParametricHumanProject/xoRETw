@@ -1,0 +1,54 @@
+General information:
+--------------------------------------------------
+
+xoRET is implemented with XOTcl and Tk. 
+xoRET 0.2 requires:
+	- XOTcl version 1.6.3 or higher (http://www.xotcl.org)
+	- Tk version 8.3 or higher (http://www.tcl.tk)
+	- Graphviz version 1.9 or higher (http://www.graphviz.org/)
+	- Tcllib version 1.4 or higher (http://tcllib.sourceforge.net/)
+
+Using xoRET:
+--------------------------------------------------
+
+Simply unpack the xoRET archive to a local directory (note that the 
+xoRET archive unpacks to the "./xoRET-x.y.z" sub-directory when 
+unpacked with "tar xvzf xoRET-ver-x.y.z.tar.gz").
+
+To use xoRET:
+(0. make sure that all relevant packages and libraries are found in the "auto_path")
+1. change to the "xoRET-x.y.z/examples" directory
+2. type "wish example01.xotcl" or "wish example02.xotcl"
+   (example02 loads a simple and rudimentary example including
+    some scenarios, steps, obstacles, etc. -- note that the 
+    example is by no means a complete domain model)
+
+Hint: many object-specific (e.g. scenario-specific, role-specific, etc.)
+      functions are available via context menus (use right mouse button 
+      to access context menus)
+
+Acknowledgements:
+--------------------------------------------------
+
+The xoRET GUI uses the following software packages:
+
+	BWidget ToolKit version 1.4.1
+	Copyright (c) 1998-1999 UNIFIX.
+	Copyright (c) 2001-2002 ActiveState Corp.
+	http://sourceforge.net/projects/tcllib/
+	
+	Mclistbox version 1.02
+	Copyright (c) 1999, Bryan Douglas Oakley
+	http://www1.clearlight.com/~oakley/tcl/mclistbox/index.html
+
+
+More information:
+--------------------------------------------------
+
+More information can be found at:
+
+http://wi.wu-wien.ac.at/home/mark/xoRET/
+
+Please report bugs and problems to:
+
+strembeck@acm.org or strembeck@computer.org or mark.strembeck@wu.ac.at

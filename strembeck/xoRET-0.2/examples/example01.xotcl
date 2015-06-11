@@ -1,0 +1,5 @@
+lappend auto_path .. ../lib/
+package require -exact xoRET 0.2
+
+Manager m
+m startGUI

@@ -1,0 +1,34 @@
+package provide xoRET::TraceTypeImport 0.1
+
+package require xotcl::package
+package require xotcl::trace
+package require xotcl::rdf::parser
+package require xotcl::rdf::recreatorVisitor
+package require xotcl::xml::printVisitor
+
+Class TraceTypeImportVisitor -superclass NodeTreeVisitor -parameter {parent}
+
+@ Class TraceTypeImportVisitor {
+  Author "Mark Strembeck"
+  Version "0.1"
+}
+
+TraceTypeImportVisitor instproc interpretAll args {
+  next
+}
+
+TraceTypeImportVisitor instproc interpretNodeTree node {
+  $node accept [self]
+}
+
+TraceTypeImportVisitor instproc visit obj {
+  my instvar parent
+  set subj [$obj getSubject] 
+  if {$subj == "xoRET_tracetypepairs"} {
+    if {[$obj content] == "re:tracetypepair"} {
+      eval set pair [$obj getPCdataList]
+      eval $parent addTraceTypePair $pair
+    }
+  }
+}
+

@@ -1,0 +1,347 @@
+package provide xoRET::Permission 0.2.2
+
+Class Permission -superclass {xoRETObject Class} -parameter {operation object}
+
+@ Class Permission {
+  Author "Mark Strembeck"
+  Version "0.2.2"
+}
+
+Permission instproc init args {
+  next
+}
+
+Permission instproc setMinCardinality {cardinality} {
+  my instvar mincardinality
+  #a minimal cardinality lower than "1" is not sensible
+  if {$cardinality >= 1} {	
+    set help [my getMinCardinality]
+    set mincardinality $cardinality
+    if {![my checkCardinalityConsistency]} {
+      #getMinCardinality returns "-1" if the "mincardinality" variable does not exist
+      if {$help != -1} {
+	#reset to old value
+	set mincardinality $help
+      } else {
+	unset mincardinality
+      }
+      my log FAILED "[self] [self proc] FAILED, the minimal cardinality must  be\
+                               lower than, or at most equal to, the maximum cardinality. \
+                     \n --> current maximum cardinality (-1 means: no limit) : [my getMaxCardinality] \
+                     \n --> current minimal cardinality (-1 means: no limit) : [my getMinCardinality]"
+      return 0
+    } else {
+      my log INFO "[self] [self proc] INFO, minimum cardinality set to: $cardinality."
+      return 1
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, a minimal cardinality lower than 1\
+                     is not sensible."
+    return 0
+  }
+}
+
+Permission instproc unsetMinCardinality {} {
+  my instvar mincardinality
+  if {[info exists mincardinality]} {
+    unset mincardinality
+    my log NORMAL "[self] [self proc]: minimal cardinality constraint deleted."
+  }
+  return 1
+}
+
+Permission instproc getMinCardinality {} {
+  my instvar mincardinality
+  if {[info exists mincardinality]} {
+    return $mincardinality
+  }
+  return -1
+}
+
+Permission instproc setMaxCardinality {cardinality} {
+  my instvar maxcardinality    
+  # a maximum cardinality of 0 may be sensible if you want to completely prevent a permission 
+  # from being assigned to any role (temporarily)
+  if {$cardinality >= 0} {
+    set help [[self] getMaxCardinality]
+    set maxcardinality $cardinality
+    if {![my checkCardinalityConsistency]} {
+      #"getMaxCardinality" returns "-1" if the variable "maxcardinality" does not exist
+      if {$help != -1} {
+	#reset to old value
+	set maxcardinality $help
+      } else {
+	unset maxcardinality
+      }
+      my log FAILED "[self] [self proc] FAILED, the maximum cardinality must be\
+                               greater than, or at least equal to, the minimal cardinality.\
+                         \n --> current maximum cardinality (-1 means: no limit) : [my getMaxCardinality].\
+                         \n --> current minimal cardinality (-1 means: no limit) : [my getMinCardinality]."
+      return 0
+    } else {
+      my log INFO "[self] [self proc] INFO, maximum cardinality constraint set to: $cardinality."
+      return 1
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, a maximum cardinality lower than 0\
+                       is not sensible."	
+    return 0
+  }
+}
+
+Permission instproc unsetMaxCardinality {} {
+  my instvar maxcardinality
+  if {[info exists maxcardinality]} {
+    unset maxcardinality
+    my log NORMAL "[self] [self proc]: maximum cardinality constraint deleted."
+  }
+  return 1
+}
+
+Permission instproc getMaxCardinality {} {
+  my instvar maxcardinality
+  if {[info exists maxcardinality]} {
+    return $maxcardinality
+  }
+  return -1
+}
+
+Permission instproc checkCardinalityConsistency {} {
+  set minNumber [my getMinCardinality]
+  set maxNumber [my getMaxCardinality]
+  if {($minNumber == -1) || ($maxNumber == -1)} {
+    return 1
+  }
+  if {$maxNumber >= $minNumber} {
+    return 1
+  }
+  return 0
+}
+
+Permission instproc cardinalityConstraintDefined {} {
+  if {([my getMinCardinality] == -1) && ([my getMaxCardinality] == -1)} {
+    return 0
+  } else {
+    return 1
+  }
+}
+
+# perm is the fully-qualified name of a runtime-perm-object (e.g. re::permissions::get_document)
+Permission instproc setSSDPermConstraint {perm} {
+  my instvar ssdconstraints
+  #here "0" means: the strings are equal
+  if {[string compare [self] $perm] != 0} {
+    lappend ssdconstraints $perm
+    set ssdconstraints [lsort -unique $ssdconstraints]
+    my log NORMAL "[self] [self proc]: defined SSD constraint to <<[$perm name]>>."
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, a permission cannot be mutual exclusive\
+                           to itself."
+    return 0
+  }    
+}
+
+# perm is the fully-qualified name of a runtime-perm-object (e.g. re::permissions::get_document)
+Permission instproc unsetSSDPermConstraint {perm} {
+  my instvar ssdconstraints
+  set index [lsearch -exact $ssdconstraints $perm]
+  if {$index != -1} {
+    set ssdconstraints [lreplace $ssdconstraints $index $index]
+    my log NORMAL "[self] [self proc]: SSD constraint to permission: <<$perm>> deleted."
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission: <<$perm>> is not mutual exclusive\
+                       to <<[my name]>>."
+    return 0
+  }
+}
+
+Permission instproc getSSDPermConstraints {} {
+  my instvar ssdconstraints
+  if {[info exists ssdconstraints]} {
+    return $ssdconstraints
+  }
+  return ""
+}
+
+# perm is the fully-qualified name of a runtime-perm-object (e.g. re::permissions::get_document)
+Permission instproc isStaticallyMutualExclusive {perm} {
+  my instvar ssdconstraints
+  if {[info exists ssdconstraints]} {
+    if {[lsearch -exact $ssdconstraints $perm] != -1} {
+      return 1
+    }
+  }
+  return 0    
+}
+
+Permission instproc ssdConstraintDefined {} {
+  my instvar ssdconstraints
+  if {[info exists ssdconstraints]} {
+    if {$ssdconstraints != ""} {
+      return 1
+    } 
+  }
+  return 0
+}
+
+Permission instproc exportRDF {fileName} {
+  my instvar mincardinality maxcardinality ssdconstraints
+  set file [open $fileName a+]
+  puts $file "  <PERMISSION rdf:ID='\#[my name]'>"
+  puts $file "    <re:permName>[my name]</re:permName>"
+  puts $file "    <re:operation>[my operation]</re:operation>"
+  puts $file "    <re:object>[my object]</re:object>"
+  if {[info exists mincardinality]} {
+    puts $file "    <re:mincardinality>[my getMinCardinality]</re:mincardinality>"
+  }
+  if {[info exists maxcardinality]} {
+    puts $file "    <re:maxcardinality>[my getMaxCardinality]</re:maxcardinality>"
+  }    
+  if {[info exists ssdconstraints]} {
+    foreach perm [my getSSDPermConstraints] {
+      puts $file "    <re:ssdconstraint rdf:resource='\#[$perm name]'/>"
+    }
+  }
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  puts $file "    <re:trace tracetype='$tracetype' targettype='$targettype'\
+                                    target='\#[$target name]'/>"
+	}
+      }
+    }
+  }
+  puts $file "    <re:modified>[my last_modified]</re:modified>"
+  puts $file "  </PERMISSION>\n"
+  close $file 
+}
+
+Permission instproc export_xoRBAC_RDF {fileName} {
+  my instvar mincardinality maxcardinality ssdconstraints
+  set file [open $fileName a+]
+  puts $file "  <PERMISSION rdf:ID='\#[my operation] [my object]'>"
+  if {[info exists mincardinality]} {
+    puts $file "    <rm:minOwnerCardinality>[[self] getMinCardinality]</rm:minOwnerCardinality>"
+  }
+  if {[info exists maxcardinality]} {
+    puts $file "    <rm:maxOwnerCardinality>[[self] getMaxCardinality]</rm:maxOwnerCardinality>"
+  }    
+  if {[info exists ssdconstraints]} {
+    foreach perm [my getSSDPermConstraints] {
+      puts $file "    <rm:staticallyMutualExclusivePermission rdf:resource='\#[$perm name]'/>"
+    }
+  }
+  puts $file "  </PERMISSION>\n"
+  close $file 
+}
+
+Permission instproc isConditionalPermission {} {
+  my instvar contextconstraints
+  if {[info exists contextconstraints]} {
+    if {$contextconstraints != ""} {
+      return 1
+    }
+  }
+  return 0
+}
+
+Permission instproc getContextConstraints {} {
+  my instvar contextconstraints
+  if {[info exists contextconstraints]} {
+    return $contextconstraints
+  } 
+  return ""
+}
+
+# constraint is a fully-qualified name of a runtime context constraint object
+Permission instproc hasContextConstraint {constraint} {
+  my instvar contextconstraints
+  if {[info exists contextconstraints]} {
+    if {[lsearch -exact $contextconstraints $constraint] != -1} {
+      return 1
+    }
+  }
+  return 0
+}
+
+# constraint is a fully-qualified name of a runtime context constraint object
+Permission instproc linkContextConstraint {constraint} {
+  my instvar contextconstraints
+  if {[info exists contextconstraints]} {
+    if {![my hasContextConstraint $constraint]} {
+      lappend contextconstraints $constraint
+      return 1
+    } else {
+      my log FAILED "[self] [self proc] FAILED, context constraint <<$constraint>> is\
+                         already linked to <<[my name]>>."
+      return 0
+    }
+  } else {
+    lappend contextconstraints $constraint
+    return 1
+  }
+}
+
+# constraint is a fully-qualified name of a runtime context constraint object
+Permission instproc unlinkContextConstraint {constraint} {
+  my instvar contextconstraints
+  if {[info exists contextconstraints]} {
+    if {[my hasContextConstraint $constraint]} {
+      set index [lsearch -exact $contextconstraints $constraint]
+      set contextconstraints [lreplace $contextconstraints $index $index]
+      return 1
+    }
+  }
+  my log FAILED "[self] [self proc] FAILED, context constraint <<$constraint>> is\
+                       not linked to <<[my name]>>."
+  return 0
+  
+}
+
+Permission instproc getAttributes {} {
+  my instvar traces
+  lappend all "[list Name: [my name]]"
+  if {[my getMinCardinality] != -1} {
+    lappend all "[list [list Minimal Cardinality:] [my getMinCardinality]]"
+  }
+  if {[my getMaxCardinality] != -1} {
+    lappend all "[list [list Maximal Cardinality:] [my getMaxCardinality]]"
+  }
+  if {[my getSSDPermConstraints] != ""} {
+    foreach mep [my getSSDPermConstraints] {
+      lappend all "[list [list SSD Constraint:] [$mep name]]"
+    }
+  }
+  if {[my getContextConstraints] != ""} {
+    foreach cc [my getContextConstraints] {
+      lappend all "[list [list Context Constraint:] [$cc name]]"
+    }
+  }
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  lappend all "[list Trace: [list [string trimleft [[self] info class] :] \
+                                    <<[my name]>> $tracetype $targettype <<[$target name]>>]]"
+	}
+      }
+    }
+  }
+  lappend all "[list [list Last Modified:] [my last_modified]]"
+  return $all
+}
+
+Permission instproc appendToTailoredTraceDotFile {filename {totypes "all"} {tracetypes "all"}} {
+  next $filename $totypes $tracetypes octagon
+}
+
+Permission instproc destroy args {
+  next
+}
+
+

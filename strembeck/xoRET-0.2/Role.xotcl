@@ -1,0 +1,610 @@
+package provide xoRET::Role 0.2.2
+
+Class Role -superclass {Class xoRETObject} -parameter {{roleswithequalpermissions ""}}
+
+@ Class Role {
+  Author "Mark Strembeck"
+  Version "0.2.2"
+}
+
+Role instproc init args {
+  next
+}
+
+#the superclasses of a role are other roles or the "::Object" class
+#this method removes redundant superclasses (junior-roles) 
+#from the superclass list of [self] (that means classes which
+#are direct AND indirect superclasses of [self] at the same time)
+Role instproc updateSuperclass {} {
+  set current [[self] info superclass]
+  set new [[self] info superclass]
+  foreach supercl $current {
+    foreach class [$supercl info heritage] {
+      set index [lsearch -exact $new $class]
+      #if class is in "self superclass" and "self superclass heritage"
+      if {$index != -1} {
+	#remove class from [self superclass]
+	set new [lreplace $new $index $index]
+      }	    
+    }
+  }
+  #set new superclasses
+  my superclass $new
+}
+
+#"permission" is a fully-qualified name of a runtime-permission-object (e.g. roleMan::permissions::move_agent)
+Role instproc assignPerm {permission} {
+  if {![my directlyOwnsPerm $permission]} {
+    if {![my transitivelyOwnsPerm $permission]} {
+      my mixin add $permission end
+      my log NORMAL "[self] [self proc]: permission <<[$permission name]>> assigned to\
+                           <<[my name]>>."
+      return 1
+    } else {
+      my log FAILED "[self] [self proc] FAILED, permission <<[$permission name]>> is already\
+                           transitively assigned to <<[my name]>>."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission <<[$permission name]>> is already directly\
+                           assigned to <<[my name]>>."
+    return 0
+  }
+}
+
+#"permission" is a fully-qualified name of a runtime-permission-object (e.g. roleMan::permissions::move_agent)
+Role instproc revokePerm {permission} {
+  if {[my directlyOwnsPerm $permission]} {
+    my mixin delete $permission
+    my log NORMAL "[self] [self proc]: Permission: <<[$permission name]>> has been revoked from\
+                       <<[my name]>>."
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission <<[$permission name]>>\
+                       is not directly assigned to <<[my name]>>."
+    return 0
+  }    	
+}
+
+#perm is a fully-qualified name of a runtime-permission-object (e.g. roleMan::permissions::move_agent)
+Role instproc directlyOwnsPerm {perm} {
+    set permissions [[self] info mixin]
+    if {[lsearch -exact $permissions $perm] == -1} {
+	return 0	
+    }
+    return 1
+}
+
+#perm is a fully-qualified name of a runtime-permission-object (e.g. roleMan::permissions::move_agent)
+Role instproc transitivelyOwnsPerm {perm} {
+  #here [[self] info parent]* specifies the pattern parameter for "info heritage" (e.g.: ::re::roles*)
+  set juniorRoles [[self] info heritage [[self] info parent]*]
+  foreach role $juniorRoles {
+    if {[$role directlyOwnsPerm $perm]} {
+      return 1
+    }
+  }
+  return 0
+}
+
+Role instproc ownsPerm {perm} {
+  if {[my directlyOwnsPerm $perm] || [my transitivelyOwnsPerm $perm]} {
+    return 1
+  }
+  return 0
+}
+
+Role instproc ownsAllPerms {permlist} {
+  foreach perm $permlist {
+    if {![my ownsPerm $perm]} {
+      return 0
+    }
+  }
+  return 1
+}
+
+Role instproc getAllDirectlyAssignedPerms {} {
+  return [lsort -dictionary [[self] info mixin]]
+}
+
+Role instproc getAllTransitivelyAssignedPerms {} {
+ #here [[self] info parent]* specifies the pattern parameter for "info heritage" (e.g.: ::re::roles*)
+  set juniorRoles [[self] info heritage [[self] info parent]*]
+  set transitivePerms ""
+  if {$juniorRoles != ""} {
+    foreach role $juniorRoles {
+      set jrDirectPerms [$role getAllDirectlyAssignedPerms]
+      if {$jrDirectPerms != ""} {
+	foreach p $jrDirectPerms {
+	  if {[lsearch -exact $transitivePerms $p] == -1} {
+	    lappend transitivePerms $p
+	  }
+	}
+      }
+    }
+  }
+  return [lsort -dictionary $transitivePerms]
+}
+
+Role instproc getAllPerms {} {
+  set allPerms [my getAllDirectlyAssignedPerms]
+  set transitivePerms [my getAllTransitivelyAssignedPerms]
+  if {$transitivePerms != ""} {
+    foreach perm $transitivePerms {
+      if {[lsearch -exact $allPerms $perm] == -1} {
+	lappend allPerms $perm
+      }
+    }
+  }
+  return [lsort -dictionary $allPerms]
+}
+
+Role instproc setMinCardinality {cardinality} {
+  my instvar mincardinality
+  #a minimal cardinality lower than "1" is not sensible
+  if {$cardinality >= 1} {
+    set help [my getMinCardinality]
+    set mincardinality $cardinality
+    if {![my checkSubjectCardinalityConsistency]} {
+      #"getMinCardinality" returns "-1" if the variable "mincardinality" does not exist
+      if {$help != -1} {
+	#reset to old value
+	set mincardinality $help
+      } else {
+	unset mincardinality
+      }
+      [self] log FAILED "[self] [self proc] FAILED, the minimal subject cardinality must\
+                               be lower than, or at most equal to, the maximum subject cardinality.\
+                     \n --> current maximum subject cardinality (-1 means: no limit): [my getMaxCardinality].\
+                     \n --> current minimum subject cardinality (-1 means: no limit) : [my getMinCardinality]."
+      return 0
+    } else {	    
+      my log INFO "[self] [self proc]: Minimal subject cardinality constraint set to: $cardinality"
+      return 1
+    }		    
+  } else {
+    my log FAILED "[self] [self proc] FAILED, a minimal subject cardinality lower than 1\
+                       is not sensible."
+    return 0
+  }
+}
+
+Role instproc getMinCardinality {} {
+  my instvar mincardinality
+  if {[info exists mincardinality]} {
+    return $mincardinality
+  }
+  return -1
+}
+
+Role instproc unsetMinCardinality {} {
+  my instvar mincardinality
+  if {[info exists mincardinality]} {
+    unset mincardinality
+    my log NORMAL "[self] [self proc]: minimal subject cardinality constraint for\
+                       <<[my name]>> deleted."
+  } 
+  return 1
+}
+
+Role instproc setMaxCardinality {cardinality} {
+  my instvar maxcardinality
+  #a maximum cardinality of "0" is sensible for the definition of "private roles"
+  if {$cardinality >= 0} {	
+    set help [my getMaxCardinality]
+    set maxcardinality $cardinality
+    if {![my checkSubjectCardinalityConsistency]} {
+      #"getMaxCardinality" returns "-1" if the variable "maxcardinality" does not exist
+      if {$help != -1} {
+	#reset to old value
+	set maxcardinality $help
+      } else {
+	unset maxcardinality
+      }
+      [self] log FAILED "[self] [self proc] FAILED, the maximum subject cardinality must be\
+                         greater than, or at least equal to the minimal subject cardinality.\
+                     \n --> Current maximum subject cardinality (-1 means: no limit): [my getMaxCardinality].\
+                     \n --> Current minimal subject cardinality (-1 means: no limit): [my getMinCardinality]."
+      set success 0
+    } else {
+      my log INFO "[self] [self proc] INFO, Maximum subject cardinality constraint set to: $cardinality"
+      set success 1
+    }
+    
+  } else {
+    my log FAILED "[self] [self proc] FAILED, a maximum subject cardinality lower than\
+                       0 is not sensible"
+    set success 0
+  }
+  return $success
+}
+
+Role instproc getMaxCardinality {} {
+  my instvar maxcardinality
+  if {[info exists maxcardinality]} {
+    return $maxcardinality
+  } 
+  return -1
+} 
+
+Role instproc unsetMaxCardinality {} {
+  my instvar maxcardinality
+  if {[info exists maxcardinality]} {
+    unset maxcardinality
+    my log NORMAL "[self] [self proc]: maximum subject cardinality constraint for\
+                       <<[my name]>> deleted."
+  }
+  return 1
+}
+
+Role instproc checkSubjectCardinalityConsistency {} {
+  set minNumber [my getMinCardinality]
+  set maxNumber [my getMaxCardinality]
+  if {($minNumber == -1) || ($maxNumber == -1)} {
+    return 1
+  }
+  if {$maxNumber >= $minNumber} {
+    return 1
+    }
+  return 0
+}
+
+# role is a fully-qualified name of a runtime-role-object (e.g. re::roles::MyRole)
+Role instproc setSSDConstraint {role} {
+  my instvar ssdconstraints
+  set name [self]
+  if {![string equal $name $role]} {
+    if {![my hasSSDRoleConstraintTo $role]} {
+      set ssdconstraints($role) 1
+      my log NORMAL "[self] [self proc]: defined <<$role>> as (statically) mutual exclusive."
+      return 1
+    } else {
+      my log INFO "[self] [self proc] INFO, role: <<$role>> is already (statically)\
+                       mutual exclusive to <<[self]>>. Note\
+                       that SSD Constraints are inherited via a role-hierarchy."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, a role cannot be mutual exclusive to itself."
+    return 0
+  }
+}
+
+# role is fully-qualified name of a runtime-role-object (e.g. re::roles::MyRole)
+Role instproc unsetSSDConstraint {role} {
+  my instvar ssdconstraints
+  if {[info exists ssdconstraints($role)]} {
+    unset ssdconstraints($role)
+    my log NORMAL "[self] [self proc]: deleted mutual exclusion constraint to <<$role>>."
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role: <<$role>> is not mutual exclusive\
+                       to <<[my name]>>"
+    return 0
+  }
+}
+
+Role instproc getDirectJuniorRoles {} {
+  set super [[self] info superclass]
+  set index [lsearch -exact $super "::xotcl::Object"]
+  if {$index != -1} {
+    set super [lreplace $super $index $index]
+  }
+  return [lsort -dictionary $super]
+}
+
+Role instproc getTransitiveJuniorRoles {} {
+  set transitive [[self] info heritage]
+  set super [[self] info superclass]
+  # remove direct junior-roles (direct superclasses)
+  foreach cl $super {
+    set index [lsearch -exact $transitive $cl]
+    set transitive [lreplace $transitive $index $index]
+  }
+  # remove ::xotcl::Object
+  set index [lsearch -exact $transitive "::xotcl::Object"]
+  if {$index != -1} {
+    set transitive [lreplace $transitive $index $index]
+  }
+  return [lsort -dictionary $transitive]
+}
+
+Role instproc getAllJuniorRoles {} {
+  set junior [[self] info heritage]
+  # remove ::xotcl::Object
+  set index [lsearch -exact $junior "::xotcl::Object"]
+  set junior [lreplace $junior $index $index]
+  return [lsort -dictionary $junior]
+}
+
+Role instproc getTransitiveSeniorRoles {} {
+  set transitive [my getAllSeniorRoles]
+  set sub [[self] info subclass]
+  # remove direct senior-roles (direct subclasses)
+  foreach cl $sub {
+    set index [lsearch -exact $transitive $cl]
+    set transitive [lreplace $transitive $index $index]
+  }
+  return [lsort -dictionary $transitive]
+}
+
+Role instproc getDirectSeniorRoles {} {
+  return [lsort -dictionary [[self] info subclass]]
+}
+# recursively seek all (direct and indirect) subclasses of the given class (instance of Role)
+# this behaves like a reversed "info heritage" (remember that senior roles are represented by subclasses !)
+Role instproc getAllSeniorRoles {} {
+  set seniorRoles [[self] info subclass]
+  if {$seniorRoles != ""} {
+    foreach sr $seniorRoles {
+      set nextLevel [$sr getAllSeniorRoles]
+      foreach r $nextLevel {
+	if {[lsearch -exact $seniorRoles $r] == -1} {
+	  lappend seniorRoles $r
+	}
+      }
+    }
+  }
+  return [lsort -dictionary $seniorRoles]
+}
+
+Role instproc hasSeniorRole {role} {
+  set seniorroles [[self] getAllSeniorRoles]
+  if {[lsearch -exact $seniorroles $role] != -1} {
+    return 1
+  }
+  return 0
+}
+
+Role instproc hasJuniorRole {role} {
+  set juniorroles [[self] getAllJuniorRoles]
+  if {[lsearch -exact $juniorroles $role] != -1} {
+    return 1
+  }
+  return 0
+}
+
+# check if [self] directly or transitively owns a permission which
+# is defined as statically mutual exclusive to a permission owned
+# by $role
+Role instproc hasSSDPermConstraintTo {role} {
+  set own [my getAllPerms]
+  set other [$role getAllPerms]
+  foreach p $own {
+    foreach op $other {
+      if {[$p isStaticallyMutualExclusive $op]} {
+	return 1
+      }
+    }
+  }
+  return 0
+}
+
+# if a given role A is defined as mutual exclusive to a role B, then A is also
+# mutual exclusive to all senior-roles of B (and vice versa). This is true since
+# a subject that is assigned to a senior-role of B (e.g. role C) also transitively 
+# possesses B (and all other junior-roles of role C).
+# As a consequence, a role X may be mutual exclusive to a role Y because two
+# of their junior-roles are defined as mutual exclusive.
+#
+# role is a fully-qualified name of a runtime-role-object (e.g. re::roles::MyRole)
+Role instproc hasSSDRoleConstraintTo {role} {
+  set mutlExclRoles [my getSSDRoleConstraints]
+  if {$mutlExclRoles != ""} {
+    if {[lsearch -exact $mutlExclRoles $role] != -1} {
+      return 1
+    }
+  }
+  return 0
+}
+
+Role instproc isStaticallyMutualExclusive {role} {
+  if {[my hasSSDRoleConstraintTo $role]} { 
+    return 1 
+  }
+  if {[my hasSSDPermConstraintTo $role]} { 
+    return 1 
+  }
+  return 0
+}
+
+Role instproc getDirectSSDRoleConstraints {} {
+  my instvar ssdconstraints
+  if {[info exists ssdconstraints]} {
+    return [array names ssdconstraints] 
+  } 
+  return ""
+}
+
+# Since each owner of a "senior-role" can activate the 
+# corresponding junior-roles, transitive ssd role constraints 
+# are automatically defined for each senior-role of a directly 
+# mutual exclusive role. 
+Role instproc getTransitiveSSDRoleConstraints {} {
+  set direct [my getDirectSSDRoleConstraints]
+  set transitive ""
+  if {$direct != ""} {
+    foreach role $direct {
+      if {[$role getAllSeniorRoles] != ""} {
+	set transitive [concat $transitive [$role getAllSeniorRoles]]
+      }
+    }
+  }
+  return [lsort -unique $transitive]
+}
+
+Role instproc getInheritedSSDRoleConstraints {} {
+  #here [[self] info parent]* specifies the pattern parameter for "info heritage" (e.g.: ::re::roles*)
+  set juniorRoles [[self] info heritage [[self] info parent]*]
+  set inherited ""
+  if {$juniorRoles != ""} {
+    foreach role $juniorRoles {
+      # get inherited role constraints
+      set issdrc [$role getSSDRoleConstraints]
+      if {$issdrc != ""} {
+	set inherited [concat $inherited $issdrc]
+      }
+    }
+  }
+  return [lsort -unique $inherited]
+}
+
+Role instproc getSSDRoleConstraints {} {
+  set all [my getDirectSSDRoleConstraints]
+  set transitive [my getTransitiveSSDRoleConstraints]
+  set inherited [my getInheritedSSDRoleConstraints]
+  if {$inherited != ""} { set all [concat $all $inherited] }
+  if {$transitive != ""} { set all [concat $all $transitive] }
+  return [lsort -unique $all]
+}
+
+Role instproc exportRDF {fileName} {
+  my instvar mincardinality maxcardinality ssdconstraints
+  set file [open $fileName a+]
+  puts $file "  <ROLE rdf:ID='\#[my name]'>"
+  puts $file "    <re:roleName>[my name]</re:roleName>"
+  if {[info exists mincardinality]} {
+    puts $file "    <re:mincardinality>[my getMinCardinality]</re:mincardinality>"
+  }
+  if {[info exists maxcardinality]} {
+    puts $file "    <re:maxcardinality>[my getMaxCardinality]</re:maxcardinality>"
+  }
+  set juniorRoles [[self] info superclass]
+  	     
+  if {($juniorRoles != "") && ($juniorRoles != "::xotcl::Object")} {
+    foreach role $juniorRoles {
+      puts $file "    <re:juniorRole rdf:resource='\#[$role name]'/>"
+    }
+  }
+  set seniorRoles [[self] info subclass]
+  if {$seniorRoles != ""} {
+    foreach role $seniorRoles {
+      puts $file "    <re:seniorRole rdf:resource='\#[$role name]'/>"
+    }
+  }
+  if {[info exists ssdconstraints]} {
+    foreach role [my getDirectSSDRoleConstraints] {
+      puts $file "    <re:staticallyMutualExclusiveRole rdf:resource='\#[$role name]'/>"
+    }
+  } 
+  set permList [my getAllDirectlyAssignedPerms]
+  if {$permList != ""} {
+    foreach perm $permList {
+      puts $file "    <re:permission rdf:resource='\#[$perm name]'/>"
+    }
+  }
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  puts $file "    <re:trace tracetype='$tracetype' targettype='$targettype'\
+                                    target='\#[$target name]'/>"
+	}
+      }
+    }
+  }
+  puts $file "    <re:modified>[my last_modified]</re:modified>"
+  puts $file "  </ROLE>\n"
+  close $file 
+}
+
+Role instproc export_xoRBAC_RDF {fileName} {
+  my instvar mincardinality maxcardinality ssdconstraints
+  set file [open $fileName a+]
+  puts $file "  <ROLE rdf:ID='\#[[self] name]'>"
+  puts $file "    <rm:roleName>[[self] name]</rm:roleName>"
+  if {[info exists minSubjectCardinality]} {
+    puts $file "    <rm:minSubjectCardinality>[my getMinCardinality]</rm:minSubjectCardinality>"
+  }
+  if {[info exists maxSubjectCardinality]} {
+    puts $file "    <rm:maxSubjectCardinality>[my getMaxCardinality]</rm:maxSubjectCardinality>"
+  }
+  set junior [my info superclass]
+  if {($junior != "") && ($junior != "::xotcl::Object")} {
+    foreach role $junior {
+      puts $file "    <rm:juniorRole rdf:resource='\#[$role name]'/>"
+    }
+  }
+  set senior [my info subclass]
+  if {$senior != ""} {
+    foreach role $senior {
+      puts $file "    <rm:seniorRole rdf:resource='\#[$role name]'/>"
+    }
+  }
+  if {[info exists ssdconstraints]} {
+    foreach role [my getDirectSSDRoleConstraints] {
+      puts $file "    <rm:staticallyMutualExclusiveRole rdf:resource='\#[$role name]'/>"
+    }
+  } 
+  foreach perm [my getAllDirectlyAssignedPerms] {
+    puts $file "    <rm:permission rdf:resource='\#[$perm operation] [$perm object]'/>"
+  }
+  puts $file "  </ROLE>\n"
+  close $file 
+}
+
+
+Role instproc appendToTailoredTraceDotFile {filename {totypes "all"} {tracetypes "all"}} {
+  next $filename $totypes $tracetypes egg
+}
+
+Role instproc getAttributes {} {
+  lappend all "[list Name: [my name]]"
+  if {[my getMinCardinality] != -1} {
+    lappend all "[list [list Minimal Subject Cardinality:] [my getMinCardinality]]"
+  }
+  if {[my getMaxCardinality] != -1} {
+    lappend all "[list [list Maximal Subject Cardinality:] [my getMaxCardinality]]"
+  }
+  if {[my getDirectSSDRoleConstraints] != ""} {
+    foreach mer [my getDirectSSDRoleConstraints] {
+      lappend all "[list [list Direct SSD Role Constraint:] [$mer name]]"
+    }
+  }
+  if {[my getInheritedSSDRoleConstraints] != ""} {
+    foreach mer [my getInheritedSSDRoleConstraints] {
+      lappend all "[list [list Inherited SSD Role Constraint:] [$mer name]]"
+    }
+  }
+  if {[my getAllDirectlyAssignedPerms] != ""} {
+    foreach perm [my getAllDirectlyAssignedPerms] {
+      lappend all "[list [list Directly Assigned Permission:] [$perm name]]"
+    }
+  }
+  if {[my getAllTransitivelyAssignedPerms] != ""} {
+    foreach perm [my getAllTransitivelyAssignedPerms] {
+      lappend all "[list [list Inherited Permission:] [$perm name]]"
+    }
+  }
+  if {[[self] getDirectJuniorRoles] !=""} {
+    foreach r [[self] getDirectJuniorRoles] {
+      lappend all "[list [list Direct Junior-Role:] [$r name]]"
+    }
+  }
+  if {[my getTransitiveJuniorRoles] != ""} {
+    foreach r [my getTransitiveJuniorRoles] {
+      lappend all "[list [list Transitive Junior-Role:] [$r name]]"
+    }
+  }
+  if {[[self] info subclass] != ""} {
+    foreach r [[self] info subclass] {
+      lappend all "[list [list Direct Senior-Role:] [$r name]]"
+    }
+  }
+  if {[my getTransitiveSeniorRoles] != ""} {
+    foreach r [my getTransitiveSeniorRoles] {
+      lappend all "[list [list Transitive Senior-Role:] [$r name]]"
+    }
+  }
+  if {[my roleswithequalpermissions] != ""} {
+    foreach r [my roleswithequalpermissions] {
+      lappend all "[list [list Role with identical Permissions:] [$r name]]"
+    }
+  }
+  return $all 
+}
+
+Role instproc destroy args {
+  next
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<rdf:RDF 
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+  xmlns:re="http://www.xotcl.org/xoret/rdf-schema#">
+
+  <rdf:Description ID="xoRET_tracetypepairs">
+    <re:tracetypepair>constrained-by constrains</re:tracetypepair>
+    <re:tracetypepair>sub-goal super-goal</re:tracetypepair>
+    <re:tracetypepair>refines refined-by</re:tracetypepair>
+    <re:tracetypepair>junior-role senior-role</re:tracetypepair>
+    <re:tracetypepair>fulfilled-by fulfills</re:tracetypepair>
+    <re:tracetypepair>impeded-by impedes</re:tracetypepair>
+    <re:tracetypepair>part-of contains</re:tracetypepair>
+    <re:tracetypepair>origin-of derived-from</re:tracetypepair>
+    <re:tracetypepair>mutual-exclusive mutual-exclusive</re:tracetypepair>
+    <re:tracetypepair>assigned-to owns</re:tracetypepair>
+  </rdf:Description>
+
+</rdf:RDF>

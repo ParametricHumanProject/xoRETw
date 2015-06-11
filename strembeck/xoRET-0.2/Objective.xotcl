@@ -1,0 +1,165 @@
+package provide xoRET::Objective 0.1.1
+
+Class Objective -superclass xoRETObject -parameter {type}
+
+@ Class Objective {
+  Author "(c) Mark Strembeck"
+  Version "0.1.1"
+}
+
+Objective proc addType {type} {
+  set [self]::typelist [lsort -unique [lappend [self]::typelist $type]]
+}
+Objective proc removeType {type} {
+  set list [self]::typelist
+  set index [lsearch -exact [set $list] $type]
+  if {$index != -1} {
+    set $list [lreplace [set $list] $index $index]
+  }
+}
+Objective proc getTypeList {} {
+  puts "------------------"
+  return [set [self]::typelist]
+}
+
+set Objective::typelist "Achieve Ensure Improve Increase Keep Maintain\
+                         Make Notify Provide Reduce"
+
+# Objective instinvar {
+#   { [my type] == "Achieve" ||
+#     [my type] == "Ensure" ||
+#     [my type] == "Improve" ||
+#     [my type] == "Increase" ||
+#     [my type] == "Keep" ||
+#     [my type] == "Maintain" ||
+#     [my type] == "Make" ||
+#     [my type] == "Notify" ||
+#     [my type] == "Provide" ||
+#     [my type] == "Reduce"}
+# }
+
+Objective instproc init args {
+  next
+}
+
+Objective instproc addDerivedAbstractContextCondition {condition} {
+  my instvar derived_conditions
+  if {[info exists derived_conditions]} {
+    if {[lsearch -exact $derived_conditions $condition] == -1} {
+      lappend derived_conditions $condition
+      my log NORMAL "[self] [self proc], abstract context condition <<$condition>>\
+                         added to <<derived_conditions>> list."
+      return 1
+    } else {
+      my log FAILED "[self] [self proc] FAILED, abstract condition <<$condition>>\
+                         is already in the <<derived_conditions>> list."
+      return 0
+    }
+  } else {
+    lappend derived_conditions $condition
+    my log NORMAL "[self] [self proc], abstract context condition <<$condition>>\
+                       added to <<derived_conditions>> list."
+    return 1
+  }
+}
+
+Objective instproc removeDerivedAbstractContextCondition {condition} {
+  my instvar derived_conditions
+  if {[info exists derived_conditions]} {
+    set index [lsearch -exact $derived_conditions $condition]
+    if {$index != -1} {
+      set derived_conditions [lreplace $derived_conditions $index $index]
+      my log NORMAL "[self] [self proc], abstract context condition <<$condition>>\
+                         removed from <<derived_conditions>> list."
+      return 1
+    } else {
+      my log FAILED "[self] [self proc] FAILED, abstract context condition\
+                         <<$condition>> is not in <<derived_conditions>> list."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, abstract context condition <<$condition>>\
+                       is not in <<derived_conditions>> list."
+    return 0
+  }
+}
+
+Objective instproc clearDerivedConditionList {} {
+  my instvar derived_conditions
+  if {[info exists derived_conditions]} {
+    unset derived_conditions
+  }
+  return 1
+}
+
+Objective instproc getDerivedConditionList {} {
+  my instvar derived_conditions
+  if {[info exists derived_conditions]} {
+    return $derived_conditions
+  } else {
+    return ""
+  }
+}
+
+Objective instproc exportRDF {fileName} {
+  my instvar derived_conditions traces
+  set file [open $fileName a+]
+  puts $file "  <OBJECTIVE rdf:ID='\#[my name]'>"
+  puts $file "    <re:type>[my type]</re:type>"
+#  puts $file "    <re:name>[[self] name]</re:name>"
+  if {[my author] != ""} {
+    puts $file "    <re:author>[my author]</re:author>"
+  }
+  if {[info exists derived_conditions]} {
+    foreach condition $derived_conditions {
+      puts $file "    <re:abstract_condition>$condition</re:abstract_condition>"
+    }
+  }
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  puts $file "    <re:trace tracetype='$tracetype' targettype='$targettype'\
+                                    target='\#[$target name]'/>"
+	}
+      }
+    }
+  }
+  puts $file "    <re:modified>[my last_modified]</re:modified>"
+  puts $file "  </OBJECTIVE>\n"
+  close $file
+}
+
+Objective instproc getAttributes {} {
+  my instvar traces
+  lappend all "[list Name: [my name]]"
+  lappend all "[list Type: [my type]]"
+  lappend all "[list Author: [my author]]"
+  if {[my getDerivedConditionList] != ""} {
+    foreach cond [my getDerivedConditionList] {
+      lappend all "[list [list Derived Abstract Condition:] $cond]"
+    }
+  }
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  lappend all "[list Trace: [list [string trimleft [[self] info class] :] \
+                                    <<[my name]>> $tracetype $targettype <<[$target name]>>]]"
+	}
+      }
+    }
+  }
+  lappend all "[list [list Last Modified:] [my last_modified]]"
+  return $all
+}
+
+Objective instproc appendToTailoredTraceDotFile {filename {totypes "all"} {tracetypes "all"}} {
+  next $filename $totypes $tracetypes house
+}
+
+Objective instproc destroy args {
+  next
+}

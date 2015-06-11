@@ -1,0 +1,571 @@
+<?xml version="1.0"?>
+<rdf:RDF 
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+  xmlns:re="http://www.xotcl.org/xorbac/rdf-schema#">
+
+  <rdf:Description ID="xoRET::objectives">
+    <re:objectives>
+      <rdf:Bag>
+        <rdf:li resource="#Withdraw_money_from_ATM"/>
+      </rdf:Bag>
+    </re:objectives>
+  </rdf:Description>
+
+  <rdf:Description ID="xoRET::obstacles">
+    <re:obstacles>
+      <rdf:Bag>
+        <rdf:li resource="#Account_overdrawn"/>
+        <rdf:li resource="#Another_Obstacle"/>
+        <rdf:li resource="#Card_expired"/>
+        <rdf:li resource="#Three_false_PIN_entries"/>
+      </rdf:Bag>
+    </re:obstacles>
+  </rdf:Description>
+
+  <rdf:Description ID="xoRET::permissions">
+    <re:permissions>
+      <rdf:Bag>
+        <rdf:li resource="#Check_credit_line_ATM"/>
+        <rdf:li resource="#Check_PIN_ATM"/>
+        <rdf:li resource="#Eject_card_Customer"/>
+        <rdf:li resource="#Emit_banknotes_Customer"/>
+        <rdf:li resource="#Enter_amount_ATM"/>
+        <rdf:li resource="#Enter_PIN_ATM"/>
+        <rdf:li resource="#Insert_ATM_card_ATM"/>
+        <rdf:li resource="#Issue_account_overdrawn_message_Customer"/>
+        <rdf:li resource="#Prompt_for_amount_Customer"/>
+        <rdf:li resource="#Prompt_for_PIN_Customer"/>
+        <rdf:li resource="#Take_banknotes_ATM"/>
+        <rdf:li resource="#Take_card_ATM"/>
+      </rdf:Bag>
+    </re:permissions>
+  </rdf:Description>
+
+  <rdf:Description ID="xoRET::scenarios">
+    <re:scenarios>
+      <rdf:Bag>
+        <rdf:li resource="#ATM_internal_PIN_check_procedure"/>
+        <rdf:li resource="#Delete_standing_order"/>
+        <rdf:li resource="#Deposit_money"/>
+        <rdf:li resource="#Establish_standing_order"/>
+        <rdf:li resource="#Sell_stocks_success"/>
+        <rdf:li resource="#Withdraw_money_failure"/>
+        <rdf:li resource="#withdraw_money_from_atm_complete"/>
+        <rdf:li resource="#Withdraw_money_success"/>
+      </rdf:Bag>
+    </re:scenarios>
+  </rdf:Description>
+
+  <rdf:Description ID="xoRET::steps">
+    <re:steps>
+      <rdf:Bag>
+        <rdf:li resource="#ATM-Check_credit_line-ATM"/>
+        <rdf:li resource="#ATM-Check_PIN-ATM"/>
+        <rdf:li resource="#ATM-Eject_card-Customer"/>
+        <rdf:li resource="#ATM-Emit_banknotes-Customer"/>
+        <rdf:li resource="#ATM-Issue_account_overdrawn_message-Customer"/>
+        <rdf:li resource="#ATM-Prompt_for_amount-Customer"/>
+        <rdf:li resource="#ATM-Prompt_for_PIN-Customer"/>
+        <rdf:li resource="#Customer-dispatch_standing_order_form-WebServer"/>
+        <rdf:li resource="#Customer-Enter_amount-ATM"/>
+        <rdf:li resource="#Customer-Enter_PIN-ATM"/>
+        <rdf:li resource="#Customer-fetch_standing_order_form-WebServer"/>
+        <rdf:li resource="#Customer-fill_in-standing_order_form"/>
+        <rdf:li resource="#Customer-Insert_ATM_card-ATM"/>
+        <rdf:li resource="#Customer-Take_banknotes-ATM"/>
+        <rdf:li resource="#Customer-Take_card-ATM"/>
+        <rdf:li resource="#WebServer-check-standing_order_form"/>
+        <rdf:li resource="#WebServer-dispatch_standing_order_form-Customer"/>
+        <rdf:li resource="#WebServer-establish_standing_order-Account_Mgmt_Backend"/>
+        <rdf:li resource="#WebServer-issue_standing_order_established_message-Customer"/>
+      </rdf:Bag>
+    </re:steps>
+  </rdf:Description>
+
+  <rdf:Description ID="xoRET::tasks">
+    <re:tasks>
+      <rdf:Bag>
+        <rdf:li resource="#Account_Management"/>
+        <rdf:li resource="#Custody_Account_Management"/>
+        <rdf:li resource="#Inventory_Control"/>
+        <rdf:li resource="#Order_Management"/>
+      </rdf:Bag>
+    </re:tasks>
+  </rdf:Description>
+
+  <rdf:Description ID="xoRET::profiles">
+    <re:profiles>
+      <rdf:Bag>
+        <rdf:li resource="#Investment_Consultant"/>
+        <rdf:li resource="#Purchasing_Agent"/>
+      </rdf:Bag>
+    </re:profiles>
+  </rdf:Description>
+
+  <OBJECTIVE rdf:ID='#Withdraw_money_from_ATM'>
+    <re:type>Achieve</re:type>
+    <re:author>Mark Strembeck</re:author>
+    <re:abstract_condition>my first condition</re:abstract_condition>
+    <re:abstract_condition>my second condition</re:abstract_condition>
+    <re:trace tracetype='impeded-by' targettype='Obstacle' target='#Account_overdrawn'/>
+    <re:trace tracetype='impeded-by' targettype='Obstacle' target='#Another_Obstacle'/>
+    <re:trace tracetype='impeded-by' targettype='Obstacle' target='#Three_false_PIN_entries'/>
+    <re:trace tracetype='fulfilled-by' targettype='Scenario' target='#Withdraw_money_success'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </OBJECTIVE>
+
+  <OBSTACLE rdf:ID='#Account_overdrawn'>
+    <re:type>Avoid</re:type>
+    <re:author>Mark</re:author>
+    <re:abstract_condition>second condition</re:abstract_condition>
+    <re:abstract_condition>available credit of subject greater-equal amount to withdraw</re:abstract_condition>
+    <re:trace tracetype='impedes' targettype='Objective' target='#Withdraw_money_from_ATM'/>
+    <re:trace tracetype='impedes' targettype='Scenario' target='#Withdraw_money_success'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </OBSTACLE>
+
+  <OBSTACLE rdf:ID='#Another_Obstacle'>
+    <re:type>Avoid</re:type>
+    <re:author>Mark</re:author>
+    <re:trace tracetype='impedes' targettype='Objective' target='#Withdraw_money_from_ATM'/>
+    <re:trace tracetype='impedes' targettype='Scenario' target='#Withdraw_money_success'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </OBSTACLE>
+
+  <OBSTACLE rdf:ID='#Card_expired'>
+    <re:type>Avoid</re:type>
+    <re:author>Mark</re:author>
+    <re:trace tracetype='impedes' targettype='Scenario' target='#Withdraw_money_success'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </OBSTACLE>
+
+  <OBSTACLE rdf:ID='#Three_false_PIN_entries'>
+    <re:type>Avoid</re:type>
+    <re:author>Mark</re:author>
+    <re:abstract_condition>pin enter attempt lower-equal 3</re:abstract_condition>
+    <re:trace tracetype='impedes' targettype='Objective' target='#Withdraw_money_from_ATM'/>
+    <re:trace tracetype='impedes' targettype='Scenario' target='#Withdraw_money_success'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </OBSTACLE>
+
+  <PERMISSION rdf:ID='#Check_credit_line_ATM'>
+    <re:permName>Check_credit_line_ATM</re:permName>
+    <re:operation>Check_credit_line</re:operation>
+    <re:object>ATM</re:object>
+    <re:modified>Fri Jul 18 11:38:15 CEST 2003</re:modified>
+  </PERMISSION>
+
+  <PERMISSION rdf:ID='#Check_PIN_ATM'>
+    <re:permName>Check_PIN_ATM</re:permName>
+    <re:operation>Check_PIN</re:operation>
+    <re:object>ATM</re:object>
+    <re:modified>Fri Jul 18 11:38:15 CEST 2003</re:modified>
+  </PERMISSION>
+
+  <PERMISSION rdf:ID='#Eject_card_Customer'>
+    <re:permName>Eject_card_Customer</re:permName>
+    <re:operation>Eject_card</re:operation>
+    <re:object>Customer</re:object>
+    <re:modified>Fri Jul 18 11:38:15 CEST 2003</re:modified>
+  </PERMISSION>
+
+  <PERMISSION rdf:ID='#Emit_banknotes_Customer'>
+    <re:permName>Emit_banknotes_Customer</re:permName>
+    <re:operation>Emit_banknotes</re:operation>
+    <re:object>Customer</re:object>
+    <re:modified>Fri Jul 18 11:38:15 CEST 2003</re:modified>
+  </PERMISSION>
+
+  <PERMISSION rdf:ID='#Enter_amount_ATM'>
+    <re:permName>Enter_amount_ATM</re:permName>
+    <re:operation>Enter_amount</re:operation>
+    <re:object>ATM</re:object>
+    <re:modified>Fri Jul 18 11:38:15 CEST 2003</re:modified>
+  </PERMISSION>
+
+  <PERMISSION rdf:ID='#Enter_PIN_ATM'>
+    <re:permName>Enter_PIN_ATM</re:permName>
+    <re:operation>Enter_PIN</re:operation>
+    <re:object>ATM</re:object>
+    <re:modified>Fri Jul 18 11:38:15 CEST 2003</re:modified>
+  </PERMISSION>
+
+  <PERMISSION rdf:ID='#Insert_ATM_card_ATM'>
+    <re:permName>Insert_ATM_card_ATM</re:permName>
+    <re:operation>Insert_ATM_card</re:operation>
+    <re:object>ATM</re:object>	
+    <re:modified>Fri Jul 18 11:38:15 CEST 2003</re:modified>
+  </PERMISSION>
+
+  <PERMISSION rdf:ID='#Issue_account_overdrawn_message_Customer'>
+    <re:permName>Issue_account_overdrawn_message_Customer</re:permName>
+    <re:operation>Issue_account_overdrawn_message</re:operation>
+    <re:object>Customer</re:object>
+    <re:modified>Fri Jul 18 11:38:15 CEST 2003</re:modified>
+  </PERMISSION>
+
+  <PERMISSION rdf:ID='#Prompt_for_amount_Customer'>
+    <re:permName>Prompt_for_amount_Customer</re:permName>
+    <re:operation>Prompt_for_amount</re:operation>
+    <re:object>Customer</re:object>
+    <re:modified>Fri Jul 18 11:38:15 CEST 2003</re:modified>
+  </PERMISSION>
+
+  <PERMISSION rdf:ID='#Prompt_for_PIN_Customer'>
+    <re:permName>Prompt_for_PIN_Customer</re:permName>
+    <re:operation>Prompt_for_PIN</re:operation>
+    <re:object>Customer</re:object>
+    <re:modified>Fri Jul 18 11:38:15 CEST 2003</re:modified>
+  </PERMISSION>
+
+  <PERMISSION rdf:ID='#Take_banknotes_ATM'>
+    <re:permName>Take_banknotes_ATM</re:permName>
+    <re:operation>Take_banknotes</re:operation>
+    <re:object>ATM</re:object>
+    <re:modified>Fri Jul 18 11:38:15 CEST 2003</re:modified>
+  </PERMISSION>
+
+  <PERMISSION rdf:ID='#Take_card_ATM'>
+    <re:permName>Take_card_ATM</re:permName>
+    <re:operation>Take_card</re:operation>
+    <re:object>ATM</re:object>
+    <re:modified>Fri Jul 18 11:38:15 CEST 2003</re:modified>
+  </PERMISSION>
+
+  <SCENARIO rdf:ID='#ATM_internal_PIN_check_procedure'>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </SCENARIO>
+
+  <SCENARIO rdf:ID='#Delete_standing_order'>
+    <re:author>Mark</re:author>
+    <re:trace tracetype='part-of' targettype='Task' target='#Account_Management'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </SCENARIO>
+
+  <SCENARIO rdf:ID='#Deposit_money'>
+    <re:author>Mark</re:author>
+    <re:trace tracetype='part-of' targettype='Task' target='#Account_Management'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </SCENARIO>
+
+  <SCENARIO rdf:ID='#Establish_standing_order'>
+    <re:author>Mark</re:author>
+   <re:node rdf:resource='#WebServer-establish_standing_order-Account_Mgmt_Backend'/>
+   <re:node rdf:resource='#Customer-fetch_standing_order_form-WebServer'/>
+   <re:node rdf:resource='#Customer-dispatch_standing_order_form-WebServer'/>
+   <re:node rdf:resource='#WebServer-dispatch_standing_order_form-Customer'/>
+   <re:node rdf:resource='#WebServer-issue_standing_order_established_message-Customer'/>
+   <re:node rdf:resource='#WebServer-check-standing_order_form'/>
+   <re:node rdf:resource='#Customer-fill_in-standing_order_form'/>
+   <re:edge>WebServer-check-standing_order_form WebServer-establish_standing_order-Account_Mgmt_Backend {check ok}</re:edge>
+   <re:edge>WebServer-dispatch_standing_order_form-Customer Customer-fill_in-standing_order_form {}</re:edge>
+   <re:edge>WebServer-establish_standing_order-Account_Mgmt_Backend WebServer-issue_standing_order_established_message-Customer {}</re:edge>
+   <re:edge>Customer-fill_in-standing_order_form Customer-dispatch_standing_order_form-WebServer {}</re:edge>
+   <re:edge>Customer-dispatch_standing_order_form-WebServer WebServer-check-standing_order_form {}</re:edge>
+   <re:edge>WebServer-check-standing_order_form WebServer-dispatch_standing_order_form-Customer {check failed}</re:edge>
+   <re:edge>Customer-fetch_standing_order_form-WebServer WebServer-dispatch_standing_order_form-Customer {}</re:edge>
+    <re:trace tracetype='contains' targettype='Step' target='#Customer-dispatch_standing_order_form-WebServer'/>
+    <re:trace tracetype='contains' targettype='Step' target='#Customer-fetch_standing_order_form-WebServer'/>
+    <re:trace tracetype='contains' targettype='Step' target='#Customer-fill_in-standing_order_form'/>
+    <re:trace tracetype='contains' targettype='Step' target='#WebServer-check-standing_order_form'/>
+    <re:trace tracetype='contains' targettype='Step' target='#WebServer-dispatch_standing_order_form-Customer'/>
+    <re:trace tracetype='contains' targettype='Step' target='#WebServer-establish_standing_order-Account_Mgmt_Backend'/>
+    <re:trace tracetype='contains' targettype='Step' target='#WebServer-issue_standing_order_established_message-Customer'/>
+    <re:trace tracetype='part-of' targettype='Task' target='#Account_Management'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </SCENARIO>
+
+  <SCENARIO rdf:ID='#Sell_stocks_success'>
+    <re:author>Mark</re:author>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </SCENARIO>
+
+  <SCENARIO rdf:ID='#Withdraw_money_failure'>
+    <re:author>Mark</re:author>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </SCENARIO>
+
+  <SCENARIO rdf:ID='#withdraw_money_from_atm_complete'>
+    <re:author>MArk Strembeck</re:author>
+   <re:node rdf:resource='#ATM-Eject_card-Customer'/>
+   <re:node rdf:resource='#Customer-Take_card-ATM'/>
+   <re:node rdf:resource='#ATM-Issue_account_overdrawn_message-Customer'/>
+   <re:node rdf:resource='#ATM-Prompt_for_amount-Customer'/>
+   <re:node rdf:resource='#ATM-Emit_banknotes-Customer'/>
+   <re:node rdf:resource='#ATM-Check_PIN-ATM'/>
+   <re:node rdf:resource='#Customer-Enter_PIN-ATM'/>
+   <re:node rdf:resource='#ATM-Prompt_for_PIN-Customer'/>
+   <re:node rdf:resource='#Customer-Insert_ATM_card-ATM'/>
+   <re:node rdf:resource='#ATM-Check_credit_line-ATM'/>
+   <re:node rdf:resource='#Customer-Enter_amount-ATM'/>
+   <re:node rdf:resource='#Customer-Take_banknotes-ATM'/>
+   <re:edge>Customer-Enter_amount-ATM ATM-Check_credit_line-ATM {}</re:edge>
+   <re:edge>ATM-Check_credit_line-ATM ATM-Issue_account_overdrawn_message-Customer {credit check failed}</re:edge>
+   <re:edge>ATM-Check_credit_line-ATM ATM-Eject_card-Customer {}</re:edge>
+   <re:edge>ATM-Eject_card-Customer Customer-Take_card-ATM {}</re:edge>
+   <re:edge>Customer-Take_card-ATM ATM-Emit_banknotes-Customer {}</re:edge>
+   <re:edge>ATM-Emit_banknotes-Customer Customer-Take_banknotes-ATM {}</re:edge>
+   <re:edge>Customer-Insert_ATM_card-ATM ATM-Prompt_for_PIN-Customer {}</re:edge>
+   <re:edge>ATM-Check_PIN-ATM ATM-Prompt_for_PIN-Customer {pin check failed}</re:edge>
+   <re:edge>ATM-Check_PIN-ATM ATM-Prompt_for_amount-Customer {pin check ok}</re:edge>
+   <re:edge>ATM-Prompt_for_PIN-Customer Customer-Enter_PIN-ATM {}</re:edge>
+   <re:edge>Customer-Enter_PIN-ATM ATM-Check_PIN-ATM {}</re:edge>
+   <re:edge>ATM-Issue_account_overdrawn_message-Customer ATM-Prompt_for_amount-Customer {}</re:edge>
+   <re:edge>ATM-Prompt_for_amount-Customer Customer-Enter_amount-ATM {}</re:edge>
+    <re:trace tracetype='contains' targettype='Step' target='#ATM-Check_PIN-ATM'/>
+    <re:trace tracetype='contains' targettype='Step' target='#ATM-Check_credit_line-ATM'/>
+    <re:trace tracetype='contains' targettype='Step' target='#ATM-Eject_card-Customer'/>
+    <re:trace tracetype='contains' targettype='Step' target='#ATM-Emit_banknotes-Customer'/>
+    <re:trace tracetype='contains' targettype='Step' target='#ATM-Issue_account_overdrawn_message-Customer'/>
+    <re:trace tracetype='contains' targettype='Step' target='#ATM-Prompt_for_PIN-Customer'/>
+    <re:trace tracetype='contains' targettype='Step' target='#ATM-Prompt_for_amount-Customer'/>
+    <re:trace tracetype='contains' targettype='Step' target='#Customer-Enter_PIN-ATM'/>
+    <re:trace tracetype='contains' targettype='Step' target='#Customer-Enter_amount-ATM'/>
+    <re:trace tracetype='contains' targettype='Step' target='#Customer-Insert_ATM_card-ATM'/>
+    <re:trace tracetype='contains' targettype='Step' target='#Customer-Take_banknotes-ATM'/>
+    <re:trace tracetype='contains' targettype='Step' target='#Customer-Take_card-ATM'/>
+    <re:trace tracetype='part-of' targettype='Task' target='#Account_Management'/>
+    <re:trace tracetype='part-of' targettype='Task' target='#Order_Management'/>
+    <re:modified>Wed Jul 16 13:45:47 CEST 2003</re:modified>
+  </SCENARIO>
+
+  <SCENARIO rdf:ID='#Withdraw_money_success'>
+    <re:author>Mark Strembeck</re:author>
+    <re:trace tracetype='fulfills' targettype='Objective' target='#Withdraw_money_from_ATM'/>
+    <re:trace tracetype='impeded-by' targettype='Obstacle' target='#Account_overdrawn'/>
+    <re:trace tracetype='impeded-by' targettype='Obstacle' target='#Another_Obstacle'/>
+    <re:trace tracetype='impeded-by' targettype='Obstacle' target='#Card_expired'/>
+    <re:trace tracetype='impeded-by' targettype='Obstacle' target='#Three_false_PIN_entries'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </SCENARIO>
+
+  <STEP rdf:ID='#ATM-Check_credit_line-ATM'>
+    <re:author>Mark</re:author>
+    <re:actor>ATM</re:actor>
+    <re:action>Check_credit_line</re:action>
+    <re:target>ATM</re:target>
+    <re:trace tracetype='origin-of' targettype='Permission' target='#Check_credit_line_ATM'/>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#withdraw_money_from_atm_complete'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#ATM-Check_PIN-ATM'>
+    <re:author>Mark</re:author>
+    <re:actor>ATM</re:actor>
+    <re:action>Check_PIN</re:action>
+    <re:target>ATM</re:target>
+    <re:trace tracetype='origin-of' targettype='Permission' target='#Check_PIN_ATM'/>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#withdraw_money_from_atm_complete'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#ATM-Eject_card-Customer'>
+    <re:author>Mark</re:author>
+    <re:actor>ATM</re:actor>
+    <re:action>Eject_card</re:action>
+    <re:target>Customer</re:target>
+    <re:trace tracetype='origin-of' targettype='Permission' target='#Eject_card_Customer'/>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#withdraw_money_from_atm_complete'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#ATM-Emit_banknotes-Customer'>
+    <re:author>Mark</re:author>
+    <re:actor>ATM</re:actor>
+    <re:action>Emit_banknotes</re:action>
+    <re:target>Customer</re:target>
+    <re:trace tracetype='origin-of' targettype='Permission' target='#Emit_banknotes_Customer'/>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#withdraw_money_from_atm_complete'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#ATM-Issue_account_overdrawn_message-Customer'>
+    <re:author>Mark</re:author>
+    <re:actor>ATM</re:actor>
+    <re:action>Issue_account_overdrawn_message</re:action>
+    <re:target>Customer</re:target>
+    <re:trace tracetype='origin-of' targettype='Permission' target='#Issue_account_overdrawn_message_Customer'/>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#withdraw_money_from_atm_complete'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#ATM-Prompt_for_amount-Customer'>
+    <re:author>Mark</re:author>
+    <re:actor>ATM</re:actor>
+    <re:action>Prompt_for_amount</re:action>
+    <re:target>Customer</re:target>
+    <re:trace tracetype='origin-of' targettype='Permission' target='#Prompt_for_amount_Customer'/>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#withdraw_money_from_atm_complete'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#ATM-Prompt_for_PIN-Customer'>
+    <re:author>Mark</re:author>
+    <re:actor>ATM</re:actor>
+    <re:action>Prompt_for_PIN</re:action>
+    <re:target>Customer</re:target>
+    <re:trace tracetype='origin-of' targettype='Permission' target='#Prompt_for_PIN_Customer'/>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#withdraw_money_from_atm_complete'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#Customer-dispatch_standing_order_form-WebServer'>
+    <re:author>Mark</re:author>
+    <re:actor>Customer</re:actor>
+    <re:action>dispatch_standing_order_form</re:action>
+    <re:target>WebServer</re:target>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#Establish_standing_order'/>
+    <re:modified>Fri Jul 18 11:42:59 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#Customer-Enter_amount-ATM'>
+    <re:author>Mark</re:author>
+    <re:actor>Customer</re:actor>
+    <re:action>Enter_amount</re:action>
+    <re:target>ATM</re:target>
+    <re:trace tracetype='origin-of' targettype='Permission' target='#Enter_amount_ATM'/>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#withdraw_money_from_atm_complete'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#Customer-Enter_PIN-ATM'>
+    <re:author>Mark</re:author>
+    <re:actor>Customer</re:actor>
+    <re:action>Enter_PIN</re:action>
+    <re:target>ATM</re:target>
+    <re:trace tracetype='origin-of' targettype='Permission' target='#Enter_PIN_ATM'/>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#withdraw_money_from_atm_complete'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#Customer-fetch_standing_order_form-WebServer'>
+    <re:author>Mark</re:author>
+    <re:actor>Customer</re:actor>
+    <re:action>fetch_standing_order_form</re:action>
+    <re:target>WebServer</re:target>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#Establish_standing_order'/>
+    <re:modified>Fri Jul 18 11:41:09 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#Customer-fill_in-standing_order_form'>
+    <re:author>Mark</re:author>
+    <re:actor>Customer</re:actor>
+    <re:action>fill_in</re:action>
+    <re:target>standing_order_form</re:target>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#Establish_standing_order'/>
+    <re:modified>Fri Jul 18 11:42:34 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#Customer-Insert_ATM_card-ATM'>
+    <re:author>Mark Strembeck</re:author>
+    <re:actor>Customer</re:actor>
+    <re:action>Insert_ATM_card</re:action>
+    <re:target>ATM</re:target>
+    <re:trace tracetype='origin-of' targettype='Permission' target='#Insert_ATM_card_ATM'/>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#withdraw_money_from_atm_complete'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#Customer-Take_banknotes-ATM'>
+    <re:author>Mark</re:author>
+    <re:actor>Customer</re:actor>
+    <re:action>Take_banknotes</re:action>
+    <re:target>ATM</re:target>
+    <re:trace tracetype='origin-of' targettype='Permission' target='#Take_banknotes_ATM'/>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#withdraw_money_from_atm_complete'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#Customer-Take_card-ATM'>
+    <re:author>Mark</re:author>
+    <re:actor>Customer</re:actor>
+    <re:action>Take_card</re:action>
+    <re:target>ATM</re:target>
+    <re:trace tracetype='origin-of' targettype='Permission' target='#Take_card_ATM'/>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#withdraw_money_from_atm_complete'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#WebServer-check-standing_order_form'>
+    <re:author>Mark</re:author>
+    <re:actor>WebServer</re:actor>
+    <re:action>check</re:action>
+    <re:target>standing_order_form</re:target>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#Establish_standing_order'/>
+    <re:modified>Fri Jul 18 11:43:22 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#WebServer-dispatch_standing_order_form-Customer'>
+    <re:author>Mark</re:author>
+    <re:actor>WebServer</re:actor>
+    <re:action>dispatch_standing_order_form</re:action>
+    <re:target>Customer</re:target>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#Establish_standing_order'/>
+    <re:modified>Fri Jul 18 11:41:54 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#WebServer-establish_standing_order-Account_Mgmt_Backend'>
+    <re:author>Mark</re:author>
+    <re:actor>WebServer</re:actor>
+    <re:action>establish_standing_order</re:action>
+    <re:target>Account_Mgmt_Backend</re:target>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#Establish_standing_order'/>
+    <re:modified>Fri Jul 18 11:44:18 CEST 2003</re:modified>
+  </STEP>
+
+  <STEP rdf:ID='#WebServer-issue_standing_order_established_message-Customer'>
+    <re:author>Mark</re:author>
+    <re:actor>WebServer</re:actor>
+    <re:action>issue_standing_order_established_message</re:action>
+    <re:target>Customer</re:target>
+    <re:trace tracetype='part-of' targettype='Scenario' target='#Establish_standing_order'/>
+    <re:modified>Fri Jul 18 11:45:12 CEST 2003</re:modified>
+  </STEP>
+
+  <TASK rdf:ID='#Account_Management'>
+    <re:author>Mark</re:author>
+    <re:scenario rdf:resource='#Deposit_money'/>
+    <re:scenario rdf:resource='#Establish_standing_order'/>
+    <re:scenario rdf:resource='#Delete_standing_order'/>
+    <re:scenario rdf:resource='#withdraw_money_from_atm_complete'/>
+    <re:trace tracetype='contains' targettype='Scenario' target='#Delete_standing_order'/>
+    <re:trace tracetype='contains' targettype='Scenario' target='#Deposit_money'/>
+    <re:trace tracetype='contains' targettype='Scenario' target='#Establish_standing_order'/>
+    <re:trace tracetype='contains' targettype='Scenario' target='#withdraw_money_from_atm_complete'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </TASK>
+
+  <TASK rdf:ID='#Custody_Account_Management'>
+    <re:author>Mark</re:author>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </TASK>
+
+  <TASK rdf:ID='#Inventory_Control'>
+    <re:author>Mark</re:author>
+    <re:trace tracetype='part-of' targettype='WorkProfile' target='#Purchasing_Agent'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </TASK>
+
+  <TASK rdf:ID='#Order_Management'>
+    <re:author>Mark</re:author>
+    <re:scenario rdf:resource='#withdraw_money_from_atm_complete'/>
+    <re:trace tracetype='contains' targettype='Scenario' target='#withdraw_money_from_atm_complete'/>
+    <re:trace tracetype='part-of' targettype='WorkProfile' target='#Purchasing_Agent'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </TASK>
+
+  <WORKPROFILE rdf:ID='#Investment_Consultant'>
+    <re:author>Mark</re:author>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </WORKPROFILE>
+
+  <WORKPROFILE rdf:ID='#Purchasing_Agent'>
+    <re:author>Mark</re:author>
+    <re:task rdf:resource='#Order_Management'/>
+    <re:task rdf:resource='#Inventory_Control'/>
+    <re:trace tracetype='contains' targettype='Task' target='#Inventory_Control'/>
+    <re:trace tracetype='contains' targettype='Task' target='#Order_Management'/>
+    <re:modified>Wed Jul 16 13:41:33 CEST 2003</re:modified>
+  </WORKPROFILE>
+
+</rdf:RDF>

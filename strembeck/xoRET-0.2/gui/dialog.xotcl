@@ -1,0 +1,145 @@
+# (c) Mark Strembeck
+
+package provide xoRET::GUI::Dialog 0.2
+
+Class xoRET_GUI::Dialog
+
+xoRET_GUI::Dialog instproc init args {
+  my instvar parent
+  set parent [focus]
+  next
+}
+
+Class xoRET_GUI::Dialog::ConfirmDialog -superclass  xoRET_GUI::Dialog
+
+xoRET_GUI::Dialog::ConfirmDialog instproc init args {
+  next
+  my instvar parent
+  set message [lindex $args 0]
+  set command [lindex $args 1]
+  if {[winfo exists $parent.confdlg]} {
+    destroy $parent.confdlg
+  }
+  set dlg [Dialog $parent.confdlg -parent $parent \
+	       -cancel 1 \
+	       -anchor c \
+	       -side bottom \
+	       -image [Bitmap::get question] \
+	       -separator 1 \
+	       -place center \
+	       -title "Confirm Action"]
+  $dlg add -name "yes" -text "Yes" -command "$dlg enddialog 1"
+  $dlg add -name "no" -text "no" -command "$dlg enddialog 0"
+  set f [$dlg getframe]
+  set msg [message $f.msg -justify center -anchor c -width 300 -text "$message"]
+  pack $msg -fill both -expand yes -padx 2 -pady 10
+  set confirmed [$dlg draw]
+  if {$confirmed} { eval $command } 
+  destroy $dlg
+}
+
+Class xoRET_GUI::Dialog::MsgDialog -superclass  xoRET_GUI::Dialog
+
+xoRET_GUI::Dialog::MsgDialog instproc init args {
+  next
+  my instvar parent
+  set message [lindex $args 0]
+  set icon [lindex $args 1]
+  set buttons [lindex $args 2]
+  if {$parent != "."} {
+    if {[winfo exists $parent.msgdlg]} {destroy $parent.msgdlg}
+      set dlg [MessageDlg $parent.msgdlg -parent $parent \
+		   -message "$message" \
+		   -icon    "$icon" \
+		   -type    user \
+		   -aspect  800 \
+	       -buttons "$buttons"]
+      update idletasks
+  } else {
+    if {[winfo exists .msdlg]} {destroy .msgdlg}
+    set dlg [MessageDlg .msgdlg -parent $parent \
+ 		 -message "$message" \
+ 		 -icon    "$icon" \
+ 		 -type    user \
+ 		 -aspect  800 \
+ 		 -buttons "$buttons"]
+    update idletasks
+  }
+}
+
+Class xoRET_GUI::Dialog::DestroyDialog -superclass  xoRET_GUI::Dialog
+
+xoRET_GUI::Dialog::DestroyDialog instproc init args {
+  next
+  my instvar parent
+  set rm [lindex $args 0]; set obj [lindex $args 1]
+  set treeobj [lindex $args 2]; set node [lindex $args 3]
+  if {[winfo exists $parent.dstrdlg]} {
+    destroy $parent.dstrdlg
+  }
+  set dlg [Dialog $parent.dstrdlg -parent $parent \
+	       -cancel 1 \
+	       -anchor c \
+	       -side bottom \
+	       -image [Bitmap::get question] \
+	       -separator 1 \
+	       -place right \
+	       -title "Delete $obj"]
+  set type [$obj info class]
+  switch $type {
+    "::Condition" {
+      $dlg add -name "del" -text "Delete <<[$obj name]>>" \
+	  -command "$rm deleteCondition [$obj name]; $dlg enddialog 1"
+    }
+    "::ContextConstraint" {
+      $dlg add -name "del" -text "Delete <<[$obj name]>>" \
+	  -command "$rm deleteContextConstraint [$obj name]; $dlg enddialog 1"
+    }
+    "::Permission" {
+      $dlg add -name "del" -text "Delete <<[$obj name]>>" \
+	  -command "$rm deletePermission [$obj name]; $dlg enddialog 1"
+    }
+    "::Role" {
+      $dlg add -name "del" -text "Delete <<[$obj name]>>" \
+	  -command "$rm deleteRole [$obj name]; $dlg enddialog 1"
+    }
+    "::Objective" {
+      $dlg add -name "del" -text "Delete <<[$obj name]>>" \
+	  -command "$rm deleteObjective [$obj name]; $dlg enddialog 1"
+    }
+    "::Obstacle" {
+      $dlg add -name "del" -text "Delete <<[$obj name]>>" \
+	  -command "$rm deleteObstacle [$obj name]; $dlg enddialog 1"
+    }
+    "::Scenario" {
+      $dlg add -name "del" -text "Delete <<[$obj name]>>" \
+	  -command "$rm deleteScenario [$obj name]; $dlg enddialog 1"
+    }
+    "::Step" {
+      $dlg add -name "del" -text "Delete <<[$obj name]>>" \
+	  -command "$rm deleteStep [$obj name]; $dlg enddialog 1"
+    }
+    "::Task" {
+      $dlg add -name "del" -text "Delete <<[$obj name]>>" \
+	  -command "$rm deleteTask [$obj name]; $dlg enddialog 1"
+    }
+    "::WorkProfile" {
+      $dlg add -name "del" -text "Delete <<[$obj name]>>" \
+	  -command "$rm deleteWorkProfile [$obj name]; $dlg enddialog 1"
+    }
+  }
+  $dlg add -name cancel -command "$dlg enddialog 0"
+  set f [$dlg getframe]
+  set msg [message $f.msg -justify center \
+	       -anchor c -width 300\
+	       -text "Do you really want to Delete the [$obj info class] object $obj"]
+  pack $msg -fill both -expand yes -padx 2 -pady 10
+  set delete_called [$dlg draw]
+  if {$delete_called} {
+    if {![my isobject $obj]} {
+      $treeobj redrawTree
+      update idletasks
+    }
+  }
+  destroy $dlg
+}

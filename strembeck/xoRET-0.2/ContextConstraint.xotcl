@@ -1,0 +1,132 @@
+package provide xoRET::ContextConstraint 0.1.2
+
+Class ContextConstraint -superclass {xoRETObject Class}
+
+@ Class ContextConstraint {
+  Author "Mark Strembeck"
+  Version "0.1.2"
+}
+
+ContextConstraint instproc init args {
+  next
+}
+
+# condition is a fully-qualified name/id of a runtime condition object
+ContextConstraint instproc linkCondition {condition} {
+  my instvar conditions
+  if {![my hasCondition $condition]} {
+    lappend conditions $condition
+    my log NORMAL "[self] [self proc], condition <<$condition>> linked to <<[self]>>."
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, condition <<$condition>> is already linked\
+                       to [self class] <<[self]>>"
+    return 0
+  }
+}
+
+# condition is a fully-qualified name/id of a runtime condition object
+ContextConstraint instproc unlinkCondition {condition} {
+  my instvar conditions
+  if {[my hasCondition $condition]} {
+    set index [lsearch -exact $conditions $condition]
+    set conditions [lreplace $conditions $index $index]
+    my log NORMAL "[self] [self proc], condition <<$condition>> unlinked from <<[self]>>."
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, condition <<$condition>> is not\
+                       linked to [self class] <<[self]>>"
+    return 0
+  }
+}
+
+# condition is a fully-qualified name of a runtime condition object
+ContextConstraint instproc hasCondition {condition} {
+  my instvar conditions 
+  if {[info exists conditions]} {
+    if {[lsearch -exact $conditions $condition] != -1} {
+      return 1
+    }
+  }
+  return 0
+}
+
+ContextConstraint instproc getAllConditions {} {
+  my instvar conditions
+  if {[info exists conditions]} {
+    return $conditions
+  }
+  return ""
+}
+
+ContextConstraint instproc appendToTailoredTraceDotFile {filename {totypes "all"} {tracetypes "all"}} {
+  next $filename $totypes $tracetypes trapezium
+}
+
+ContextConstraint instproc exportRDF {fileName} {
+  my instvar conditions
+  set file [open $fileName a+]
+  puts $file "  <CONTEXTCONSTRAINT rdf:ID='\#[my name]'>"
+  if {[info exists conditions]} {
+    foreach condition $conditions {
+      puts $file "    <re:condition rdf:resource='\#[$condition name]'/>"
+    }
+  }
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  puts $file "    <re:trace tracetype='$tracetype' targettype='$targettype'\
+                                    target='\#[$target name]'/>"
+	}
+      }
+    }
+  }
+  puts $file "    <re:modified>[my last_modified]</re:modified>"
+  puts $file "  </CONTEXTCONSTRAINT>\n"
+  close $file
+}
+
+ContextConstraint instproc export_xoRBAC_RDF {fileName} {
+  my instvar conditions
+  set file [open $fileName a+]
+  puts $file "  <CONTEXTCONSTRAINT rdf:ID='\#[my name]'>"
+  if {[info exists conditions]} {
+    foreach condition $conditions {
+      puts $file "    <rm:condition rdf:resource='\#[$condition name]'/>"
+    }
+  }
+  puts $file "  </CONTEXTCONSTRAINT>\n"
+  close $file
+}
+
+
+ContextConstraint instproc getAttributes {} {
+  my instvar traces
+  lappend all "[list Name: [my name]]"
+  if {[my getAllConditions] != ""} {
+    foreach c [my getAllConditions] {
+      lappend all "[list Condition: [$c name]]"
+    }
+  } else {
+    lappend all "[list {NO CONDITIONS} {CONTEXT CONSTRAINT INCOMPLETE}]"
+  } 
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  lappend all "[list Trace: [list [string trimleft [[self] info class] :] \
+                                    <<[my name]>> $tracetype $targettype <<[$target name]>>]]"
+	}
+      }
+    }
+  }
+  return $all
+}
+
+ContextConstraint instproc destroy args {
+  next 
+}
+

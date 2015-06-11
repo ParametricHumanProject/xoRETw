@@ -1,0 +1,137 @@
+package provide xoRET::Task 0.1.1
+
+Class Task -superclass xoRETObject 
+
+@ Class Task {
+  Author "Mark Strembeck"
+  Version "0.1.1"
+}
+
+Task instproc init args {
+  next
+}
+
+# scenario is a fully-qualified runtime id/name of a scenario object
+Task instproc addScenario {scenario} {
+  my instvar scenarios
+  if {[info exists scenarios]} {
+    if {[lsearch -exact $scenarios $scenario] == -1} {
+      lappend scenarios $scenario
+      my log NORMAL "[self] [self proc], scenario <<$scenario>> added."
+      return 1
+    } else {
+      my log FAILED "[self] [self proc] FAILED, scenario <<$scenario>> is already\
+                         registered for Task <<[self]>>."
+      return 0
+    }
+  }
+  lappend scenarios $scenario
+  my log NORMAL "[self] [self proc], scenario <<$scenario>> added."
+  return 1
+}
+
+Task instproc hasScenario {scenario} {
+  my instvar scenarios
+  if {[info exists scenarios]} {
+    # return index value if $scenario is in $scenarios, -1 otherwise
+    return [lsearch -exact $scenarios $scenario]
+  }
+  return -1
+}
+
+# scenario is a fully-qualified runtime id/name of a scenario object
+Task instproc removeScenario {scenario} {
+  my instvar scenarios
+  if {[info exists scenarios]} {
+    set index [lsearch -exact $scenarios $scenario]
+    if {$index != -1} {
+      set scenarios [lreplace $scenarios $index $index]
+      my log NORMAL "[self] [self proc], scenario <<$scenario>> removed."
+      return 1
+    } else {
+      my log FAILED "[self] [self proc] FAILED, scenario <<$scenario>> is not\
+                         registered for Task <<[self]>>."
+      return 0
+    }
+  }
+  my log FAILED "[self] [self proc] FAILED, currently no scenarios are registered\
+                     for <<[self]>>."
+  return 0
+}
+
+Task instproc clearScenarioList {} {
+  my instvar scenarios
+  if {[info exists scenarios]} {
+    unset scenarios
+  }
+  return 1
+}
+
+Task instproc getScenarios {} {
+  my instvar scenarios
+  if {[info exists scenarios]} {
+    return [lsort -dictionary $scenarios]
+  } 
+  return ""
+}
+
+
+Task instproc exportRDF {fileName} {
+  my instvar scenarios traces
+  set file [open $fileName a+]
+  puts $file "  <TASK rdf:ID='\#[my name]'>"
+  if {[my author] != ""} {
+    puts $file "    <re:author>[my author]</re:author>"
+  }
+  if {[info exists scenarios]} {
+    foreach scenario $scenarios {
+      puts $file "    <re:scenario rdf:resource='\#[$scenario name]'/>"
+    }
+  }
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  puts $file "    <re:trace tracetype='$tracetype' targettype='$targettype'\
+                                    target='\#[$target name]'/>"
+	}
+      }
+    }
+  }
+  puts $file "    <re:modified>[my last_modified]</re:modified>"
+  puts $file "  </TASK>\n"
+  close $file
+}
+
+Task instproc getAttributes {} {
+  my instvar traces
+  lappend all "[list Name: [my name]]"
+  lappend all "[list Author: [my author]]"
+  if {[my getScenarios] != ""} {
+    foreach scen [my getScenarios] {
+      lappend all "[list [list Attached Scenario:] [$scen name]]"
+    }
+  }
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  lappend all "[list Trace: [list [string trimleft [[self] info class] :] \
+                                    <<[my name]>> $tracetype $targettype <<[$target name]>>]]"
+	}
+      }
+    }
+  }
+  lappend all "[list [list Last Modified:] [my last_modified]]"
+  return $all
+}
+
+Task instproc appendToTailoredTraceDotFile {filename {totypes "all"} {tracetypes "all"}} {
+  next $filename $totypes $tracetypes hexagon
+}
+
+Task instproc destroy args {
+  next
+}

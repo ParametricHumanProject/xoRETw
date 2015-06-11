@@ -1,0 +1,6 @@
+lappend auto_path .. ../lib/
+package require -exact xoRET 0.2
+
+Manager m
+m importRDF [file join [file dirname [info script]] "some-example-objects.rdf"]
+m startGUI

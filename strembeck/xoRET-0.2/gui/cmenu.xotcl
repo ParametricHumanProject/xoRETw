@@ -1,0 +1,202 @@
+# (c) Mark Strembeck
+
+package provide xoRET::GUI::CMenu 0.1
+
+Class xoRET_GUI::CMenu 
+
+xoRET_GUI::CMenu  instproc init args {
+  my instvar m pm obj x y treeobj node
+  set m [lindex $args 0]; set pm [lindex $args 1]
+  set obj [lindex $args 2]; set x [lindex $args 3]
+  set y [lindex $args 4];  set treeobj [lindex $args 5]
+  set node [lindex $args 6]
+  if {[winfo exists $m]} {
+     destroy $m
+   }
+  menu $m -tearoff 0
+  next 
+  tk_popup $m $x $y
+}
+
+xoRET_GUI::CMenu instproc destroy args {
+  my instvar m
+  destroy $m
+  next
+}
+
+Class xoRET_GUI::CMenu::ConditionMenu -superclass xoRET_GUI::CMenu
+
+xoRET_GUI::CMenu::ConditionMenu instproc init args {
+  my instvar m pm obj x y treeobj node
+  next 
+  $m add command -label "Create Condition" \
+      -command "::xoRET_GUI::Create::Condition [Object autoname crco%05d] $pm $obj $treeobj"
+  $m add separator
+  $m add command -label "Manage Traces" \
+      -command "::xoRET_GUI::Traces::Create [Object autoname traces%05d] $pm $treeobj $obj" 
+  $m add separator
+  $m add command -label "Delete Condition" \
+      -command "::xoRET_GUI::Dialog::DestroyDialog dd $pm $obj $treeobj $node" 
+}
+
+Class xoRET_GUI::CMenu::CCMenu -superclass xoRET_GUI::CMenu
+
+xoRET_GUI::CMenu::CCMenu instproc init args {
+  my instvar m pm obj x y treeobj node
+  next 
+  $m add command -label "Create Context Constraint" \
+      -command "::xoRET_GUI::Create::CC [Object autoname crcc%05d] $pm $obj $treeobj"
+  $m add command -label "Manage Conditions" \
+      -command "::xoRET_GUI::Edit::CCCondMgmt [Object autoname cccm%05d] $pm $obj $treeobj"
+  $m add separator
+  $m add command -label "Manage Traces" \
+      -command "::xoRET_GUI::Traces::Create [Object autoname traces%05d] $pm $treeobj $obj" 
+  $m add separator
+  $m add command -label "Delete Context Constraint" \
+      -command "::xoRET_GUI::Dialog::DestroyDialog dd $pm $obj $treeobj $node" 
+}
+
+
+Class xoRET_GUI::CMenu::ObjectiveMenu -superclass xoRET_GUI::CMenu
+
+xoRET_GUI::CMenu::ObjectiveMenu instproc init args {
+  my instvar m pm obj x y treeobj node
+  next 
+  $m add command -label "Create Objective" \
+      -command "::xoRET_GUI::Create::Objective [Object autoname createobj%05d] $pm $treeobj"
+  $m add command -label "Edit Objective" \
+      -command "::xoRET_GUI::Edit::Objective [Object autoname editobj%05d] $pm $obj $treeobj"
+  $m add separator
+  $m add command -label "Manage Traces" \
+      -command "::xoRET_GUI::Traces::Create [Object autoname traces%05d] $pm $treeobj $obj" 
+  $m add separator
+  $m add command -label "Delete Objective" \
+      -command "::xoRET_GUI::Dialog::DestroyDialog dd $pm $obj $treeobj $node" 
+}
+
+Class xoRET_GUI::CMenu::ObstMenu -superclass xoRET_GUI::CMenu
+
+xoRET_GUI::CMenu::ObstMenu instproc init args {
+  my instvar m pm obj x y treeobj node
+  next 
+  $m add command -label "Create Obstacle" \
+      -command "::xoRET_GUI::Create::Obstacle [Object autoname createobs%05d] $pm $treeobj"
+  $m add command -label "Edit Obstacle" \
+      -command "::xoRET_GUI::Edit::Obstacle [Object autoname editobs%05d] $pm $obj $treeobj"
+  $m add separator
+  $m add command -label "Manage Traces" \
+      -command "::xoRET_GUI::Traces::Create [Object autoname traces%05d] $pm $treeobj $obj" 
+  $m add separator
+  $m add command -label "Delete Obstacle" \
+      -command "::xoRET_GUI::Dialog::DestroyDialog dd $pm $obj $treeobj $node" 
+}
+
+Class xoRET_GUI::CMenu::PermMenu -superclass xoRET_GUI::CMenu
+
+xoRET_GUI::CMenu::PermMenu instproc init args {
+  my instvar m pm obj x y treeobj node
+  next
+  $m add command -label "Create Permission" \
+      -command "::xoRET_GUI::Create::Perm [Object autoname createp%05d] $pm $obj $treeobj"
+  $m add command -label "Cardinality Constraints" \
+      -command "::xoRET_GUI::Edit::PermCard [Object autoname pcard%05d] $pm $obj $treeobj"
+  $m add command -label "SSD Constraints" \
+      -command "::xoRET_GUI::Edit::SSDPerm [Object autoname ssd%05d] $pm $obj $treeobj" 
+  $m add command -label "Context Constraints" \
+      -command "::xoRET_GUI::Edit::PermCCMgmt [Object autoname pccm%05d] $pm $obj $treeobj" 
+  $m add separator
+  $m add command -label "Manage Traces" \
+      -command "::xoRET_GUI::Traces::Create [Object autoname traces%05d] $pm $treeobj $obj" 
+  $m add separator
+  $m add command -label "Delete Permission" \
+      -command "::xoRET_GUI::Dialog::DestroyDialog dd $pm $obj $treeobj $node" 
+}
+
+Class xoRET_GUI::CMenu::RoleMenu -superclass xoRET_GUI::CMenu
+
+xoRET_GUI::CMenu::RoleMenu instproc init args {
+  my instvar m pm obj x y treeobj node
+  next 
+  $m add command -label "Create Role" \
+      -command "::xoRET_GUI::Create::Role [Object autoname create%05d] $pm $obj $treeobj"
+  $m add command -label "Permission/Role Assignment" \
+      -command "::xoRET_GUI::Edit::PRA [Object autoname pra%05d] $pm $obj $treeobj"
+  $m add command -label "Role/Role Assignment" \
+      -command "::xoRET_GUI::Edit::RRA [Object autoname rra%05d] $pm $obj $treeobj"
+  $m add command -label "SSD Role Constraints" \
+      -command "::xoRET_GUI::Edit::SSDRole [Object autoname ssdr%05d] $pm $obj $treeobj"
+  $m add command -label "Role Cardinalities" \
+      -command "::xoRET_GUI::Edit::RoleCard [Object autoname rcard%05d] $pm $obj $treeobj"
+  $m add separator
+  $m add command -label "Manage Traces" \
+      -command "::xoRET_GUI::Traces::Create [Object autoname traces%05d] $pm $treeobj $obj" 
+  $m add separator
+  $m add command -label "Delete Role" \
+      -command "::xoRET_GUI::Dialog::DestroyDialog dd $pm $obj $treeobj $node" 
+}
+
+Class xoRET_GUI::CMenu::ScenMenu -superclass xoRET_GUI::CMenu
+
+xoRET_GUI::CMenu::ScenMenu instproc init args  {
+  my instvar m pm obj x y treeobj node
+  next 
+  $m add command -label "Create Scenario" \
+      -command "::xoRET_GUI::Create::Scenario [Object autoname create%05d] $pm $obj $treeobj"
+  $m add command -label "Edit Scenario" \
+      -command "::xoRET_GUI::Create::Scenario [Object autoname edit%05d] $pm $obj $treeobj edit"
+  $m add separator
+  $m add command -label "Manage Traces" \
+      -command "::xoRET_GUI::Traces::Create [Object autoname traces%05d] $pm $treeobj $obj" 
+  $m add separator
+  $m add command -label "Delete Scenario" \
+      -command "::xoRET_GUI::Dialog::DestroyDialog dd $pm $obj $treeobj $node" 
+}
+
+Class xoRET_GUI::CMenu::StepMenu -superclass xoRET_GUI::CMenu
+
+xoRET_GUI::CMenu::StepMenu instproc init args {
+  my instvar m pm obj x y treeobj node
+  next
+  $m add command -label "Edit Step" \
+      -command "::xoRET_GUI::Edit::Step [Object autoname editst%05d] $pm $obj $treeobj"
+  $m add separator
+  $m add command -label "Manage Traces" \
+      -command "::xoRET_GUI::Traces::Create [Object autoname traces%05d] $pm $treeobj $obj" 
+  $m add separator
+  $m add command -label "Delete Step" \
+      -command "::xoRET_GUI::Dialog::DestroyDialog dd $pm $obj $treeobj $node" 
+}
+
+Class xoRET_GUI::CMenu::TaskMenu -superclass xoRET_GUI::CMenu
+
+xoRET_GUI::CMenu::TaskMenu instproc init args {
+  my instvar m pm obj x y treeobj node
+  next
+  $m add command -label "Create Task" \
+      -command "::xoRET_GUI::Create::Task [Object autoname createt%05d] $pm $treeobj"
+  $m add command -label "Edit Task" \
+      -command "::xoRET_GUI::Edit::Task [Object autoname editt%05d] $pm $obj $treeobj"
+  $m add separator
+  $m add command -label "Manage Traces" \
+      -command "::xoRET_GUI::Traces::Create [Object autoname traces%05d] $pm $treeobj $obj" 
+  $m add separator
+  $m add command -label "Delete Task" \
+      -command "::xoRET_GUI::Dialog::DestroyDialog dd $pm $obj $treeobj $node" 
+}
+
+Class xoRET_GUI::CMenu::WPMenu -superclass xoRET_GUI::CMenu
+
+xoRET_GUI::CMenu::WPMenu instproc init args {
+  my instvar m pm obj x y treeobj node
+  next
+  $m add command -label "Create Work Profile" \
+      -command "::xoRET_GUI::Create::Profile [Object autoname createwp%05d] $pm $treeobj"
+  $m add command -label "Edit Work Profile" \
+      -command "::xoRET_GUI::Edit::Profile [Object autoname editwp%05d] $pm $obj $treeobj"
+  $m add separator
+  $m add command -label "Manage Traces" \
+      -command "::xoRET_GUI::Traces::Create [Object autoname traces%05d] $pm $treeobj $obj" 
+  $m add separator
+  $m add command -label "Delete Work Profile" \
+      -command "::xoRET_GUI::Dialog::DestroyDialog dd $pm $obj $treeobj $node" 
+}

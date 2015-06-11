@@ -1,0 +1,67 @@
+package provide xoRET::Condition 0.1.2
+
+Class Condition -superclass xoRETObject -parameter {isenforceable}
+
+@ Class Condition {
+  Author "Mark Strembeck"
+  Version "0.1.2"
+}
+
+Condition instproc init args {
+  next
+}
+
+Condition instproc destroy args {
+  next
+}
+
+Condition instproc exportRDF {fileName} {
+  set file [open $fileName a+]
+  puts $file "  <CONDITION rdf:ID='\#[my name]'>"
+#   if {[info exists conditions]} {
+#     foreach condition $conditions {
+#       puts $file "    <re:condition rdf:resource='\#[$condition name]'/>"
+#     }
+#   }
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  puts $file "    <re:trace tracetype='$tracetype' targettype='$targettype'\
+                                    target='\#[$target name]'/>"
+	}
+      }
+    }
+  }
+  puts $file "    <re:modified>[my last_modified]</re:modified>"
+  puts $file "  </CONDITION>\n"
+  close $file
+}
+
+Condition instproc export_xoRBAC_RDF {fileName} {
+  set file [open $fileName a+]
+  puts $file "  <CONDITION rdf:ID='\#[my name]'></CONDITION>\n"
+  close $file
+}
+
+Condition instproc getAttributes {} {
+  my instvar traces
+  lappend all "[list Name: [my name]]"
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  lappend all "[list Trace: [list [string trimleft [[self] info class] :] \
+                                    <<[my name]>> $tracetype $targettype <<[$target name]>>]]"
+	}
+      }
+    }
+  }
+  return $all
+}
+
+Condition instproc appendToTailoredTraceDotFile {filename {totypes "all"} {tracetypes "all"}} {
+  next $filename $totypes $tracetypes parallelogram
+}

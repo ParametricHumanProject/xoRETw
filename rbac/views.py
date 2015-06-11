@@ -49,24 +49,20 @@ def dashboard(request):
         print 'object type is ', object_type
         
         if object_type == OBJECT_TYPE_OBJECTIVE:
-            print 'Z'
             objective_id = request.POST.get('id', None)
             objective_name = request.POST.get('name', None)
             objective_type = request.POST.get('type', None)
             condition_names = request.POST.getlist('conditions[]', None)
             mode = request.POST.get('mode', None)
             mode = int(mode)
-            print 'Z1'
             if objective_id != '':
                 objective_id = int(objective_id)
             
-            print 'Z2'            
             objective_created = False
             if mode == CREATE_NEW:
                 
                 # use objective name as an exact lookup
                 objective, objective_created = Objective.objects.get_or_create(name__exact=objective_name, user__exact=user, defaults={'name':objective_name,'type': objective_type, 'user':user})
-                print 'Z3'
                 if objective_created:
                     objective.save()
                                     
@@ -80,37 +76,28 @@ def dashboard(request):
                 
             # edit mode
             else:
-                print 'AAAA'
                 objective, objective_created = Objective.objects.get_or_create(id__exact=objective_id, user__exact=user, defaults={'name':objective_name,'type': objective_type, 'user':user})
-                print 'AAAA1'
                 if not objective_created:
-                    print 'AAAA2'
                     objective.name = objective_name
                     objective.type = objective_type
                     objective.save()
-                    print 'AAAA3'
                     # remove conditions then add
                     conditions = objective.conditions.all()
-                    print 'AAAA4'
                     for condition in conditions:
                         objective.conditions.remove(condition)
-                    print 'AAAA5'
+
                     for condition_name in condition_names:
                         condition, condition_created = Condition.objects.get_or_create(name=condition_name, user=user)
                         if condition_created:
                             condition.save()
                         objective.conditions.add(condition)
-                        
-            print 'C'
             data = {}
-            print 'objective_created ', objective_created
             data['created'] = str(objective_created).lower()
-            data['obstacle_name'] = objective_name
+            data['objective_name'] = objective_name
             json_data = json.dumps(data)
             return HttpResponse(json_data, content_type='application/json')
                                         
         elif object_type == OBJECT_TYPE_OBSTACLE:
-            print 'OBJECT_TYPE_OBSTACLE'
             
             obstacle_id = request.POST.get('id', None)
             obstacle_name = request.POST.get('name', None)
@@ -182,6 +169,48 @@ def dashboard(request):
             data['obstacle_name'] = obstacle_name
             json_data = json.dumps(data)
             return HttpResponse(json_data, content_type='application/json')
+            
+        elif object_type == OBJECT_TYPE_CONDITION:
+            
+            condition_id = request.POST.get('id', None)
+            condition_name = request.POST.get('name', None)
+            mode = request.POST.get('mode', None)
+            mode = int(mode)
+            
+            if condition_id != '':
+                condition_id = int(condition_id)
+                
+            condition_created = False
+            
+            print 'condition_id ', condition_id
+            print 'condition_name ', condition_name
+            print 'mode ', mode
+            
+            if mode == CREATE_NEW:
+                print 'creating new condition'
+                # use condition name as an exact lookup
+                condition, condition_created = Condition.objects.get_or_create(name__exact=condition_name, user__exact=user, defaults={'name':condition_name, 'user':user})
+
+                print 'A'
+                if condition_created:
+                    print 'A saving'
+                    condition.save()                                    
+            # edit mode
+            else:
+                print 'hello'
+                condition, condition_created = Condition.objects.get_or_create(id__exact=condition_id, user__exact=user, defaults={'name':condition_name, 'user':user})
+
+                if not condition_created:
+                    condition.name = condition_name
+                    condition.save()
+                    
+            print 'C'
+            data = {}
+            print 'condition_created ', condition_created
+            data['created'] = str(condition_created).lower()
+            data['condition_name'] = condition_name
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
         
     # if a GET (or any other method)
     else:    
@@ -189,10 +218,14 @@ def dashboard(request):
             objectives = Objective.objects.all().filter(user=user)
             return render_to_response('dashboard.html', {'object_type':object_type, 'objectives':objectives}, context_instance=RequestContext(request))
         elif object_type == OBJECT_TYPE_OBSTACLE:
-            print 'get obstacles'
             obstacles = Obstacle.objects.all().filter(user=user)
-            print 'zzz'
             return render_to_response('dashboard.html', {'object_type':object_type, 'obstacles':obstacles}, context_instance=RequestContext(request))
+        elif object_type == OBJECT_TYPE_CONDITION:
+            print 'get conditions'
+            conditions = Condition.objects.all().filter(user=user)
+            print 'conditions ', conditions
+            print 'type of ', type(object_type)
+            return render_to_response('dashboard.html', {'object_type':object_type, 'conditions':conditions}, context_instance=RequestContext(request))
             
     return render_to_response('dashboard.html', {'object_type':object_type}, context_instance=RequestContext(request))
 
@@ -296,6 +329,42 @@ def edit_obstacle(request):
         print '6'
         print ' condition ', condition
         data['conditions'].append(condition.name)
+    
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
+def delete_condition(request):
+    user = request.user
+
+    data = {}
+    if request.method == 'POST':      
+        condition_id = request.POST.get('condition_id', None)
+        if condition_id:
+            o = Condition.objects.get(id=condition_id, user=user)
+            o.delete()
+            data['deleted'] = 'true'
+            data['condition_id'] = condition_id
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
+
+def edit_condition(request):
+    user = request.user
+    print 'aaa'
+    # if this is a POST request we need to process the data
+    if request.method == 'GET':   
+        print 'aaa 0'     
+        condition_id = request.GET.get('condition_id', None)
+        print 'aaa1'
+        
+        if condition_id:
+            print 'aaa2'
+            condition = Condition.objects.get(id=condition_id, user=user)
+    print 'aaa3'
+    # get name, type and conditions
+    data = {}
+    
+    data['name'] = condition.name
     
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')

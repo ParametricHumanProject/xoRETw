@@ -1,0 +1,184 @@
+package provide xoRET::Scenario 0.2
+
+package require struct 1.3
+
+Class Scenario -superclass xoRETObject
+
+@ Class Scenario {
+  Author "Mark Strembeck"
+  Version "0.2"
+}
+
+@ Class Scenario Variables {
+  [self]::graph -> reference to a tcllib graph structure
+}
+
+Scenario instproc init args {
+  next 
+  ::struct::graph [self]::graph
+}
+
+Scenario instproc addStep {step} {
+  if {$step != ""} {
+    if {![[self]::graph node exists [$step name]]} {
+      [self]::graph node insert [$step name]
+      [self]::graph node set [$step name] -key fqoi "$step"
+      return 1
+    } else {
+      my log FAILED "[self] [self proc] FAILED, step <<[$step name]>> already exists\
+                         in scenario <<[my name]>>."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, you must specify the step that should be added."
+    return 0
+  }
+}
+
+Scenario instproc addEdge {source target {edgelabel ""}} {
+  if {($source != "") && ($target != "")} {
+    if {[[self]::graph node exists [$source name]]} {
+      if {[[self]::graph node exists [$target name]]} {
+	set id [[self]::graph arc insert [$source name] [$target name]]
+	[self]::graph arc set $id -key label "$edgelabel" 
+	return 1
+      } else {
+	my log FAILED "[self] [self proc] FAILED, step <<[$target name]>> does not exist in\
+                           scenario <<[my name]>>."
+	return 0
+      }
+      } else {
+	my log FAILED "[self] [self proc] FAILED, step <<[$source name]>> does not exist in\
+                           scenario <<[my name]>>."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, you must provide a source and\
+                       a target step in order to define a new edge."
+    return 0
+  }
+}
+
+Scenario instproc removeStep {step} {
+  if {[[self]::graph node exists [$step name]]} {
+    [self]::graph node delete [$step name]
+    return 1
+  } else {
+    [self] log FAILED "[self] [self proc] FAILED, step <<$step>> not in scenario."
+    return 0
+  }
+}
+
+Scenario instproc getSteps {} {
+  set steps ""
+  foreach node [[self]::graph nodes] {
+    lappend steps [[self]::graph node get $node -key fqoi]
+  }
+  return [lsort -dictionary $steps]
+}
+
+Scenario instproc hasStep {step} {
+  set steps [my getSteps]
+  if {[lsearch -exact $steps $step] != -1} {
+    return 1
+  }
+  return 0
+}
+
+Scenario instproc clear {} {
+  [self]::graph destroy
+  ::struct::graph [self]::graph
+}
+
+Scenario instproc exportScenarioDotFile {filename} {
+  set file [open $filename w]
+  puts $file "digraph [my name] \{"
+  puts $file "\t node \[height=\"0.3\", width=1\];"
+  puts $file "\t edge \[minlen=1\];"
+  foreach node [[self]::graph nodes] {
+    puts $file "\t\"$node\" \[shape=box fontname=helvetica fontsize=11\];"
+    foreach arc [[self]::graph arcs -out $node] {
+      set label [[self]::graph arc get $arc -key label]
+      set target [[self]::graph arc target $arc]
+      if {$label != ""} {
+	puts $file "\t\"$node\" -> \"$target\" \[label=\"$label\"\];"
+      } else {
+	puts $file "\t\"$node\" -> \"$target\";"
+      }
+    }
+  }
+  puts $file "\}"
+  close $file
+}
+
+Scenario instproc appendToTailoredTraceDotFile {filename {totypes "all"} {tracetypes "all"}} {
+  next $filename $totypes $tracetypes ellipse
+}
+
+Scenario instproc exportRDF {fileName} {
+  my instvar sequence traces
+  set file [open $fileName a+]
+  puts $file "  <SCENARIO rdf:ID='\#[my name]'>"
+  if {[my author] != ""} {
+    puts $file "    <re:author>[my author]</re:author>"
+  }
+  foreach node [[self]::graph nodes] {
+    puts $file "   <re:node rdf:resource='\#$node'/>"
+  }
+  foreach arc [[self]::graph arcs] {
+    puts $file "   <re:edge>[[self]::graph arc source $arc]\
+                            [[self]::graph arc target $arc]\
+                            [list [[self]::graph arc set $arc -key label]]</re:edge>"
+  }
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      [self] instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  puts $file "    <re:trace tracetype='$tracetype' targettype='$targettype'\
+                                    target='\#[$target name]'/>"
+	}
+      }
+    }
+  }
+  puts $file "    <re:modified>[[self] last_modified]</re:modified>"
+  puts $file "  </SCENARIO>\n"
+  close $file
+}
+
+Scenario instproc getAttributes {} {
+  my instvar traces
+  lappend all "[list Name: [my name]]"
+  lappend all "[list Author: [my author]]"
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  lappend all "[list Trace: [list [string trimleft [[self] info class] :] \
+                                    <<[my name]>> $tracetype $targettype <<[$target name]>>]]"
+	}
+      }
+    }
+  }
+  lappend all "[list [list Last Modified:] [my last_modified]]"
+  return $all
+}
+
+Scenario instproc destroy args {
+  [self]::graph destroy
+  next
+}
+
+# Scenario instproc printGraph {} {
+#   foreach node [[self]::graph nodes] {
+#     puts "Node: $node"
+#     foreach edge [[self]::graph nodes -key name $node -out] {
+#     puts "\t Out-edge to: $edge "
+#     }
+#   }
+#   foreach arc [[self]::graph arcs] {
+#     puts "\tEdge: $arc [[self]::graph arc source $arc] [[self]::graph arc target $arc] [[self]::graph arc set $arc -key label]"
+#   }
+#   puts "++++++++"
+# }

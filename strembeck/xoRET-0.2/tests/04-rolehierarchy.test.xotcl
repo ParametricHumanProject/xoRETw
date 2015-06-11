@@ -1,0 +1,169 @@
+#### Role-Hierarchy
+
+TestCase RoleHierarchy \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createRole roleA 
+      m createRole roleB
+      m createRole roleC
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {RoleHierarchy::CreateSuccess RoleHierarchy::CreateSuccess2 \
+		RoleHierarchy::CreateFail RoleHierarchy::CreateFail2 \
+		RoleHierarchy::CreateFail3 RoleHierarchy::AddJuniorSuccess\
+		RoleHierarchy::AddJuniorFail RoleHierarchy::AddJuniorSuccess2\
+		RoleHierarchy::AddJuniorFail2 RoleHierarchy::AddJuniorFail3\
+		RoleHierarchy::AddJuniorFail4 RoleHierarchy::AddJuniorFail5\
+		RoleHierarchy::RemoveJuniorSuccess RoleHierarchy::RemoveJuniorFail\
+		RoleHierarchy::RemoveJuniorFail2 RoleHierarchy::RemoveJuniorFail3\
+		RoleHierarchy::RemoveJuniorFail4 RoleHierarchy::AddSeniorSuccess\
+		RoleHierarchy::AddSeniorFail RoleHierarchy::RemoveSeniorSuccess\
+		RoleHierarchy::RemoveSeniorFail
+    }
+
+TestScenario RoleHierarchy::CreateSuccess \
+    -testScript {
+      m createRole roleX roleA {roleB roleC}      
+    } \
+    -testResult {1} \
+    -cleanupScript {m deleteRole roleX; ::m::roles::roleB superclass Object
+      ::m::roles::roleC superclass Object}
+
+
+TestScenario RoleHierarchy::CreateSuccess2 \
+    -testScript {
+      m createRole roleX {roleA roleB} roleC
+    } \
+    -testResult {1} \
+    -cleanupScript {m deleteRole roleX; ::m::roles::roleC superclass Object}
+
+TestScenario RoleHierarchy::CreateFail \
+    -testScript {
+      m createRole roleX roleZ roleA
+    } \
+    -testResult {0}
+
+TestScenario RoleHierarchy::CreateFail2 \
+    -testScript {
+      m createRole roleX roleA roleZ
+    } \
+    -testResult {0}
+
+TestScenario RoleHierarchy::CreateFail3 \
+    -testScript {
+      m createRole roleX roleA {roleB roleC}
+      m createRole roleZ {roleB roleC} roleA
+    } \
+    -testResult {0} \
+    -cleanupScript {::m::roles::roleB superclass Object
+      ::m::roles::roleC superclass Object}
+
+TestScenario RoleHierarchy::AddJuniorSuccess \
+    -testScript {
+      m addJuniorRoleRelation roleA roleB
+    } \
+    -testResult {1}
+
+TestScenario RoleHierarchy::AddJuniorFail \
+    -testScript {
+      m addJuniorRoleRelation roleA roleB
+    } \
+    -testResult {0}
+
+TestScenario RoleHierarchy::AddJuniorSuccess2 \
+    -testScript {
+      m addJuniorRoleRelation roleC roleA
+    } \
+    -testResult {1}
+    
+
+TestScenario RoleHierarchy::AddJuniorFail2 \
+    -testScript {
+      m createRole roleX
+      m addJuniorRoleRelation roleX roleA
+      m addJuniorRoleRelation roleX roleB
+    } \
+    -testResult {0} \
+    -cleanupScript {m deleteRole roleX}
+
+TestScenario RoleHierarchy::AddJuniorFail3 \
+    -testScript {
+      m addJuniorRoleRelation roleA roleY
+    } \
+    -testResult {0}
+
+TestScenario RoleHierarchy::AddJuniorFail4 \
+    -testScript {
+      m addJuniorRoleRelation roleY roleA
+    } \
+    -testResult {0}
+
+TestScenario RoleHierarchy::AddJuniorFail5 \
+    -testScript {
+      m addJuniorRoleRelation roleA roleC
+    } \
+    -testResult {0} \
+    -cleanupScript {::m::roles::roleC superclass Object}
+
+TestScenario RoleHierarchy::RemoveJuniorSuccess \
+    -testScript {
+      m addJuniorRoleRelation roleA roleB
+      m removeJuniorRoleRelation roleA roleB
+    } \
+    -testResult {1}
+
+TestScenario RoleHierarchy::RemoveJuniorFail \
+    -testScript {
+      m removeJuniorRoleRelation roleA roleB
+    } \
+    -testResult {0}
+
+TestScenario RoleHierarchy::RemoveJuniorFail2 \
+    -testScript {
+      m addJuniorRoleRelation roleA roleB
+      m addJuniorRoleRelation roleC roleA
+      m removeJuniorRoleRelation roleC roleB
+    } \
+    -testResult {0} \
+    -cleanupScript {::m::roles::roleA superclass Object
+      ::m::roles::roleC superclass Object}
+
+
+TestScenario RoleHierarchy::RemoveJuniorFail3 \
+    -testScript {
+      m removeJuniorRoleRelation roleA roleX
+    } \
+    -testResult {0}
+
+TestScenario RoleHierarchy::RemoveJuniorFail4 \
+    -testScript {
+      m removeJuniorRoleRelation roleX roleA
+    } \
+    -testResult {0}
+
+TestScenario RoleHierarchy::AddSeniorSuccess \
+    -testScript {
+      m addSeniorRoleRelation roleB roleA
+    } \
+    -testResult {1}
+
+TestScenario RoleHierarchy::AddSeniorFail \
+    -testScript {
+      m addSeniorRoleRelation roleB roleA
+    } \
+    -testResult {0}
+
+TestScenario RoleHierarchy::RemoveSeniorSuccess \
+    -testScript {
+      m removeSeniorRoleRelation roleB roleA
+    } \
+    -testResult {1}
+
+TestScenario RoleHierarchy::RemoveSeniorFail \
+    -testScript {
+      m removeSeniorRoleRelation roleB roleA
+    } \
+    -testResult {0}

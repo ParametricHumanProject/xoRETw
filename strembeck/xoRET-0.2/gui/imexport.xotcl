@@ -1,0 +1,309 @@
+# (c) Mark Strembeck
+
+package provide xoRET::GUI::ImExport 0.2.1
+
+Class xoRET_GUI::ImExport
+
+xoRET_GUI::ImExport instproc init args {
+  my instvar root tree treeobj list top count pm entry filter
+  set pm [lindex $args 0]; set treeobj [lindex $args 1] 
+  set type [lindex $args 2]
+  set config(Export) "[self] exportRDF"
+  set config(Import) "[self] importRDF"
+  set config([list xoRBAC Export]) "[self] export_xoRBAC_RDF"
+  set top [toplevel .[[self class] autoname create%07d] -relief raised -borderwidth 2]
+  wm minsize $top 650 320
+  wm maxsize $top 800 320
+  wm withdraw $top
+  wm title $top "$type File Browser"
+  BWidget::place $top 0 0 center
+  wm geometry $top 650x320+320+320
+  wm protocol $top WM_DELETE_WINDOW "[self] destroy"
+
+  set frame [frame $top.f]
+  set upper [frame $frame.upper]
+  # left frame
+  set lf [TitleFrame $upper.lf -text "Directory Browser" -ipad 5]
+  set sw [ScrolledWindow [$lf getframe].sw -relief sunken -borderwidth 2]
+  set tree [::Tree $sw.tree \
+		-relief flat -borderwidth 0 -width 15 -highlightthickness 0\
+		-redraw 0 -dropenabled 1 -dragenabled 1 \
+		-background white \
+		-opencmd   "[self] moddir 1" \
+		-closecmd  "[self] moddir 0"]
+  # the opened/closed node is appended to the "opencmd/closecmd" respectively
+  $sw setwidget $tree
+  pack $sw -expand yes -fill both
+  pack $lf -side left -fill both -expand yes
+  # right frame
+  set rf   [TitleFrame $upper.rf -text "Files" -ipad 5]
+  set sw   [ScrolledWindow [$rf getframe].sw \
+		-scrollbar horizontal -auto none -relief sunken -borderwidth 2]
+  set list [ListBox::create $sw.lb \
+		-relief flat -borderwidth 0 \
+		-width 20 -highlightthickness 0 -multicolumn true \
+		-redraw 0 -background white]
+  $sw setwidget $list
+  pack $sw -fill both -expand yes
+  pack $rf -side left -expand yes -fill both
+  # bottom frame
+  set lower [TitleFrame $frame.lower -text "Options" -ipad 5]
+  set f [$lower getframe]
+  set lframe [frame $f.lframe]
+  set eframe [frame $lframe.eframe]
+  set elabel [Label $eframe.label -text "Selection:"]
+  set entry [Entry $eframe.entry -width 45 -text ""]
+  pack $entry $elabel -side bottom -expand yes -anchor w
+  set fframe [frame $lframe.fframe]
+  set flabel [Label $fframe.label -text "Filter:"]
+  set filter [ComboBox $fframe.filter -width 44 \
+		  -values "{All Files (*)} {XML/RDF Files (*.xml, *.rdf)}" -editable false \
+		  -modifycmd "[self] updatelist"]
+  $filter setvalue @1
+  pack $filter $flabel -side bottom -expand yes -anchor w
+  pack $fframe $eframe -side bottom -expand yes -anchor w
+  set bframe [frame $f.bframe]
+  set cancel [Button $bframe.cancel -text "Cancel" \
+		  -height 1 -width 16 -command "[self] destroy"]
+  set option [Button $bframe.option -width 16 -text "$type" \
+		  -command "$config($type)"]
+  set placeholder [frame $bframe.ph -height 15]
+  pack $cancel $placeholder $option -side bottom -expand yes -anchor s
+
+  pack $lframe -side left -expand yes -anchor sw
+  pack $bframe -side left -expand yes -anchor se
+  pack $lower $upper -side bottom -fill both -expand yes
+  pack $frame -fill both -expand yes
+
+  # note that for "bindText" the node idenfier that is associated with an
+  # event is appended to the command
+  $tree bindText  <ButtonPress-1>        "[self] select tree 1"
+  $tree bindText  <Double-ButtonPress-1> "[self] select tree 2"
+  $list bindText  <ButtonPress-1>        "[self] select list 1"
+  $list bindText  <Double-ButtonPress-1> "[self] select list 2"
+  $list bindImage <Double-ButtonPress-1> "[self] select list 2"
+
+  set count  0
+  global   tcl_platform
+  if { $tcl_platform(platform) == "unix" } {
+    set root [glob "~"]
+  } else {
+    set root "c:\\"
+  }
+  $tree insert end root home -text $root -data $root \
+      -open 1 -image [Bitmap::get openfold]
+  my getdir home $root
+  my select tree 1 home
+  $tree configure -redraw 1
+  $list configure -redraw 1
+
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+  next
+}
+
+xoRET_GUI::ImExport instproc exportRDF {} {
+  my instvar entry tree pm 
+  set file [$entry cget -text]
+  if {$file != ""} {
+    set node [$tree selection get]
+    set path [$tree itemcget $node -text]
+    set parent [$tree parent $node]
+    while {$parent != "root"} {
+      set path [join "[$tree itemcget $parent -text] $path" \/]
+      $tree selection set $parent
+      set node [$tree selection get]
+      set parent [$tree parent $node]
+    }
+    set file [join "$path $file" \/]
+    if {[file isfile $file]} {
+      xoRET_GUI::Dialog::ConfirmDialog cd "File already exists. Overwrite file $file ?"\
+	  "$pm exportRDF $file ;
+           xoRET_GUI::Dialog::MsgDialog md {xoRET model written to file: '$file'.} info Ok ;
+           [self] destroy"
+    } else {
+      xoRET_GUI::Dialog::ConfirmDialog cd "File does not exist. Create file $file ?"\
+	  "$pm exportRDF $file ;
+           xoRET_GUI::Dialog::MsgDialog md {xoRET model written to file: '$file'.} info Ok ;
+           [self] destroy"
+    }
+  } else {
+     xoRET_GUI::Dialog::MsgDialog md "In order to export the current xoRET model you\
+                                       must select/enter a file name first." info Ok
+  }
+}
+
+xoRET_GUI::ImExport instproc importRDF {} {
+  my instvar entry tree treeobj pm
+  set file [$entry cget -text]
+  if {$file != ""} {
+    set node [$tree selection get]
+    set path [$tree itemcget $node -text]
+    set parent [$tree parent $node]
+    while {$parent != "root"} {
+      set path [join "[$tree itemcget $parent -text] $path" \/]
+      $tree selection set $parent
+      set node [$tree selection get]
+      set parent [$tree parent $node]
+    }
+    set file [join "$path $file" \/]
+    if {[file isfile $file]} {
+      xoRET_GUI::Dialog::ConfirmDialog cd "Import xoRET model from $file ?"\
+	  "$pm importRDF $file ;
+           xoRET_GUI::Dialog::MsgDialog md {Import of: '$file' completed.} info Ok ;
+           $treeobj redrawTree ;
+           [self] destroy"
+    } else {
+      xoRET_GUI::Dialog::MsgDialog md "File '$file' does not exist." warning Ok
+    }
+  } else {
+     xoRET_GUI::Dialog::MsgDialog md "In order to import an xoRET model you\
+                                       must select/enter a file name first." info Ok
+  }
+}
+
+xoRET_GUI::ImExport instproc export_xoRBAC_RDF {} {
+  my instvar entry tree pm 
+  set file [$entry cget -text]
+  if {$file != ""} {
+    set node [$tree selection get]
+    set path [$tree itemcget $node -text]
+    set parent [$tree parent $node]
+    while {$parent != "root"} {
+      set path [join "[$tree itemcget $parent -text] $path" \/]
+      $tree selection set $parent
+      set node [$tree selection get]
+      set parent [$tree parent $node]
+    }
+    set file [join "$path $file" \/]
+    if {[file isfile $file]} {
+      xoRET_GUI::Dialog::ConfirmDialog cd "File already exists. Overwrite file $file ?"\
+	  "$pm export_xoRBAC_RDF $file ;
+           xoRET_GUI::Dialog::MsgDialog md {xoRBAC compatible export written to file: '$file'.} info Ok ;
+           [self] destroy"
+    } else {
+      xoRET_GUI::Dialog::ConfirmDialog cd "File does not exist. Create file $file ?"\
+	  "$pm export_xoRBAC_RDF $file ;
+           xoRET_GUI::Dialog::MsgDialog md {xoRBAC compatible export written to file: '$file'.} info Ok ;
+           [self] destroy"
+    }
+  } else {
+     xoRET_GUI::Dialog::MsgDialog md "In order to export an xoRBAC policy rule set file you\
+                                       must select/enter a file name first." info Ok
+  }
+}
+
+xoRET_GUI::ImExport instproc getdir {parent path} {
+  my instvar tree count
+  set nodes [glob -nocomplain [file join $path "*"]]
+  set lfiles ""
+  foreach n [lsort -dictionary $nodes] {
+    set tail [file tail $n]
+    if { [file isdirectory $n] } {
+      $tree insert end $parent n:$count \
+	  -text      $tail \
+	  -image     [Bitmap::get folder] \
+	  -drawcross allways \
+	  -data      $n
+      incr count
+    } else {
+      lappend lfiles $tail
+    }
+  }
+  $tree itemconfigure $parent -drawcross auto -data $lfiles
+}
+
+xoRET_GUI::ImExport instproc moddir {idx node} {
+  my instvar tree
+  if { $idx && [$tree itemcget $node -drawcross] == "allways" } {
+    [self] getdir $node [$tree itemcget $node -data]
+    if { [llength [$tree nodes $node]] } {
+      $tree itemconfigure $node -image [Bitmap::get openfold]
+    } else {
+      $tree itemconfigure $node -image [Bitmap::get folder]
+    }
+  } else {
+    $tree itemconfigure $node -image [Bitmap::get [lindex {folder openfold} $idx]]
+  }
+}
+xoRET_GUI::ImExport instproc select {where num node} {
+  my instvar tree list entry filter
+  $entry configure -text ""
+  if { $num == 1 } {
+    if { $where == "tree" } {
+      [self] select_node $node
+    } else {
+      $list selection set $node
+      if {![$tree exists $node]} {
+	$entry configure -text "[$list itemcget [$list selection get] -text]"
+      } 
+    }
+  } elseif { $where == "list" && [$tree exists $node] } {
+    set parent [$tree parent $node]
+    while { $parent != "root" } {
+      $tree itemconfigure $parent -open 1
+      set parent [$tree parent $parent]
+    }
+    my select_node $node
+  }
+}
+
+xoRET_GUI::ImExport instproc updatelist {} {
+  my instvar tree entry
+  $entry configure -text ""
+  my select_node [$tree selection get]
+}
+
+xoRET_GUI::ImExport instproc select_node {node} {
+  my instvar root tree list filter
+  $tree selection set $node
+  update idletasks
+  eval $list delete [$list item 0 end]
+  set dir [$tree itemcget $node -data]
+  if { [$tree itemcget $node -drawcross] == "allways" } {
+    my getdir $node $dir
+    set dir [$tree itemcget $node -data]
+  }  
+  foreach subnode [$tree nodes $node] {
+    $list insert end $subnode \
+	-text  [$tree itemcget $subnode -text] \
+	-image [Bitmap::get folder] 
+  }
+  set num 0
+  if {![$filter getvalue]} {
+    foreach f [lsort -dictionary $dir] {
+      $list insert end f:$num \
+	  -text  $f \
+	  -image [Bitmap::get file]
+      incr num
+    }
+  } else {
+    foreach f [lsort -dictionary $dir] {
+      if {([file extension $f] == ".xml") || ([file extension $f] == ".rdf")} {
+	$list insert end f:$num \
+	    -text  $f \
+	    -image [Bitmap::get file]
+	incr num
+      }
+    }
+  }
+}
+
+xoRET_GUI::ImExport instproc expand {but} {
+  my instvar tree
+  if { [set cur [$tree selection get]] != "" } {
+    if { $but == 0 } {
+      $tree opentree $cur
+    } else {
+      $tree closetree $cur
+    }
+  }
+}
+
+xoRET_GUI::ImExport instproc destroy args {
+  my instvar top
+  destroy $top
+  next
+}

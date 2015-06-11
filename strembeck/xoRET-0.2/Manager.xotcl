@@ -1,0 +1,2447 @@
+package provide xoRET 0.2
+
+package require XOTcl
+namespace import -force ::xotcl::*
+
+package require -exact xoRET::Object 0.1.1
+package require -exact xoRET::Objective 0.1.1
+package require -exact xoRET::Obstacle 0.1.1
+package require -exact xoRET::ContextConstraint 0.1.2
+package require -exact xoRET::Condition 0.1.2
+package require -exact xoRET::Permission 0.2.2
+package require -exact xoRET::Scenario 0.2
+package require -exact xoRET::Step 0.1.1
+package require -exact xoRET::Task 0.1.1
+package require -exact xoRET::Role 0.2.2
+package require -exact xoRET::WorkProfile 0.1.1
+package require -exact xoRET::TraceTypeImport 0.1
+package require -exact xoRET::Recreator 0.2
+package require -exact xoRET::GUI 0.1.2
+
+Class Manager -parameter {{loggingOn 0} {guiActive 0}}
+
+@ Class Manager {
+  Author "(c) Mark Strembeck"
+  Version "0.2"
+}
+
+Manager instproc init args {
+  Object [self]::objectives
+  Object [self]::obstacles
+  Object [self]::permissions
+  Object [self]::scenarios
+  Object [self]::steps
+  Object [self]::tasks
+  Object [self]::profiles
+  Object [self]::roles
+  Object [self]::constraints
+  Object [self]::conditions
+  my importTraceTypePairs
+  my set importinprogress 0
+  my log NORMAL "[self] [self proc] [self class], new [self class] object created."
+  next
+}
+
+Manager instproc startGUI {} {
+  my guiActive 1
+  xoRET_GUI [self]::gui [self]
+}
+
+Manager instproc startLogging {} {
+  if {![my loggingOn]} {
+    my loggingOn 1
+    my log NORMAL "[self] [self proc], logging activated."
+  } else {
+    my log FAILED "[self] [self proc] FAILED, logging is already activated."
+  }
+}
+
+Manager instproc stopLogging {} {
+  if {[my loggingOn]} {
+    my log NORMAL "[self] [self proc], logging deactivated."
+    my loggingOn 0
+  } else {
+    my log FAILED "[self] [self proc] FAILED, logging is already deactivated."
+  }
+}
+
+Manager instproc getStepList {} {
+  return [lsort -dictionary [[self]::steps info children]]
+}
+
+Manager instproc getScenarioList {} {
+  return  [lsort -dictionary [[self]::scenarios info children]]
+}
+
+Manager instproc getObjectiveList {} {
+  return  [lsort -dictionary [[self]::objectives info children]]
+}
+
+Manager instproc getObstacleList {} {
+  return  [lsort -dictionary [[self]::obstacles info children]]
+}
+
+Manager instproc getTaskList {} {
+  return  [lsort -dictionary [[self]::tasks info children]]
+}
+
+Manager instproc getWorkProfileList {} {
+  return  [lsort -dictionary [[self]::profiles info children]]
+}
+
+Manager instproc getPermissionList {} {
+  return  [lsort -dictionary [[self]::permissions info children]]
+}
+
+Manager instproc getRoleList {} {
+  return [lsort -dictionary [[self]::roles info children]]
+}
+
+Manager instproc getConditionList {} {
+  return [lsort -dictionary [[self]::conditions info children]]
+}
+
+Manager instproc getContextConstraintList {} {
+  return [lsort -dictionary [[self]::constraints info children]]
+}
+
+Manager instproc existCondition {condition} {
+  if {[lsearch -exact [my getConditionList] $condition] != -1} {
+    return 1
+  }
+  return 0
+}
+
+Manager instproc existContextConstraint {constraint} {
+  if {[lsearch -exact [my getContextConstraintList] $constraint] != -1} {
+    return 1
+  }
+  return 0
+}
+
+Manager instproc existStep {step} {
+  if {[lsearch -exact [my getStepList] $step] != -1} {
+    return 1
+  }
+  return 0
+}
+
+Manager instproc existScenario {scenario} {
+  if {[lsearch -exact [my getScenarioList] $scenario] != -1} {
+    return 1
+  }
+  return 0
+}
+
+Manager instproc existObjective {objective} {
+  if {[lsearch -exact [my getObjectiveList] $objective] != -1} {
+    return 1
+  }
+  return 0
+}
+
+Manager instproc existObstacle {obstacle} {
+  if {[lsearch -exact [my getObstacleList] $obstacle] != -1} {
+    return 1
+  }
+  return 0
+}
+
+Manager instproc existTask {task} {
+  if {[lsearch -exact [my getTaskList] $task] != -1} {
+    return 1
+  }
+  return 0
+}
+
+Manager instproc existWorkProfile {profile} {
+  if {[lsearch -exact [my getWorkProfileList] $profile] != -1} {
+    return 1
+  }
+  return 0
+}
+
+Manager instproc existPermission {permission} {
+  if {[lsearch -exact [my getPermissionList] $permission] != -1} {
+    return 1
+  }
+  return 0
+}
+
+Manager instproc existRole {role} {
+  if {[lsearch -exact [my getRoleList] $role] != -1} {
+    return 1
+  }
+  return 0
+}
+
+Manager instproc existObject {name} {
+  if {[my existStep [self]::steps::$name] || 
+      [my existScenario [self]::scenarios::$name] || 
+      [my existObjective [self]::objectives::$name] || 
+      [my existObstacle [self]::obstacles::$name] || 
+      [my existTask [self]::tasks::$name] || 
+      [my existWorkProfile [self]::profiles::$name] ||
+      [my existPermission [self]::permissions::$name] ||
+      [my existContextConstraint [self]::permissions::$name] ||
+      [my existCondition [self]::permissions::$name] ||
+      [my existRoles [self]::roles::$name]} {
+    return 1
+  }
+  return 0
+}
+
+Manager instproc createObjective {name  {author ""} {type "Achieve"}} {
+  set name [join $name _]
+  if {[my existObjective [self]::objectives::$name]} {
+    my log FAILED "[self] [self proc] FAILED, objective <<$name>> already exists."
+    return 0
+  }
+  Objective [self]::objectives::$name -type $type -name "$name" -author "$author"
+  return 1
+}
+
+Manager instproc createObstacle {name {author ""} {type "Avoid"}} {
+  set name [join $name _]
+  if {[my existObstacle [self]::obstacles::$name]} {
+    my log FAILED "[self] [self proc] FAILED, obstacle <<$name>> already exists."
+    return 0
+  }
+  Obstacle [self]::obstacles::$name -type "$type" -name "$name" -author "$author"
+  return 1
+}
+
+Manager instproc createStep {actor action target {author ""}} {
+  set actor [join $actor _]; set action [join $action _]; set target [join $target _]
+  set name [join "$actor $action $target" -]
+  if {[my existStep [self]::steps::$name]} {
+    my log FAILED "[self] [self proc] FAILED, step <<$name>> already exists."
+    return 0
+  }
+  Step [self]::steps::$name -actor "$actor" -action "$action" -target "$target"\
+                            -author "$author" -name "$name"
+  return 1
+}
+
+Manager instproc createScenario {name {author ""}} {
+  set name [join $name _]
+  if {[my existScenario [self]::scenarios::$name]} {
+    my log FAILED "[self] [self proc] FAILED, scenario <<$name>> already exists."
+    return 0
+  }
+  Scenario [self]::scenarios::$name -name "$name" -author "$author"
+  return 1
+}
+
+Manager instproc createTask {name {author ""}} {
+  set name [join $name _]
+  if {[my existTask [self]::tasks::$name]} {
+    my log FAILED "[self] [self proc] FAILED, task <<$name>> already exists."
+    return 0
+  }
+  Task [self]::tasks::$name -name "$name" -author "$author"
+  return 1
+}
+
+Manager instproc createWorkProfile {name {author ""}} {
+  set name [join $name _]
+  if {[my existWorkProfile [self]::profiles::$name]} {
+    my log FAILED "[self] [self proc] FAILED, work profile <<$name>> already exists."
+    return 0
+  }
+  WorkProfile [self]::profiles::$name -name "$name" -author "$author"
+  return 1
+}
+
+Manager instproc createPermission {perm {author ""}} {
+  set operation [lindex $perm 0]; set object [lindex $perm 1]; set perm [join $perm _]
+  if {[my existPermission [self]::permissions::$perm]} {
+    my log FAILED "[self] [self proc] FAILED, permission <<$perm>> already exists."
+    return 0
+  }
+  Permission [self]::permissions::$perm -name "$perm" -operation "$operation" -object "$object"
+  return 1
+}
+
+Manager instproc createCondition {name {author ""}} {
+  set name [join $name _]
+  set condition [self]::conditions::$name
+  if {[my existCondition $condition]} {
+    my log FAILED "[self] [self proc] FAILED, condition <<$condition>> already exists."
+    return 0
+  }
+  Condition $condition -name "$name" -author "$author"
+  return 1
+}
+
+Manager instproc createContextConstraint {name {author ""}} {
+  set name [join $name _]
+  set constraint [self]::constraints::$name
+  if {[my existContextConstraint $constraint]} {
+    my log FAILED "[self] [self proc] FAILED, context constraint <<$constraint>> already exists."
+    return 0
+  }
+  ContextConstraint $constraint -name "$name" -author "$author"
+  return 1
+}
+
+Manager instproc createRole {name {juniorRoles ""} {seniorRoles ""}} {
+  set name [join $name _]
+  if {![my existRole [self]::roles::$name]} {		
+    if {$juniorRoles != ""} {	
+      foreach role $juniorRoles {
+	if {[my existRole [self]::roles::$role]} {
+	  lappend junior [self]::roles::$role
+	} else {
+	  my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist. Thus,\
+                        it cannot be defined as junior-role of <<$name>>. Not created Role\
+                        <<$name>>."
+	  return 0
+	}
+      }
+      # now check if two or more of the intended juniorRoles are defined as 
+      # mutual exclusive or own mutual exclusive permissions
+      foreach r1 $junior {
+	foreach r2 $junior {
+	  if {![string equal $r1 $r2]} {
+	    if {[$r1 isStaticallyMutualExclusive $r2]} {
+	      my log FAILED "[self] [self proc] FAILED, at least two of the intended junior-roles\
+                                 of <<$name>> are mutual exclusive.\
+                                 <<$r1>> and <<$r2>> are mutual exclusive or own permissions that\
+                                 are mutual exclusive."
+	      return 0
+	    }
+	  }
+	}
+      } 
+    }
+    if {$seniorRoles != ""} {
+      foreach role $seniorRoles {
+	if {[my existRole [self]::roles::$role]} {
+	  lappend senior [self]::roles::$role
+	} else {
+	  my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist.\
+                           Thus, it cannot be defined as senior-role of <<$name>>.\
+                           Creation of role <<$name>> failed."
+	  return 0
+	}
+      }
+    }
+    if {($juniorRoles != "") && ($seniorRoles != "")} {
+      foreach sr $senior {
+	foreach jr $junior {
+	  if {![my ssdConstraintsAllowSeniorRole $jr $sr]} {
+	    my log FAILED "[self] [self proc] FAILED, <<$jr>> and <<$sr>> are\
+                               statically mutual exclusive. Therefore, <<$sr>> cannot\
+                               be defined as (transitive) senior-role of <<$jr>>. Creation\
+                               of role <<$name>> failed."
+	    return 0
+	  }
+	}
+      }
+    }
+    if {[info exists junior]} {
+      catch { Role [self]::roles::$name -superclass $junior -name $name } message
+      if {[my errorOccurred $message]} {
+	my deleteRole $name
+	return 0
+      }	
+    } else {
+      #create the new role (without juniorRoles/superclasses)
+      Role [self]::roles::$name -name $name
+    }
+    if {[info exists senior]} {
+      foreach role $senior {
+	set old [$role info superclass]
+	set new [concat [self]::roles::$name $old]		    
+	catch { $role superclass $new } message2
+	if {[my errorOccurred $message2]} {
+	  my deleteRole $name
+	  return 0
+	}
+      }
+    }	
+    #remove all redundant superclass-relations
+    my updateRoleHierarchy	
+    my log NORMAL "[self] [self proc] Role: <<$name>> successfully created."
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role <<$name>> already exists."
+    return 0
+  }   
+}
+
+# here "role" is the name of a role (e.g.: "Student" or "Professor")
+Manager instproc deleteRole {role} {
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    set seniorRoles [$role info subclass]
+    set juniorRoles [$role info superclass]
+    if {$seniorRoles != ""} {
+      foreach cr $seniorRoles {
+	set old [$cr info superclass]
+	#delete "$role" from the list of superclasses
+	set index [lsearch -exact $old $role]
+	set new [lreplace $old $index $index]
+	#append the indirect junior-roles that were inherited through "$role"
+	set new [concat $new $juniorRoles]
+	#set the new junior-roles (superclasses)
+	$cr superclass $new
+      }
+    }
+    foreach r [$role getDirectSSDRoleConstraints] {
+      my unsetSSDRoleConstraint [$role name] [$r name]
+    }
+    #delete the role-object $role
+    $role destroy
+    #remove all redundant superclass-relations
+    my updateRoleHierarchy
+    my log NORMAL "[self] [self proc]: role object <<$role>> destroyed."
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exsist."
+    return 0
+  }
+}
+
+Manager instproc updateRoleHierarchy {} {
+  foreach role [my getRoleList] { $role updateSuperclass }
+}
+
+Manager instproc addJuniorRoleRelation {role junior {type "junior"}} {
+  my instvar importinprogress
+  set role [self]::roles::$role
+  set junior [self]::roles::$junior
+  if {$type == "junior"} {set cproc [self proc]} else {set cproc [self callingproc]}
+  if {[my existRole $role]} {
+    if {[my existRole $junior]} {
+      if {![string equal $role $junior]} {
+	if {![$role hasJuniorRole $junior]} {
+	  if {![$role hasSeniorRole $junior]} {
+	    if {[my ssdConstraintsAllowSeniorRole $junior $role]} {
+	      # add $junior to the superclass list of $role
+	      set super [$role info superclass]
+	      set new [concat $junior $super]
+	      $role superclass $new
+	      if {$type == "junior"} {
+		my log NORMAL "[self] $cproc, <<$junior>> added to junior-role list of <<$role>>."
+	      } else {
+		my log NORMAL "[self] $cproc, <<$role>> added to senior-role list of <<$junior>>."
+	      }
+	      my updateRoleHierarchy
+	      my addTraceRelation Role [$role name] senior-role Role [$junior name]
+	      return 1
+	    } else {
+	      my log FAILED "[self] $cproc FAILED, definition of $type-role relation between\
+                                 <<$role>> and <<$junior>> prohibited by SSD constraints. Either\
+                                 <<$role>> or one of its senior-roles is defined as statically\
+                                 mutual exclusive to <<$junior>>. The prohibitory constraint\
+                                 is either an SSD role constraint defined on <<$junior>>, or an SSD\
+                                 permission constraint defined on one of the permissions of <<$junior>>."
+	      return 0
+	    }
+	  } else {
+	    if {!$importinprogress} {
+	      my log FAILED "[self] $cproc FAILED: <<$role>> already is a junior-role of <<$junior>>"
+	    }
+	    return 0
+	  }
+	} else {
+	  if {!$importinprogress} {
+	    my log FAILED "[self] $cproc FAILED: <<$role>> already is a senior-role of <<$junior>>."
+	  }
+	  return 0
+	}
+      } else {
+	  my log FAILED "[self] $cproc FAILED: a role cannot be $type-role of itself."
+	return 0
+      }
+    } else {
+      my log FAILED "[self] $cproc FAILED: role <<$junior>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] $cproc FAILED: role <<$role>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc removeJuniorRoleRelation {role junior {type "junior"}} {
+  set role [self]::roles::$role
+  set junior [self]::roles::$junior
+  if {$type == "junior"} {set cproc [self proc]} else {set cproc [self callingproc]}
+  if {[my existRole $role]} {
+    if {[my existRole $junior]} {
+      set old [$role info superclass]
+      set index [lsearch -exact $old $junior]
+      if {$index != -1} {
+	#delete "$junior" from the list of superclasses
+	set new [lreplace $old $index $index]
+	#set the new junior-roles (superclasses)
+	if {$new == ""} {set new "::xotcl::Object"}
+	$role superclass $new
+	if {$type == "junior"} {
+	  my log NORMAL "[self] $cproc <<$junior>> removed from junior-role list of <<$role>>."
+	} else {
+	  my log NORMAL "[self] $cproc <<$role>> removed from senior-role list of <<$junior>>."
+	}
+	my updateRoleHierarchy
+	my removeTraceRelation Role [$role name] senior-role Role [$junior name]
+	return 1
+      } else {
+	if {$type == "junior"} {
+	  my log FAILED "[self] $cproc FAILED: <<$junior>> is not a (direct) junior-role\
+                           of <<$role>>."
+	} else {
+	  my log FAILED "[self] $cproc FAILED: <<$role>> is not a (direct) senior-role\
+                             of <<$junior>>."
+	}
+	return 0
+      }
+    } else {
+      my log FAILED "[self] $cproc FAILED: role <<$junior>> does not exist"
+      return 0
+    }
+  } else {
+    my log FAILED "[self] $cproc FAILED: role <<$role>> does not exist"
+    return 0
+  }
+}
+
+Manager instproc addSeniorRoleRelation {role senior} {
+  my addJuniorRoleRelation $senior $role "senior"
+}
+
+Manager instproc removeSeniorRoleRelation {role senior} {
+  my removeJuniorRoleRelation $senior $role "senior"
+}
+
+Manager instproc errorOccurred {message} {
+  if {[regexp {(expected classes in dependence order but got)} $message]} {
+    my log FAILED "[self] [self proc] ERROR: Dependence-order constraint violated.\
+                       [self callingproc] FAILED. \n --> Generated message: <<$message>>
+                 \n The roles/classes must be given in dependence-order (first: most-powerful role;\
+                    last: least-powerful role).  Anyway it is not sensible for a (senior-)role to\
+                    inherit directly AND indirectly from the same (junior-)role" 
+    return 1
+  }    
+  if {[regexp {(expected a cycle-free graph but got)} $message]} {
+    my log FAILED "[self] [self proc] ERROR: Acyclicy constraint violated.\
+                       [self callingproc] FAILED. \n --> Generated message: <<$message>>
+                       \nNote that Role/Class-Hierachies are directed acylic graphs."
+    return 1
+  }   
+  if {[regexp {(expected a list of classes but got)} $message]} {
+    my log FAILED "[self] [self proc] ERROR: Unknown role-name. [self callingproc] FAILED.\
+                 \n --> Generated message: <<$message>>
+                 \nAt least one role-name is unknown to <<[self]>> perhaps this is just a\
+                    spelling mistake."
+    return 1
+  }
+  return 0
+}
+
+# build a preliminary role hierarchy
+Manager instproc buildRoleHierarchy {} {
+  # check for redundancies and add junior-role relations
+  foreach r1 [my getRoleList] {
+    foreach r2 [my getRoleList] {
+      if {$r1 != $r2} {
+	if {[my equalPermissions [$r1 name] [$r2 name]]} {
+	  $r1 roleswithequalpermissions "[lsort -unique [concat [$r1 roleswithequalpermissions] $r2]]"
+	  $r2 roleswithequalpermissions "[lsort -unique [concat [$r2 roleswithequalpermissions] $r1]]"
+	}
+	if {[my role1PermsSupersetOfRole2Perms [$r1 name] [$r2 name]]} {
+	  if {![$r1 hasJuniorRole $r2]} {
+	    my addJuniorRoleRelation [$r1 name] [$r2 name]
+	  }
+	}
+      }
+    }
+  }
+  # remove redundant junior-role relations
+  my updateRoleHierarchy
+  # remove redundant permissions
+  my removeRedundantPermissionsFromRoles
+}
+
+Manager instproc setRoleMinCardinality {role cardinality} {
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    return [$role setMinCardinality $cardinality]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc unsetRoleMinCardinality {role} {
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    return [$role unsetMinCardinality]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc getRoleMinCardinality {role} {
+  set role [self]::roles::$role
+  if {[my existRole $role]} {	
+    return [$role getMinCardinality]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
+    return ""
+  }
+}
+
+Manager instproc setRoleMaxCardinality {role cardinality} {
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    return [$role setMaxCardinality $cardinality]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc unsetRoleMaxCardinality {role} {
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    return [$role unsetMaxCardinality]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc getRoleMaxCardinality {role} {
+  set role [self]::roles::$role
+  if {[my existRole $role]} {	
+    return [$role getMaxCardinality]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist"
+    return ""
+  }
+}
+
+# role and senior are fully-qualified names of runtime role objects (e.g. m::roles::MyRole)
+Manager instproc ssdConstraintsAllowSeniorRole {role senior} {
+  set allseniors [concat $senior [$senior getAllSeniorRoles]]
+  foreach r $allseniors {
+    if {[$role isStaticallyMutualExclusive $r]} {
+      return 0
+    }
+  }
+  return 1
+}
+
+# perm is an "action object" pair
+Manager instproc permRoleAssign {perm role} {
+  set perm [self]::permissions::[join $perm _]
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    if {[my existPermission $perm]} {	   
+      if {[my ssdPermConstraintAllowPRA $perm $role]} {
+	if {[my permMaxCardinalityAllowAssignment $perm]} {
+	  set success [$role assignPerm $perm]
+	  if {$success} {
+	    my incrPermOwnerQuantity $perm
+	    my addTraceRelation Permission [$perm name] assigned-to Role [$role name]
+	  }
+	  return $success
+	} else {
+	  my log FAILED "[self] [self proc] FAILED, the permission maximum owner cardinality of\
+                             <<[$perm name]>> is already reached. In order to assign permission\
+                             <<[$perm name]>> to role: <<[$role name]>> you have to revoke\
+                             <<[$perm name]>> from at least one of its current owners first."
+	  return 0
+	}		    
+      } else {
+	my log FAILED "[self] [self proc] FAILED, assignment prevented by SSD constraint defined on\
+                           permission <<$perm>>. <<$role>> or one of its owners (subjects) possesses\
+                           at least one permission that is defined as mutual exclusive to <<$perm>>."
+	return 0
+      }
+    } else {
+      my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role: <<$role>> does not exist."
+    return 0
+  }
+}
+
+# perm is an "action object" pair
+Manager instproc permRoleRevoke {perm role} {
+  set perm [self]::permissions::[join $perm _]    
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    if {[my existPermission $perm]} {
+      if {[my permMinCardinalityAllow $perm]} {
+	set success [$role revokePerm $perm]
+	if {$success} {
+	  my decrPermOwnerQuantity $perm
+	  my removeTraceRelation Permission [$perm name] assigned-to Role [$role name]
+	}
+	return $success
+      } else {
+	my log FAILED "[self] [self proc] FAILED, the permission minimal owner cardinality\
+                    of <<[$perm name]>> has already been reached\
+             \n --> In order to revoke permission <<$perm>> from role: <<$role>>\
+                    you have to assign at least one new owner first."
+	return 0
+      }
+    } else {
+      my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role: <<$role>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc equalPermissions {role1 role2} {
+  set role1 [self]::roles::$role1
+  set role2 [self]::roles::$role2
+  if {[my existRole $role1]} {
+    if {[my existRole $role2]} {
+      if {$role1 != $role2} {
+	if {[string equal [$role1 getAllPerms] [$role2 getAllPerms]]} {
+	  return 1
+	}
+      }
+      return 0
+    } else {
+      my log FAILED "[self] [self proc] FAILED, role <<$role2>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role <<$role1>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc role1PermsSupersetOfRole2Perms {role1 role2} {
+  set role1 [self]::roles::$role1
+  set role2 [self]::roles::$role2
+  if {[my existRole $role1]} {
+    if {[my existRole $role2]} {
+      if {$role1 != $role2} {
+	if {![my equalPermissions [$role1 name] [$role2 name]]} {
+	  if {[$role1 ownsAllPerms [$role2 getAllPerms]]} {
+	    return 1
+	  }
+	}
+      }
+      return 0
+    } else {
+      my log FAILED "[self] [self proc] FAILED, role <<$role2>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role <<$role1>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc removeRedundantPermissionsFromRoles {} {
+  foreach role [my getRoleList] {
+    foreach perm [$role getAllDirectlyAssignedPerms] {
+      if {[$role transitivelyOwnsPerm $perm]} {
+	my permRoleRevoke [$perm name] [$role name]
+      }
+    }
+  }
+}
+
+# perm is a fully-qualified name of a runtime-permission-object (e.g. m::permissions::get_document)
+Manager instproc permMaxCardinalityAllowAssignment {perm} {
+  set maxNumber [$perm getMaxCardinality]
+  if {$maxNumber == -1} {
+    return 1
+  } 
+  set current [my getPermOwnerQuantity $perm]
+  if {[expr $maxNumber - $current > 0]} {
+    return 1
+  }
+  return 0
+}
+
+# perm is a fully-qualified name of a runtime-permissin-object (e.g.: m::permissions::get_document)
+Manager instproc permMinCardinalityFulfilled {perm} {
+  set minNumber [$perm getMinCardinality]
+  if {$minNumber == -1} {
+    return 1 
+  }
+  set current [my getPermOwnerQuantity $perm]
+  if {$current >= $minNumber} {
+    return 1
+  }
+  return 0
+}
+
+# perm is the fully-qualified name of a runtime-permissin-object (e.g.: m::permissions::get_document)
+Manager instproc permMinCardinalityAllow {perm} {
+  set minNumber [$perm getMinCardinality]
+  if {$minNumber == -1} {
+    return 1
+  }
+  set current [my getPermOwnerQuantity $perm]
+  if {[expr $current - $minNumber >= 1]} {
+    return 1
+  }	
+  return 0
+}
+
+Manager instproc incrPermOwnerQuantity {perm} {
+  my instvar permOwnerQuantity
+  if {[info exists permOwnerQuantity($perm)]} {
+    incr permOwnerQuantity($perm)
+  } else {	
+    set permOwnerQuantity($perm) 1	
+  }
+  if {![my permMinCardinalityFulfilled $perm]} {
+    set currentQuantity [my getPermOwnerQuantity $perm]
+    set minCardinality [$perm getMinCardinality]
+    my log INFO "[self] [self proc]: Minimal owner cardinality of <<$perm>> is not yet fulfilled,\
+                       you must assign <<$perm>> to at least [expr $minCardinality - $currentQuantity]\
+                       more role(s)."		
+  }
+  return 1
+}
+
+# perm is the fully-qualified name of a runtime-permission-object (e.g.: m::permissions::get_document)
+Manager instproc decrPermOwnerQuantity {perm} {
+  my instvar permOwnerQuantity
+  if {[info exists permOwnerQuantity($perm)]} {
+    incr permOwnerQuantity($perm) -1
+    if {![set permOwnerQuantity($perm)] > 0} {
+      unset permOwnerQuantity($perm)
+    }
+  }
+}
+
+# perm is the full name of a runtime-permission-object (e.g.: rm::permissions::get_document)
+Manager instproc unsetPermOwnerQuantity {perm} {
+  my instvar permOwnerQuantity
+  if {[info exists permOwnerQuantity($perm)]} {
+    unset permOwnerQuantity($perm)
+  }
+}
+
+# perm is the fully-qualified name of a runtime-permission-object (e.g.: m::permissions::get_document)
+Manager instproc getPermOwnerQuantity {perm} {
+  my instvar permOwnerQuantity
+  if {[my existPermission $perm]} {	
+    if {[info exists permOwnerQuantity($perm)]} {
+      return [set permOwnerQuantity($perm)]
+    }
+    #here "0" is not "false" but the number of permission owners
+    return 0
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+  }
+}
+
+Manager instproc getAllRolesTransitivelyOwningPerm {perm} {
+  set perm [self]::permissions::[join $perm _]
+  if {[my existPermission $perm]} {
+    set owners ""
+    foreach role [my getRoleList] {
+      if {[$role transitivelyOwnsPerm $perm]} {
+	lappend owners $role
+      }
+    }
+    return $owners
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+    return ""
+  }
+}
+
+Manager instproc getAllRolesDirectlyOwningPerm {perm} {
+  set perm [self]::permissions::[join $perm _]
+  if {[my existPermission $perm]} {
+    set owners ""
+    foreach role [my getRoleList] {
+      if {[$role directlyOwnsPerm $perm]} {
+	lappend owners $role
+      }
+    }
+    return $owners
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+    return ""
+  }
+}
+
+# perm is an "action object" pair
+Manager instproc getAllRolesOwningPerm {perm} {
+  set perm [self]::permissions::[join $perm _]
+  if {[my existPermission $perm]} {
+    foreach role [my getRoleList] {
+      #check if $perm is directly (per mixin) or transitively assigned to $role
+      if {[$role ownsPerm $perm]} {
+	lappend permOwners $role
+      }
+    }    
+    if {[info exists permOwners]} {
+      my log NORMAL "[self] [self proc]: Permission <<$perm>> is (directly or transitively)\
+                         assigned to the following roles <<$permOwners>>"
+      return $permOwners
+    } else {
+      my log NORMAL "[self] [self proc]: Permission <<$perm>> is not yet assigned to any role."
+      return ""
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+    return ""
+  }
+}
+
+Manager instproc getAllPermsTransitivelyAssignedToRole {role} {
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    return [$role getAllTransitivelyAssignedPerms]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
+    return ""
+  }
+}
+
+Manager instproc getAllPermsDirectlyAssignedToRole {role} {
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    return [$role getAllDirectlyAssignedPerms]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
+    return ""
+  }
+}
+
+Manager instproc getAllPermsAssignedToRole {role} {
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    return [$role getAllPerms]
+  }
+  my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
+  return ""
+}
+
+Manager instproc possessCommonSeniorRole {role1 role2} {
+  set r1SeniorRoles [$role1 getAllSeniorRoles]
+  set r2SeniorRoles [$role2 getAllSeniorRoles]
+  foreach sr2 $r2SeniorRoles {
+    if {[lsearch -exact $r1SeniorRoles $sr2] != -1} {
+      return 1
+    }
+  }
+  return 0
+}
+
+Manager instproc getDirectJuniorRoles {role} {
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    return [$role getDirectJuniorRoles]
+  }
+  my log FAILED "[self] [self proc] FAILED, role: <<$role>> does not exist."
+  return ""
+}
+
+Manager instproc getTransitiveJuniorRoles {role} {
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    return [$role getTransitiveJuniorRoles]
+  }
+  my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
+  return ""
+}
+
+Manager instproc getAllJuniorRoles {role} {
+  set role [self]::roles::$role 
+  if {[my existRole $role]} {
+    return [$role getAllJuniorRoles]
+  }
+  my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
+  return ""
+}
+
+Manager instproc getTransitiveSeniorRoles {role} {
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    return [$role getTransitiveSeniorRoles]
+  }
+  my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
+  return ""
+}
+
+Manager instproc getAllSeniorRoles {role} {
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    return [$role getAllSeniorRoles]
+  }
+  my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
+  return ""
+}
+
+# a role cannot be defined as mutual exclusive to one of its junior-roles
+# or one of its senior-roles. Furthermore two roles that have a common
+# senior-role must not be defined as mutual exclusive.
+# role and mutlexcl are role names respectively (e.g. "Student" or "Professor")
+Manager instproc  setSSDRoleConstraint {role mutlexcl} {
+  set role [self]::roles::$role
+  set mutlexcl [self]::roles::$mutlexcl
+  if {[my existRole $role]} {
+    if {[my existRole $mutlexcl]} {
+      if {![string equal $role $mutlexcl]} {
+	if {![my possessCommonSeniorRole $role $mutlexcl]} {
+	  #[$role info parent]* specifies the pattern parameter for "info heritage" (e.g.: ::rm::roles*)
+	  set juniorRoles [$role info heritage [[self] info parent]*]
+	  set seniorRoles [$role getAllSeniorRoles]
+	  if {[lsearch -exact $seniorRoles $mutlexcl] == -1} {
+	    if {[lsearch -exact $juniorRoles $mutlexcl] == -1} {
+	      #set the ssdRoleConstraint for both roles
+	      set success [$role setSSDConstraint $mutlexcl]
+	      if {$success} {
+		set success [$mutlexcl setSSDConstraint $role]
+	      }
+	      return $success
+	    } else {
+	      my log FAILED "[self] [self proc] FAILED, role <<$role>> cannot be mutual\
+                                   exclusive to its junior-role <<$mutlexcl>>."
+	      return 0
+	    }		
+	    } else {
+	      my log FAILED "[self] [self proc] FAILED, role <<$role>> cannot be mutual\
+                                 exclusive to its senior-role <<$mutlexcl>>."
+	      return 0
+	    }
+	} else {
+	  my log FAILED "[self] [self proc] FAILED, <<$role>> and <<$mutlexcl>> possess a\
+                               common senior-role."
+	  return 0
+	}
+      } else {
+	my log FAILED "[self] [self proc] FAILED, a role cannot be mutual exclusive to itself."
+	return 0
+      }
+    } else {
+      my log FAILED "[self] [self proc] FAILED, role <<$mutlexcl>> does not exist."
+      return 0
+    }    
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
+    return 0
+  }
+}
+ 
+# role and mutlexcl are role names respectively (e.g. "Student" or "Professor")
+Manager instproc unsetSSDRoleConstraint {role mutlexcl} {
+  set role [self]::roles::$role
+  set mutlexcl [self]::roles::$mutlexcl
+  if {[my existRole $role]} {
+    if {[my existRole $mutlexcl]} {
+      #delete the mutual exclusion constraint from both roles
+      set success [$role unsetSSDConstraint $mutlexcl]
+      if {$success} {
+	set success [$mutlexcl unsetSSDConstraint $role]
+      }
+      return $success
+    } else {
+      my log FAILED "[self] [self proc] FAILED, the role <<$mutlexcl>> does not exist."
+      return 0
+    }	
+  } else {
+    my log FAILED "[self] [self proc] FAILED, the role <<$role>> does not exist."
+    return 0
+  }
+}
+
+# role is a role name (e.g. "Student" or "Professor")
+Manager instproc getSSDRoleConstraints {role} {
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    return [$role getSSDRoleConstraints]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
+    return ""
+  }
+}
+
+# SSD Constraints are inherited within a role-hierarchy and are valid for
+# ALL roles and permissions of a xoRET Manager instance
+# PRA is an acronym for "PermissionRoleAssign"
+# role is the fully-qualified name of a runtime-role-object (e.g. m::roles::MyRole)
+# perm is the fully-qualified name of a runtime-permission-object (e.g. m::permissions::get_document)
+Manager instproc ssdPermConstraintAllowPRA {perm role} {
+  # first: check if one or more of the permissions that are (directly or transitively) assigned 
+  # to $role are defined as mutual exclusive to $perm 
+  foreach rp [$role getAllPerms] {
+    if {[$perm isStaticallyMutualExclusive $rp]} {
+      lappend mutualExcl $rp
+    }
+  }
+  # now: check if a senior-role of $role already owns a permission that 
+  # is mutual exclusive to $perm. In this case the assignment of $perm to $role
+  # must be denied - otherwise the corresponding senior-role would acquire two
+  # mutual exclusive permissions
+  foreach sr [$role getAllSeniorRoles] {
+    foreach srp [$sr getAllPerms] {
+      if {[$perm isStaticallyMutualExclusive $srp]} {
+	lappend mutualExcl $srp
+      }
+    }
+  }
+  if {[info exists mutualExcl]} {
+    my log NORMAL "[self] [self proc]:  <<$role>> or at least one\
+                       senior-role of <<$role>>, owns the following permission(s)\
+                       <<$mutualExcl>> which are defined as mutual exclusive to <<$perm>>."
+    return 0
+  }
+  return 1
+}
+
+Manager instproc deletePermission {perm} {
+  set perm [self]::permissions::[join $perm _]
+  if {[my existPermission $perm]} {
+    $perm destroy
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+    return 0
+  }
+}
+
+# perm1 and perm2 are fully-qualified names of runtime-permission-objects 
+# respectively (e.g.: m::permissions::get_document)
+Manager instproc permAssignedToSameRole {perm1 perm2} {
+  foreach role [my getRoleList] {
+    if {[$role ownsPerm $perm1] && [$role ownsPerm $perm2]} {
+      lappend owners $role
+    }
+  }
+  if {[info exists owners]} {
+    my log INFO "[self] [self proc]: The role(s): <<$owners>> own both permissions <<$perm1>>\
+                       and <<$perm2>> (directly or transitively)"
+    return 1
+  }
+  return 0
+}
+
+Manager instproc setSSDPermConstraint {perm mutlexcl} {
+  set perm [self]::permissions::[join $perm _]
+  set mutlexcl [self]::permissions::[join $mutlexcl _]
+  if {[my existPermission $perm]} {
+    if {[my existPermission $mutlexcl]} {
+      if {![my permAssignedToSameRole $perm $mutlexcl]} {
+	set success [$perm setSSDPermConstraint $mutlexcl]
+	if {$success} {
+	  return [$mutlexcl setSSDPermConstraint $perm]
+	} 
+	return $success
+      } else {
+	my log FAILED "[self] [self proc] FAILED, at least one role owns both\
+                           permissions <<$perm>> and <<$mutlexcl>> (directly or transitively).\
+                           In order to register a mutual exclusion constraint for two permissions\
+                           they must not be assigned to the same role."
+	return 0
+      }
+    } else {
+      my log FAILED "[self] [self proc] FAILED, permission <<$mutlexcl>> does not exist."
+    return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc unsetSSDPermConstraint {perm mutlexcl} {
+  set perm [self]::permissions::$perm
+  set mutlexcl [self]::permissions::$mutlexcl
+  if {[my existPermission $perm]} {
+    if {[my existPermission $mutlexcl]} {
+      $perm unsetSSDPermConstraint $mutlexcl
+      $mutlexcl unsetSSDPermConstraint $perm
+    } else {
+      my log FAILED "[self] [self proc] FAILED, permission <<$mutlexcl>> does not exist."
+    return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc setPermMaxCardinality {perm max} {
+  set perm [self]::permissions::[join $perm _]
+  if {[my existPermission $perm]} {
+    return [$perm setMaxCardinality $max]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc getPermMaxCardinality {perm} {
+  set perm [self]::permissions::[join $perm _]
+  if {[my existPermission $perm]} {
+    return [$perm getMaxCardinality]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+    return ""
+  }
+}
+
+Manager instproc unsetPermMaxCardinality {perm} {
+  set perm [self]::permissions::[join $perm _]
+  if {[my existPermission $perm]} {
+    return [$perm unsetMaxCardinality]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc setPermMinCardinality {perm min} {
+  set perm [self]::permissions::[join $perm _]
+  if {[my existPermission $perm]} {
+    return [$perm setMinCardinality $min]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc getPermMinCardinality {perm} {
+  set perm [self]::permissions::[join $perm _]
+  if {[my existPermission $perm]} {
+    return [$perm getMinCardinality]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+    return ""
+  }
+}
+
+Manager instproc unsetPermMinCardinality {perm} {
+  set perm [self]::permissions::[join $perm _]
+  if {[my existPermission $perm]} {
+    return [$perm unsetMinCardinality]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc linkConditionToContextConstraint {condition constraint} {
+  set condition [self]::conditions::[join $condition _]
+  set constraint [self]::constraints::[join $constraint _]
+  if {[my existCondition $condition]} {
+    if {[my existContextConstraint $constraint]} {
+      set success [$constraint linkCondition $condition]
+      if {$success} {
+	my addTraceRelation ContextConstraint [$constraint name] contains Condition [$condition name]
+      }
+      return $success
+    } else {
+      my log FAILED "[self] [self proc] FAILED, context constraint <<$constraint>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, condition <<$condition>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc linkContextConstraintToPerm {constraint perm} {
+  set constraint [self]::constraints::[join $constraint _]
+  set perm [self]::permissions::[join $perm _]
+  if {[my existContextConstraint $constraint]} {
+    if {[my existPermission $perm]} {
+      set success [$perm linkContextConstraint $constraint]
+      if {$success} {
+	my addTraceRelation ContextConstraint [$constraint name] constrains Permission [$perm name]
+      }
+      return $success 
+    } else {
+      my log FAILED "[self] [self proc] FAILED, permisssion <<$perm>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, context constraint <<$constraint>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc unlinkContextConstraintFromPerm {constraint perm} {
+  set constraint [self]::constraints::[join $constraint _]
+  set perm [self]::permissions::[join $perm _]
+  if {[my existContextConstraint $constraint]} {
+    if {[my existPermission $perm]} {
+      set success [$perm unlinkContextConstraint $constraint]
+      if {$success} {
+	my removeTraceRelation ContextConstraint [$constraint name] constrains Permission [$perm name]
+      } 
+      return $success
+    } else {
+      my log FAILED "[self] [self proc] FAILED, permisssion <<$perm>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, context constraint <<$constraint>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc unlinkConditionFromContextConstraint {condition constraint} {
+  set condition [self]::conditions::[join $condition _]
+  set constraint [self]::constraints::[join $constraint _]
+  if {[my existCondition $condition]} {
+    if {[my existContextConstraint $constraint]} {
+      set success [$constraint unlinkCondition $condition]
+      if {$success} {
+	my removeTraceRelation ContextConstraint [$constraint name] contains Condition [$condition name]
+      }
+      return $success
+    } else {
+      my log FAILED "[self] [self proc] FAILED, context constraint <<$constraint>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, condition <<$condition>> does not exist."
+    return 0
+  }  
+}
+
+Manager instproc derivePermissionFromStep {actor action target} {
+  set actor [join $actor _]; set action [join $action _]; set target [join $target _]
+  set name [join "$actor $action $target" -]
+  set step [self]::steps::$name
+  if {[my existStep $step]} {
+    set permname [join "$action $target" _]
+    set perm [self]::permissions::$permname
+    if {![my existPermission $perm]} {
+      Permission $perm -name "$permname" -operation "$action" -object "$target"
+      my addTraceRelation Permission [$perm name] derived-from Step [$step name]
+      return 1
+    } else {
+      if {![$perm existTrace derived-from Step $step]} {
+	my addTraceRelation Permission [$perm name] derived-from Step [$step name]
+      }
+      return 1
+    }
+  } else {
+    my log FAILED, "[self] [self proc] FAILED, step <<$step>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc deriveRoleFromWorkProfile {profile} {
+  set profile [self]::profiles::[join $profile _]
+  if {[my existWorkProfile $profile]} {
+    set rolename [join "Role [$profile name]" _]
+    set permissions [my getPermissionsLinkedToWorkProfile [$profile name]]
+    if {![my existRole [self]::roles::$rolename]} {
+      my createRole $rolename
+    }
+    my addTraceRelation Role $rolename derived-from WorkProfile [$profile name]
+    foreach p $permissions {
+      if {![[self]::roles::$rolename ownsPerm $p]} {
+	my permRoleAssign [$p name] $rolename
+      }
+    }
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, work profile <<$profile>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc deriveCCFromObjective {objective} {
+  set objective [self]::objectives::[join $objective _]
+  if {[my existObjective $objective]} {
+    set conditions [$objective getDerivedConditionList]
+    # if conditions list is not empty
+    if {$conditions != ""} {
+      foreach cond $conditions {
+	set condname [join $cond _]
+	set condition [self]::conditions::$condname
+	# create condition if necessary
+	if {![my existCondition $condition]} {
+	  my createCondition $condname automaticallyderived
+	}
+	my addTraceRelation Condition $condname derived-from Objective [$objective name]
+	lappend clist $condition
+      }
+      set ccname [join "[$objective type] [$objective name]" _]
+      set constraint [self]::constraints::$ccname
+      # create constraint if necessary
+      if {![my existContextConstraint $constraint]} {
+	my createContextConstraint $ccname automaticallyderived
+      }
+      my addTraceRelation ContextConstraint $ccname derived-from Objective [$objective name]
+      # link conditions to constraint if necessary
+      foreach cond $clist {
+	if {![$constraint hasCondition $cond]} {
+	  my linkConditionToContextConstraint [$cond name] [$constraint name]
+	}
+      }
+      # link constraint to permissions
+      foreach perm [my getAllPermissionsPotentiallyNeededForObjective [$objective name]] {
+	if {![$perm hasContextConstraint $constraint]} {
+	  my linkContextConstraintToPerm [$constraint name] [$perm name]
+	}
+      }
+    }
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, objective <<$objective>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc deriveCCFromObstacle {obstacle} {
+  set obstacle [self]::obstacles::[join $obstacle _]
+  if {[my existObstacle $obstacle]} {
+    set conditions [$obstacle getDerivedConditionList]
+    # if conditions list is not empty
+    if {$conditions != ""} {
+      foreach cond $conditions {
+	set condname [join $cond _]
+	set condition [self]::conditions::$condname
+	# create condition if necessary
+	if {![my existCondition $condition]} {
+	  my createCondition $condname automaticallyderived
+	}
+	my addTraceRelation Condition $condname derived-from Obstacle [$obstacle name]
+	lappend clist $condition
+      }
+      set ccname [join "[$obstacle type] [$obstacle name]" _]
+      set constraint [self]::constraints::$ccname
+      # create constraint if necessary
+      if {![my existContextConstraint $constraint]} {
+	my createContextConstraint $ccname automaticallyderived
+      }
+      my addTraceRelation ContextConstraint $ccname derived-from Obstacle [$obstacle name]
+      # link conditions to constraint if necessary
+      foreach cond $clist {
+	if {![$constraint hasCondition $cond]} {
+	  my linkConditionToContextConstraint [$cond name] [$constraint name]
+	}
+      } 
+      # link constraint to permissions
+      foreach perm [my getAllPermissionsInfluencedByObstacle [$obstacle name]] {
+	if {![$perm hasContextConstraint $constraint]} {
+	  my linkContextConstraintToPerm [$constraint name] [$perm name]
+	}
+      }
+    }
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, obstacle <<$obstacle>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc getAllPermissionsNeededForScenario {scenario} {
+  set scenario [self]::scenarios::[join $scenario _]
+  set perms ""
+  if {[my existScenario $scenario]} {
+    foreach step [$scenario getSteps] {
+      set perms [concat $perms [$step getAllTraceTargets origin-of Permission]]
+    }
+    set refined [$scenario getAllTraceTargets refined-by Scenario]
+    foreach rs $refined {
+      # recursively seek in refinement scenarios
+      set perms [concat $perms [my getAllPermissionsNeededForScenario [$rs name]]]
+    }
+  }
+  return [lsort -dictionary -unique $perms]
+}
+
+Manager instproc getAllPermissionsPotentiallyNeededForObjective {objective} {
+  set objective [self]::objectives::[join $objective _]
+  set perms ""
+  set scenarios [$objective getAllTraceTargets fulfilled-by Scenario]
+  foreach scenario $scenarios {
+    set perms [concat $perms [my getAllPermissionsNeededForScenario [$scenario name]]]
+  }
+  set subgoals [$objective getAllTraceTargets sub-goal Objective]
+  foreach obj $subgoals {
+    # recursively seek in sub-goals
+    set perms [concat $perms [my getAllPermissionsPotentiallyNeededForObjective [$obj name]]]
+  }
+  return [lsort -dictionary -unique $perms]
+}
+
+Manager instproc getAllPermissionsInfluencedByObstacle {obstacle} {
+  set obstacle [self]::obstacles::[join $obstacle _]
+  set perms ""
+  set objectives [$obstacle getAllTraceTargets impedes Objective]
+  foreach obj $objectives {
+    set perms [concat $perms [my getAllPermissionsPotentiallyNeededForObjective [$obj name]]]
+  }
+  return [lsort -dictionary -unique $perms]
+}
+
+Manager instproc deleteCondition {condition} {
+  set condition [self]::conditions::[join $condition -]
+  if {[my existCondition $condition]} {
+    foreach cc [my getContextConstraintList] {
+      if {[$cc hasCondition $condition]} {
+	$cc unlinkCondition $condition
+      }
+    }
+    $condition destroy
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, condition <<$condition>> already exists."
+    return 0
+  }
+}
+
+Manager instproc deleteContextConstraint {constraint} {
+  set constraint [self]::constraints::[join $constraint _]
+  if {[my existContextConstraint $constraint]} {
+    foreach perm [my getPermissionList] {
+      if {[$perm hasContextConstraint $constraint]} {
+	$perm unlinkContextConstraint $constraint
+      }
+    }
+    $constraint destroy
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, context constraint <<$constraint>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc clearScenario {name} {
+  set scenario [self]::scenarios::[join $name _]
+  if {[my existScenario $scenario]} {
+    foreach step [$scenario getSteps] {
+      my removeTraceRelation Scenario [$scenario name] contains Step [$step name]
+    }
+    $scenario clear
+  } else {
+    my log FAILED "[self] [self proc] FAILED, scenario <<$scenario>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc deleteScenario {scenario} {
+  set scenario [self]::scenarios::[join $scenario _]
+  if {[my existScenario $scenario]} {
+    foreach task [[self] getTaskList] {
+      if {[$task hasScenario $scenario] != -1} {
+	$task removeScenario $scenario
+      }
+    }
+    $scenario destroy 
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, scenario <<$scenario>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc deleteStep {step} {
+  set step [self]::steps::$step
+  if {[my existStep $step]} {
+    foreach s [my getScenarioList] {
+      if {[$s hasStep $step]} {
+	my removeStepFromScenario [$step actor] [$step action] [$step target] [$s name]
+      }
+    }
+    $step destroy
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, step <<$step>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc deleteObjective {objective} {
+  set objective [self]::objectives::[join $objective _]
+  if {[my existObjective $objective]} {
+    $objective destroy
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, objective <<$objective>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc deleteObstacle {obstacle} {
+  set obstacle [self]::obstacles::[join $obstacle _]
+  if {[my existObstacle $obstacle]} {
+    $obstacle destroy
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, obstacle <<$obstacle>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc deleteTask {task} {
+  set task [self]::tasks::[join $task _]
+  if {[my existTask $task]} {
+    foreach profile [my getWorkProfileList] {
+      if {[$profile hasTask $task] != -1} {
+	$profile removeTask $task
+      }
+    }
+    $task destroy
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, task <<$task>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc deleteWorkProfile {profile} {
+  set profile [self]::profiles::[join $profile _]
+  if {[my existWorkProfile $profile]} {
+    $profile destroy
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, work profile <<$profile>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc addStepToScenario {actor action target scenario} {
+  set actor [join $actor _]; set action [join $action _]; set target [join $target _]
+  set name [join "$actor $action $target" -]
+  set scenario [self]::scenarios::[join $scenario _]
+  set step [self]::steps::$name
+  if {[my existScenario $scenario]} {
+    if {[my existStep $step]} {
+      set success [$scenario addStep $step]
+      if {$success} {
+	my addTraceRelation Scenario [$scenario name] contains Step [$step name]
+      }
+      return $success
+    } else {
+      my log FAILED "[self] [self proc] FAILED, step <<$step>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, scenario <<$scenario>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc addEdgeToScenario {fromactr fromactn fromtgt toactr toactn totgt scenario {edgelabel ""}} {
+  set fromactr [join $fromactr _]; set fromactn [join $fromactn _]; set fromtgt [join $fromtgt _]
+  set toactr [join $toactr _]; set toactn [join $toactn _]; set totgt [join $totgt _]
+  set fromstep [self]::steps::[join "$fromactr $fromactn $fromtgt" -]
+  set tostep [self]::steps::[join "$toactr $toactn $totgt" -]
+  set scenario [self]::scenarios::[join $scenario _]
+  if {[my existScenario $scenario]} { 
+    if {[my existStep $fromstep]} {
+      if {[my existStep $tostep]} {
+	$scenario addEdge $fromstep $tostep "$edgelabel"
+      } else {
+	my log FAILED "[self] [self proc] FAILED, step <<$tostep>> does not exist."
+	return 0
+      }
+    } else {
+      my log FAILED "[self] [self proc] FAILED, step <<$fromstep>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, scenario <<$scenario>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc removeStepFromScenario {actor action target scenario} {
+  set actor [join $actor _]; set action [join $action _]; set target [join $target _]
+  set name [join "$actor $action $target" -]
+  set scenario [self]::scenarios::[join $scenario _]
+  set step [self]::steps::$name
+  if {[my existScenario $scenario]} {
+    if {[my existStep $step]} {
+      set success [$scenario removeStep $step]
+      if {$success} {
+	my removeTraceRelation Scenario [$scenario name] contains Step [$step name]
+      }
+      return $success
+    } else {
+      my log FAILED "[self] [self proc] FAILED, step <<$step>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, scenario <<$scenario>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc getStepListOfScenario {scenario} {
+  set scenario [self]::scenarios::[join $scenario _]
+  if {[my existScenario $scenario]} {
+    return [$scenario getSteps]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, scenario <<$scenario>> does not exist."
+    return ""
+  }
+}
+
+Manager instproc exportScenarioDotFile {scenario file} {
+  set scenario [self]::scenarios::[join $scenario _]
+  if {[my existScenario $scenario]} {
+    $scenario exportScenarioDotFile $file
+  } else {
+    my log FAILED "[self] [self proc] FAILED, scenario <<$scenario>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc exportTailoredTraceDotFile {filename {types "all"} {tracetypes "all"}} {
+  set file [open $filename w]
+  puts $file "digraph [string trimleft [self] :] \{"
+  puts $file "\t node \[height=\"0.3\", width=\"0.3\", fontname=helvetica, fontsize=11\];"
+  puts $file "\t edge \[minlen=1, fontname=helvetica, fontsize=11\];"
+  close $file
+  if {($types == "all") && ($tracetypes == "all")} {
+    set objects [lsort -dictionary [concat [my getAllObjects]]]
+    foreach o $objects {
+      $o appendToTailoredTraceDotFile $filename 
+    }
+  } else {
+    foreach t $types {
+      if {[Object isclass $t]} {
+	foreach i [$t info instances] {
+	  $i appendToTailoredTraceDotFile $filename "$types" "$tracetypes"
+	}
+      }
+    }
+  }
+  set file [open $filename a]
+  puts $file "\}"
+  close $file
+}
+
+Manager instproc getAllObjects {} {
+  set all ""
+  foreach m {getObjectiveList getObstacleList getScenarioList\
+		 getStepList getTaskList getWorkProfileList\
+		 getRoleList getPermissionList} {
+    set l [my $m]
+    if {$l != ""} {
+      set all [concat $all $l]
+    }
+  }
+  return [concat $all]
+}
+
+Manager instproc addScenarioToTask {scenario task} {
+  set task [self]::tasks::[join $task _]
+  set scenario [self]::scenarios::[join $scenario _]
+  if {[my existTask $task]} {
+    if {[my existScenario $scenario]} {
+      set success [$task addScenario $scenario]
+      if {$success} {
+	my addTraceRelation Task [$task name] contains Scenario [$scenario name]
+      }
+      return $success
+    } else {
+      my log FAILED "[self] [self proc] FAILED, scenario <<$scenario>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, task <<$task>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc removeScenarioFromTask {scenario task} {
+  set task [self]::tasks::[join $task _]
+  set scenario [self]::scenarios::[join $scenario _]
+  if {[my existTask $task]} {
+    set success [$task removeScenario $scenario]
+    if {$success} {
+      my removeTraceRelation Task [$task name] contains Scenario [$scenario name]
+    }
+    return $success
+  } else {
+    my log FAILED "[self] [self proc] FAILED, task <<$task>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc clearScenarioListOfTask {task} {
+  set task [self]::tasks::[join $task _]
+  if {[my existTask $task]} {
+    foreach s [$task getScenarios] {
+      my removeTraceRelation Task [$task name] contains Scenario [$s name]
+    }
+    return [$task clearScenarioList]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, task <<$task>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc getScenarioListOfTask {task} {
+  set task [self]::tasks::[join $task _]
+  if {[my existTask $task]} {
+    return [$task getScenarios]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, task <<$task>> does not exist."
+    return ""
+  }
+}
+
+Manager instproc addTaskToWorkProfile {task profile} {
+  set profile [self]::profiles::[join $profile _]
+  set task [self]::tasks::[join $task _]
+  if {[my existWorkProfile $profile]} {
+    if {[my existTask $task]} {
+      set success [$profile addTask $task]
+      if {$success} {
+	my addTraceRelation WorkProfile [$profile name] contains Task [$task name]
+      }
+      return $success
+    } else {
+      my log FAILED "[self] [self proc] FAILED, task <<$task>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, work object <<$profile>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc removeTaskFromWorkProfile {task profile} {
+  set profile [self]::profiles::[join $profile _]
+  set task [self]::tasks::[join $task _]
+  if {[my existWorkProfile $profile]} {
+    set success [$profile removeTask $task]
+    if {$success} {
+      my removeTraceRelation WorkProfile [$profile name] contains Task [$task name]
+    }
+    return $success
+  } else {
+    my log FAILED "[self] [self proc] FAILED, work profile <<$profile>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc clearTaskListOfWorkProfile {profile} {
+  set profile [self]::profiles::[join $profile _]
+  if {[my existWorkProfile $profile]} {
+    foreach task [$profile getTasks] {
+      my removeTraceRelation WorkProfile [$profile name] contains Task [$task name]
+    }
+    return [$profile clearTaskList]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, work profile <<$profile>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc getTaskListOfWorkProfile {profile} {
+  set profile [self]::profiles::[join $profile _]
+  if {[my existWorkProfile $profile]} {
+    return [$profile getTasks]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, work profile <<$profile>> does not exist."
+    return ""
+  }
+}
+
+Manager instproc getPermissionsLinkedToWorkProfile {profile} {
+  set profile [self]::profiles::[join $profile _]
+  if {[my existWorkProfile $profile]} {
+    set perms ""
+    foreach task [$profile getTasks] {
+      foreach scenario [$task getScenarios] {
+	foreach step [$scenario getSteps] {
+	  set perms [concat $perms [$step getAllTraceTargets origin-of Permission]]
+	}
+      }
+    }
+    return [lsort -unique -dictionary $perms]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, work profile <<$profile>> does not exist."
+    return ""
+  }
+}
+
+# name = name of an object (myObjective, myScenario, heavyTask, step003 ...)
+# returns the fully-qualified name of the corresponding object, e.g. ::m::objectives::myObjective
+Manager instproc getFullyQualifiedObjectName {type name} {
+  set name [join $name _]
+  switch $type {
+    "Objective" {
+      if {[my existObjective [self]::objectives::$name]} {
+	return [self]::objectives::$name
+      } 
+    }
+    "Obstacle" {
+      if {[my existObstacle [self]::obstacles::$name]} {
+	return [self]::obstacles::$name
+      } 
+    }
+    "Scenario" {
+      if {[my existScenario [self]::scenarios::$name]} {
+	return [self]::scenarios::$name
+      } 
+    }
+    "Step" {
+      if {[my existStep [self]::steps::$name]} {
+	return [self]::steps::$name
+      } 
+    }
+    "Task" {
+      if {[my existTask [self]::tasks::$name]} {
+	return [self]::tasks::$name
+      } 
+    }
+    "WorkProfile" {
+      if {[my existWorkProfile [self]::profiles::$name]} {
+	return [self]::profiles::$name
+      } 
+    }
+    "Permission" {
+      if {[my existPermission [self]::permissions::$name]} {
+	return [self]::permissions::$name
+      } 
+    }
+    "Role" {
+      if {[my existRole [self]::roles::$name]} {
+	return [self]::roles::$name
+      } 
+    }
+    "Condition" {
+      if {[my existCondition [self]::conditions::$name]} {
+	return [self]::conditions::$name
+      }
+    }
+    "ContextConstraint" {
+      if {[my existContextConstraint [self]::constraints::$name]} {
+	return [self]::constraints::$name
+      } 
+    }
+  }
+  my log FAILED "[self] [self proc] FAILED, object <<$name>> is not of type <<$type>>"
+  return FAILED
+}
+
+Manager instproc getAllTracesStartingFrom {type object} {
+  set name [my getFullyQualifiedObjectName $type $object]
+  if {$name != "FAILED"} {
+    return [$name getAllTraces]
+  } else {
+    return FAILED
+  }
+}
+
+Manager instproc isValidTraceType {type} {
+  my instvar tracetype_counterparts
+  return [info exists tracetype_counterparts($type)]
+}
+
+Manager instproc getTraceTypes {} {
+  my instvar tracetype_counterparts
+  if {[info exists tracetype_counterparts]} {
+    return [lsort -unique -dictionary [array get tracetype_counterparts]]
+  }
+  return ""
+}
+
+# from = name of an object (myObjective, myScenario, ...)
+# fromtype = type of the "from" object (Objective, Obstacle, Scenario, Step, Task, WorkProfile)
+# to = name of an object (heavyTask, easyTask, step003, ...)
+# totype = type of the "to" object (Objective, Obstacle, Scenario, Step, Task, WorkProfile)
+# tracetype = type of the trace relation (refines, subobjective, superobjective, impedes, ...)
+Manager instproc addTraceRelation {fromtype from tracetype totype to} {
+  ### temporary - can be removed when used with GUI
+  set from [join $from _]; set to [join $to _]
+  my instvar tracetype_counterparts
+  set from [my getFullyQualifiedObjectName $fromtype $from]
+  if {$from != "FAILED"} {
+    set to [my getFullyQualifiedObjectName $totype $to]
+    if {$to != "FAILED"} {
+      if {[my isValidTraceType $tracetype]} {
+	if {[$from addTrace $tracetype [string trimleft [$to info class] :] $to]} {
+	  return [$to addTrace [set tracetype_counterparts($tracetype)]\
+		      [string trimleft [$from info class] :] $from]
+	  return $success
+	}
+	return 0
+      } else {
+	my log FAILED "[self] [self proc] FAILED, <<$tracetype>> is not a valid trace type."
+	return 0
+      }
+    } else {
+      my log FAILED "[self] [self proc] FAILED, because of earlier errors."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, because of earlier errors."
+    return 0
+  }
+}
+
+Manager instproc removeTraceRelation {fromtype from tracetype totype to} {
+  my instvar tracetype_counterparts
+  set from [my getFullyQualifiedObjectName $fromtype $from]
+  if {$from != "FAILED"} {
+    set to [my getFullyQualifiedObjectName $totype $to]
+    if {$to != "FAILED"} {
+      if {[$from removeTrace $tracetype [string trimleft [$to info class] :] $to]} {
+	return [$to removeTrace [set tracetype_counterparts($tracetype)] [string trimleft [$from info class] :] $from]
+      }
+    } else {
+      my log FAILED "[self] [self proc] FAILED, because of earlier errors."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, because of earlier errors."
+    return 0
+  }
+}
+
+# objective = name of an ojective (myObjective, yourObjective, objective007, ...)
+Manager instproc addDerivedAbstractContextConditionToObjective {condition objective} {
+  set objective [self]::objectives::[join $objective _]
+  if {[my existObjective $objective]} {
+    return [$objective addDerivedAbstractContextCondition "$condition"]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, objective <<$objective>> does not exist."
+    return 0
+  }
+}
+
+# objective = name of an objective (myObjective, yourObjective, objective007, ...)
+Manager instproc removeDerivedAbstractContextConditionFromObjective {condition objective} {
+  set objective [self]::objectives::[join $objective _]
+  if {[my existObjective $objective]} {
+    return [$objective removeDerivedAbstractContextCondition $condition]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, objective <<$objective>> does not exist."
+    return 0
+  }
+}
+
+# obstacle = name of an obstacle (obstacle03, avoidFailure, ...)
+Manager instproc addDerivedAbstractContextConditionToObstacle {condition obstacle} {
+  set obstacle [self]::obstacles::[join $obstacle _]
+  if {[my existObstacle $obstacle]} {
+    return [$obstacle addDerivedAbstractContextCondition $condition]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, obstacle <<$obstacle>> does not exist."
+    return 0
+  }
+}
+
+# obstacle = name of an obstacle (obstacle03, avoidFailure, ...)
+Manager instproc removeDerivedAbstractContextConditionFromObstacle {condition obstacle} {
+  set obstacle [self]::obstacles::[join $obstacle _]
+  if {[my existObstacle $obstacle]} {
+    return [$obstacle removeDerivedAbstractContextCondition $condition]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, obstacle <<$obstacle>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc getDerivedConditionListOfObjective {objective} {
+  set objective [self]::objectives::[join $objective _]
+  if {[my existObjective $objective]} {
+    return [$objective getDerivedConditionList]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, objective <<$objective>> does not exist."
+    return ""
+  }
+}
+
+Manager instproc getDerivedConditionListOfObstacle {obstacle} {
+  set obstacle [self]::obstacles::[join $obstacle _]
+  if {[my existObstacle $obstacle]} {
+    return [$obstacle getDerivedConditionList]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, obstacle <<$obstacle>> does not exist."
+    return ""
+  }
+}
+
+Manager instproc clearDerivedConditionListOfObjective {objective} {
+  set objective [self]::objectives::[join $objective _]
+  if {[my existObjective $objective]} {
+    return [$objective clearDerivedConditionList]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, objective <<$objective>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc clearDerivedConditionListOfObstacle {obstacle} {
+  set obstacle [self]::obstacles::[join $obstacle _]
+  if {[my existObstacle $obstacle]} {
+    return [$obstacle clearDerivedConditionList]
+  } else {
+    my log FAILED "[self] [self proc] FAILED, obstacle <<$obstacle>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc exportTraceTypePairs {} {
+  my instvar tracetype_counterparts
+  if {[info exists tracetype_counterparts]} {
+    set file [open xoRET_tracetypepairs.xml.rdf w]
+    puts $file "<?xml version=\"1.0\"?>"
+    puts $file "<rdf:RDF\
+              \n  xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns\#\"\
+              \n  xmlns:re=\"http://www.xotcl.org/xoret/rdf-schema\#\">\n"
+    puts $file "  <rdf:Description ID=\"xoRET_tracetypepairs\">"
+    set alreadyexported ""
+    foreach index [array names tracetype_counterparts] {
+      if {[lsearch -exact $alreadyexported $index] == -1} {
+	set pair "$index $tracetype_counterparts($index)"
+	puts $file "    <re:tracetypepair>$pair</re:tracetypepair>"
+	eval lappend alreadyexported $pair
+      }
+    }
+    puts $file "  </rdf:Description>\n"
+    puts $file "</rdf:RDF>"
+    close $file
+    my log NORMAL "[self] [self proc], trace type pairs exported to <<xoRET_tracetypepairs.xml.rdf>>"
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, no trace type pairs defined for <<[self]>>"
+    return 0
+  }
+}
+
+Manager instproc importTraceTypePairs {} {
+  my instvar tracetype_counterparts
+  set dir [file dirname [info script]]
+  if {[file exists [file join $dir xoRET_tracetypepairs.xml.rdf]]} {
+    set file [open [file join $dir xoRET_tracetypepairs.xml.rdf] r]
+    set content [read $file]
+    close $file
+    RDFParser parser
+    parser parse $content
+    TraceTypeImportVisitor visitor -parent [self]
+    visitor interpretAll parser
+    visitor destroy
+    parser destroy
+    my log NORMAL "[self] [self proc], trace type import from\
+                       <<xoRET_tracetypepairs.xml.rdf>> completed."
+  } else {
+    my log NORMAL "[self] [self proc], file <<xoRET_tracetypepairs.xml.rdf>>\
+                       does not exist. No trace type pairs imported."
+  }
+}
+
+Manager instproc addTraceTypePair {type1 type2} {
+  my instvar tracetype_counterparts
+  if {![info exists tracetype_counterparts($type1)]} {
+    if {![info exists tracetype_counterparts($type2)]} {
+      set tracetype_counterparts($type1) $type2
+      set tracetype_counterparts($type2) $type1
+      my log NORMAL "[self] [self proc], added trace type pair <<$type1 $type2>>"
+      return 1
+    } else {
+      my log FAILED "[self] [self proc] FAILED, a trace pair\
+                         <<$type2 $tracetype_counterparts($type2)>> already exists."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, a trace pair\
+                       <<$type1 $tracetype_counterparts($type1)>> already exists."
+    return 0
+  }
+}
+
+Manager instproc removeTraceTypePair {type1 type2} {
+  my instvar tracetype_counterparts
+  if {[info exists tracetype_counterparts($type1)] && ($tracetype_counterparts($type1) == $type2)} {
+    unset tracetype_counterparts($type1)
+    unset tracetype_counterparts($type2)
+    my log NORMAL "[self] [self proc], removed trace pair <<$type1 $type2>>."
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, trace pair <<$type1 $type2>>\
+                       does not exist."
+    return 0
+  }
+}
+
+Manager instproc exportRDF {fileName} {
+    set file [open $fileName w]
+    puts $file "<?xml version=\"1.0\"?>"
+    puts $file "<rdf:RDF\
+              \n  xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns\#\"\
+              \n  xmlns:re=\"http://www.xotcl.org/xorbac/rdf-schema\#\">\n"
+    puts $file "  <rdf:Description ID=\"xoRET::objectives\">"
+    puts $file "    <rm:objectives>"
+    puts $file "      <rdf:Bag>"
+    foreach objective [my getObjectiveList] { 
+	puts $file "        <rdf:li resource=\"\#[$objective name]\"/>"
+    }
+    puts $file "      </rdf:Bag>"
+    puts $file "    </rm:objectives>"
+    puts $file "  </rdf:Description>\n"
+    puts $file "  <rdf:Description ID=\"xoRET::obstacles\">"
+    puts $file "    <rm:obstacles>"
+    puts $file "      <rdf:Bag>"
+    foreach obst [my getObstacleList] {
+	puts $file "        <rdf:li resource=\"\#[$obst name]\"/>"
+    }
+    puts $file "      </rdf:Bag>"
+    puts $file "    </rm:obstacles>"
+    puts $file "  </rdf:Description>\n"
+    puts $file "  <rdf:Description ID=\"xoRET::permissions\">"
+    puts $file "    <rm:permissions>"
+    puts $file "      <rdf:Bag>"
+    foreach perm [my getPermissionList] {
+	puts $file "        <rdf:li resource=\"\#[$perm name]\"/>"
+    }
+    puts $file "      </rdf:Bag>"
+    puts $file "    </rm:permissions>"
+    puts $file "  </rdf:Description>\n"
+    puts $file "  <rdf:Description ID=\"xoRET::scenarios\">"
+    puts $file "    <rm:scenarios>"
+    puts $file "      <rdf:Bag>"
+    foreach scenario [my getScenarioList] {
+	puts $file "        <rdf:li resource=\"\#[$scenario name]\"/>"
+    }
+    puts $file "      </rdf:Bag>"
+    puts $file "    </rm:scenarios>"
+    puts $file "  </rdf:Description>\n"
+    puts $file "  <rdf:Description ID=\"xoRET::steps\">"
+    puts $file "    <rm:steps>"
+    puts $file "      <rdf:Bag>"
+    foreach step [my getStepList] {
+	puts $file "        <rdf:li resource=\"\#[$step name]\"/>"
+    }
+    puts $file "      </rdf:Bag>"
+    puts $file "    </rm:steps>"
+    puts $file "  </rdf:Description>\n"
+    puts $file "  <rdf:Description ID=\"xoRET::tasks\">"
+    puts $file "    <rm:tasks>"
+    puts $file "      <rdf:Bag>"
+    foreach task [my getTaskList] {
+	puts $file "        <rdf:li resource=\"\#[$task name]\"/>"
+    }
+    puts $file "      </rdf:Bag>"
+    puts $file "    </rm:tasks>"
+    puts $file "  </rdf:Description>\n"
+    puts $file "  <rdf:Description ID=\"xoRET::profiles\">"
+    puts $file "    <rm:profiles>"
+    puts $file "      <rdf:Bag>"
+    foreach profile [my getWorkProfileList] {
+	puts $file "        <rdf:li resource=\"\#[$profile name]\"/>"
+    }
+    puts $file "      </rdf:Bag>"
+    puts $file "    </rm:profiles>"
+    puts $file "  </rdf:Description>\n"
+    puts $file "  <rdf:Description ID=\"xoRET::roles\">"
+    puts $file "    <rm:roles>"
+    puts $file "      <rdf:Bag>"
+      foreach role [my getRoleList] {
+	puts $file "        <rdf:li resource=\"\#[$role name]\"/>"
+    }
+    puts $file "      </rdf:Bag>"
+    puts $file "    </rm:roles>"
+    puts $file "  </rdf:Description>\n"
+    puts $file "  <rdf:Description ID=\"xoRET::conditions\">"
+    puts $file "    <rm:conditions>"
+    puts $file "      <rdf:Bag>"
+      foreach condition [my getConditionList] {
+	puts $file "        <rdf:li resource=\"\#[$condition name]\"/>"
+    }
+    puts $file "      </rdf:Bag>"
+    puts $file "    </rm:conditions>"
+    puts $file "  </rdf:Description>\n"
+    puts $file "  <rdf:Description ID=\"xoRET::constraints\">"
+    puts $file "    <rm:constraints>"
+    puts $file "      <rdf:Bag>"
+      foreach constraint [my getContextConstraintList] {
+	puts $file "        <rdf:li resource=\"\#[$constraint name]\"/>"
+    }
+    puts $file "      </rdf:Bag>"
+    puts $file "    </rm:constraints>"
+    puts $file "  </rdf:Description>\n"
+
+    close $file
+    foreach objective [my getObjectiveList] {
+	$objective exportRDF $fileName
+    }
+    foreach obst [my getObstacleList] {
+	$obst exportRDF $fileName
+    }
+    foreach perm [my getPermissionList] {
+      $perm exportRDF $fileName
+    }
+    foreach scenario [my getScenarioList] {
+      $scenario exportRDF $fileName
+    }
+    foreach step [my getStepList] {
+      $step exportRDF $fileName
+    }
+    foreach task [my getTaskList] {
+      $task exportRDF $fileName
+    }
+    foreach profile [my getWorkProfileList] {
+      $profile exportRDF $fileName
+    }
+    foreach role [my getRoleList] {
+      $role exportRDF $fileName
+    }
+    foreach condition [my getConditionList] {
+      $condition exportRDF $fileName
+    }
+    foreach constraint [my getContextConstraintList] {
+      $constraint exportRDF $fileName
+    }
+    set file [open $fileName a+]
+    puts $file "</rdf:RDF>"
+    close $file
+}
+
+Manager instproc importRDF {fileName} {
+  my instvar importinprogress
+  if {[file exists $fileName]} {
+    set file [open $fileName r]
+    set content [read $file]
+    RDFParser parser
+    parser parse $content
+    close $file
+    xoRET_RecreatorVisitor visitor -parent [self]
+    set importinprogress 1
+    visitor interpretAll parser
+    visitor destroy
+    parser destroy
+    my log NORMAL "[self] [self proc], import from <<$fileName>> completed."
+    set importinprogress 0
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, file <<$fileName>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc export_xoRBAC_RDF {fileName} {
+  set file [open $fileName w]
+  puts $file "<?xml version=\"1.0\"?>"
+  puts $file "<rdf:RDF\
+              \n  xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns\#\"\
+              \n  xmlns:rm=\"http://www.xotcl.org/xorbac/rdf-schema\#\">\n"
+  puts $file "  <rdf:Description ID=\"xoRBAC::roles\">"
+  puts $file "    <rm:roles>"
+  puts $file "      <rdf:Bag>"
+  foreach role [my getRoleList] { 
+    if {[$role name] != "Guest"} {
+      puts $file "        <rdf:li resource=\"\#[$role name]\"/>"
+    }
+  }
+  puts $file "      </rdf:Bag>"
+  puts $file "    </rm:roles>"
+  puts $file "  </rdf:Description>\n"
+  puts $file "  <rdf:Description ID=\"xoRBAC::permissions\">"
+  puts $file "    <rm:permissions>"
+  puts $file "      <rdf:Bag>"
+  foreach perm [my getPermissionList] {
+    puts $file "        <rdf:li resource=\"\#[$perm operation] [$perm object]\"/>"
+  }
+  puts $file "      </rdf:Bag>"
+  puts $file "    </rm:permissions>"
+  puts $file "  </rdf:Description>\n"
+#   puts $file "  <rdf:Description ID=\"xoRBAC::conditions\">"
+#   puts $file "    <rm:conditions>"
+#   puts $file "      <rdf:Bag>"
+#   foreach condition [my getConditionList] {
+#     puts $file "        <rdf:li resource=\"\#[$condition name]\"/>"
+#   }
+#   puts $file "      </rdf:Bag>"
+#   puts $file "    </rm:conditions>"
+#   puts $file "  </rdf:Description>\n"
+#  puts $file "  <rdf:Description ID=\"xoRBAC::constraints\">"
+#   puts $file "    <rm:constraints>"
+#   puts $file "      <rdf:Bag>"
+#   foreach constraint [my getContextConstraintList] {
+#     puts $file "        <rdf:li resource=\"\#[$constraint name]\"/>"
+#   }
+#   puts $file "      </rdf:Bag>"
+#   puts $file "    </rm:constraints>"
+#   puts $file "  </rdf:Description>\n"
+  close $file
+  foreach role [my getRoleList] { $role export_xoRBAC_RDF $fileName }
+  foreach perm [my getPermissionList] { $perm export_xoRBAC_RDF $fileName }
+#  foreach condition [my getConditionList] { $condition export_xoRBAC_RDF $fileName }
+#  foreach constraint [my getContextConstraintList] { $constraint export_xoRBAC_RDF $fileName }
+  set file [open $fileName a+]
+  puts $file "</rdf:RDF>"
+  close $file
+  return ""
+}
+
+Manager instproc bgerror {message icon buttons} {
+  xoRET_GUI::Dialog::MsgDialog md $message $icon $buttons
+}
+
+Manager instproc log {type message} {
+  ### remove comment below to print status messages to stderr 
+  puts stderr "$message"
+  if {[my guiActive]} {
+    switch $type {
+      FAILED {
+        my bgerror $message warning Ok
+      }
+      INFO {
+        my bgerror $message info Ok
+      }
+    }
+  }
+  if {![my loggingOn]} { 
+    return 
+  }
+  set file [open xoRET_MAIN_LOG a+]   
+  puts $file "[clock format [clock seconds]] -> $message"
+  close $file
+  switch $type {    
+    FAILED {
+      set file [open xoRET_FAILED_LOG a+]	    
+      puts $file "[clock format [clock seconds]] -> $message"
+      close $file
+    }
+    EXCEPTION {
+      set file [open xoRET_EXCEPTION_LOG a+]	    
+      puts $file "[clock format [clock seconds]] -> $message"
+      close $file
+    }
+    ABBORTED {
+      set file [open xoRET_ABBORTED_LOG a+]	    
+      puts $file "[clock format [clock seconds]] -> $message"
+      close $file
+    }
+    NORMAL {
+      set file [open xoRET_NORMAL_LOG a+]	    
+      puts $file "[clock format [clock seconds]] -> $message"
+      close $file
+    }
+  }
+}
+
+Manager instproc getAllAttributes {type obj} {
+  if {$type == "::Manager"} {
+    return [my getAttributes]
+  }
+  return [$obj getAttributes]       
+}
+
+Manager instproc destroy args {
+  my exportTraceTypePairs
+  my log NORMAL "[self] [self proc], <<[self class]>> object <<[self]>> destroyed."
+  next
+}
+

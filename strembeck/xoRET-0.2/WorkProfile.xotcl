@@ -1,0 +1,136 @@
+package provide xoRET::WorkProfile 0.1.1
+
+Class WorkProfile -superclass xoRETObject
+
+@ Class WorkProfile {
+  Author "Mark Strembeck"
+  Version "0.1.1"
+}
+
+WorkProfile instproc init args {
+  next
+}
+
+# task is a fully qualified name of a runtime task object
+WorkProfile instproc addTask {task} {
+  my instvar tasks
+  if {[info exists tasks]} {
+    if {[lsearch -exact $tasks $task] == -1} {
+      lappend tasks $task
+      my log NORMAL "[self] [self proc], task <<$task>> added."
+      return 1
+    } else {
+      my log FAILED "[self] [self proc] FAILED, task <<$task>> is already\
+                         registered for <<[self]>>."
+      return 0
+    }
+  }
+  lappend tasks $task
+  my log NORMAL "[self] [self proc], task <<$task>> added."
+  return 1
+}
+
+WorkProfile instproc hasTask {task} {
+  my instvar tasks
+  if {[info exists tasks]} {
+    # return index value if $task is in $tasks, -1 otherwise
+    return [lsearch -exact $tasks $task]
+  }
+  return -1
+}
+
+WorkProfile instproc getTasks {} {
+  my instvar tasks
+  if {[info exists tasks]} {
+    return $tasks
+  } 
+  return ""
+}
+
+# task is a fully-qualified name of a runtime task object
+WorkProfile instproc removeTask {task} {
+  my instvar tasks
+  if {[info exists tasks]} {
+    set index [lsearch -exact $tasks $task]
+    if {$index != -1} {
+      set tasks [lreplace $tasks $index $index]
+      my log NORMAL "[self] [self proc], task <<$task>> removed."
+      return 1
+    } else {
+      my log FAILED "[self] [self proc] FAILED, task <<$task>> is not\
+                         registered for <<[self]>>."
+      return 0
+    }
+  }
+  my log FAILED "[self] [self proc] FAILED, currently no tasks are registered\
+                     for <<[self]>>."
+  return 0
+}
+
+WorkProfile instproc clearTaskList {} {
+  my instvar tasks
+  if {[info exists tasks]} {
+    unset tasks
+  }
+  return 1
+}
+
+WorkProfile instproc exportRDF {fileName} {
+  my instvar tasks traces
+  set file [open $fileName a+]
+  puts $file "  <WORKPROFILE rdf:ID='\#[my name]'>"
+  if {[my author] != ""} {
+    puts $file "    <re:author>[my author]</re:author>"
+  }
+  if {[info exists tasks]} {
+    foreach task $tasks {
+      puts $file "    <re:task rdf:resource='\#[$task name]'/>"
+    }
+  }
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  puts $file "    <re:trace tracetype='$tracetype' targettype='$targettype'\
+                                    target='\#[$target name]'/>"
+	}
+      }
+    }
+  }
+  puts $file "    <re:modified>[my last_modified]</re:modified>"
+  puts $file "  </WORKPROFILE>\n"
+  close $file
+}
+
+WorkProfile instproc getAttributes {} {
+  my instvar traces
+  lappend all "[list Name: [my name]]"
+  lappend all "[list Author: [my author]]"
+  if {[my getTasks] != ""} {
+    foreach task [my getTasks] {
+      lappend all "[list [list Attached Task:] [$task name]]"
+    }
+  }
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  lappend all "[list Trace: [list [string trimleft [[self] info class] :] \
+                                    <<[my name]>> $tracetype $targettype <<[$target name]>>]]"
+	}
+      }
+    }
+  }
+  lappend all "[list [list Last Modified:] [my last_modified]]"
+  return $all
+}
+
+WorkProfile instproc appendToTailoredTraceDotFile {filename {totypes "all"} {tracetypes "all"}} {
+  next $filename $totypes $tracetypes diamond
+}
+
+WorkProfile instproc destroy args {
+  next
+}

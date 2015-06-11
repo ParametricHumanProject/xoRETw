@@ -1,0 +1,104 @@
+
+#### Role Introspection
+
+TestCase RoleIntrospection \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createRole roleA
+      m createPermission permA
+      m createPermission permB
+      m createPermission permC
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {RoleIntrospection::RolePermissionDirect RoleIntrospection::RolePermissionDirect2\
+		RoleIntrospection::RolePermissionDirect3 RoleIntrospection::RolePermissionDirect4\
+		RoleIntrospection::RolePermissionDirect5
+    }
+
+TestScenario RoleIntrospection::RolePermissionDirect \
+    -testScript {
+      m permRoleAssign permA roleA
+      m getAllPermsDirectlyAssignedToRole roleA
+    } \
+    -testResult {::m::permissions::permA}
+
+TestScenario RoleIntrospection::RolePermissionDirect2 \
+    -testScript {
+      m permRoleAssign permC roleA
+      m getAllPermsDirectlyAssignedToRole roleA
+    } \
+    -testResult {::m::permissions::permA ::m::permissions::permC}
+
+TestScenario RoleIntrospection::RolePermissionDirect3 \
+    -testScript {
+      m permRoleAssign permB roleA
+      m getAllPermsDirectlyAssignedToRole roleA
+    } \
+    -testResult {::m::permissions::permA ::m::permissions::permB \
+		     ::m::permissions::permC
+    }
+
+TestScenario RoleIntrospection::RolePermissionDirect4 \
+    -testScript {
+      m deleteRole roleA
+      m getAllPermsDirectlyAssignedToRole roleA
+    } \
+    -testResult {}\
+    -cleanupScript {m createRole roleA}
+
+TestScenario RoleIntrospection::RolePermissionDirect5 \
+    -testScript {
+      m getAllPermsDirectlyAssignedToRole roleA
+    } \
+    -testResult {}
+
+#### Permission Introspection
+
+TestCase PermIntrospection \
+    -setupScript {
+      package require -exact xoRET 0.2
+      Manager m
+      m createRole roleA
+      m createRole roleB
+      m createRole roleC
+      m createPermission permA
+    } \
+    -cleanupScript {
+      m destroy
+    } \
+    -order {PermIntrospection::PermRoleDirect PermIntrospection::PermRoleDirect2\
+		PermIntrospection::PermRoleDirect3 PermIntrospection::PermRoleDirect4
+    }
+
+TestScenario PermIntrospection::PermRoleDirect \
+    -testScript {
+      m permRoleAssign permA roleA
+      m getAllRolesDirectlyOwningPerm permA
+    } \
+    -testResult {::m::roles::roleA}
+
+TestScenario PermIntrospection::PermRoleDirect2 \
+    -testScript {
+      m permRoleAssign permA roleC
+      m getAllRolesDirectlyOwningPerm permA
+    } \
+    -testResult {::m::roles::roleA ::m::roles::roleC}
+
+
+TestScenario PermIntrospection::PermRoleDirect3 \
+    -testScript {
+      m permRoleAssign permA roleB
+      m getAllRolesDirectlyOwningPerm permA
+    } \
+    -testResult {::m::roles::roleA ::m::roles::roleB\
+		     ::m::roles::roleC}
+
+TestScenario PermIntrospection::PermRoleDirect4 \
+    -testScript {
+      m deletePermission permA
+      m getAllRolesDirectlyOwningPerm permA
+    } \
+    -testResult {} 

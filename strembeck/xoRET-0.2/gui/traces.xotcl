@@ -1,0 +1,648 @@
+# (c) Mark Strembeck
+
+package provide xoRET::GUI::Traces 0.1
+#package require Tkspline
+#package require Tcldot
+
+Class xoRET_GUI::Traces
+
+xoRET_GUI::Traces instproc init args {
+  my instvar top pm treeobj obj
+  set pm [lindex $args 0]; set treeobj [lindex $args 1]; set obj [lindex $args 2]
+  set top [toplevel .[[self class] autoname traces%07d] -relief raised -borderwidth 2]
+  wm protocol $top WM_DELETE_WINDOW "[self] destroy"
+  next 
+}
+
+xoRET_GUI::Traces instproc destroy args {
+  my instvar top
+  destroy $top
+  next
+}
+
+Class xoRET_GUI::Traces::Create -superclass xoRET_GUI::Traces
+
+xoRET_GUI::Traces::Create instproc init args {
+  next
+  my instvar pm top obj fromtypecombo totypecombo ttcombo listbox\
+      toobjcombo fromobjcombo rightframe
+
+  set objecttypes "Condition ContextConstraint Objective Obstacle\
+                   Permission Role Scenario Step Task WorkProfile"
+  # left frame
+  set leftframe [frame $top.leftframe]
+  # upper left frame
+  set upperleftframe [TitleFrame $leftframe.upperframe -text "Trace Definition" -ipad 2]
+  set ulf [$upperleftframe getframe]
+  # from frame
+  set fromframe [frame $ulf.fromframe]
+  set ftframe [frame $fromframe.ftf]
+  set fromtypelabel [Label $ftframe.l -text "Start type:" -anchor w]
+  set fromtypecombo [ComboBox $ftframe.ftc -values "$objecttypes" -text "" \
+			 -helptext "Choose the object-type the trace should start from" \
+			 -width 15 \
+			 -background white \
+			 -modifycmd "[self] updateFromObjCombo"]
+  pack $fromtypelabel $fromtypecombo -side top -padx 2 -pady 2 -fill x
+  set foframe [frame $fromframe.fof]
+  set fromobjlabel [Label $foframe.l -text "Start object:" -anchor w]
+  set fromobjcombo [ComboBox $foframe.foc -values "" -text "" \
+			-helptext "Choose the start-object of the trace" \
+			-width 25 \
+			-background white \
+			-modifycmd "[self] updateListbox"]
+  pack $fromobjlabel $fromobjcombo -side top -padx 2 -pady 2 -fill x
+  pack $ftframe $foframe -side left -padx 2 -pady 2 -fill x
+  # trace-type frame
+  set ttframe [frame $ulf.ttframe]
+  set ttlabel [Label $ttframe.l -text "Trace type:" -anchor w]
+  set ttcombo [ComboBox $ttframe.ttc -values "[$pm getTraceTypes]" -text "" \
+		   -helptext "Choose a trace-type" \
+		   -width 15 \
+		   -background white]
+  pack $ttlabel $ttcombo -side top -padx 2 -pady 2 -anchor w
+  # to frame
+  set toframe [frame $ulf.toframe]
+  set totypeframe [frame $toframe.totypef]
+  set totypelabel [Label $totypeframe.l -text "Destination type:" -anchor w]
+  set totypecombo [ComboBox $totypeframe.c -values "$objecttypes" -text "" \
+		       -helptext "Chosse the object-type the traces should point to" \
+		       -width 15 \
+		       -background white \
+		       -modifycmd "[self] updateToObjCombo"]
+  pack $totypelabel $totypecombo -side top -padx 2 -pady 2 -fill x
+  set toobjframe [frame $toframe.toobjf]
+  set toobjlabel [Label $toobjframe.l -text "Destination object:" -anchor w]
+  set toobjcombo [ComboBox $toobjframe.c -values "" -text "" \
+		      -helptext "Choose the destination object oft the trace" \
+		      -width 25 \
+		      -background white]
+  pack $toobjlabel $toobjcombo -side top -padx 2 -pady 2 -fill x
+  pack $totypeframe $toobjframe -side left -padx 2 -pady 2 -fill x
+  # pack left upper frame
+  pack $fromframe $ttframe $toframe -side top -padx 2 -pady 2 -fill x
+  
+  # lower left frame
+  set lowerleftframe [TitleFrame $leftframe.lowerframe -text "Options:" -ipad 5]
+  set lft [$lowerleftframe getframe]
+  set addbutton [Button $lft.add -text "Create Trace" \
+		     -command "[self] addTrace"]
+  set closebutton [Button $lft.close -text "Close Dialog" \
+		       -command "[self] destroy"]
+  pack $addbutton $closebutton -side left -padx 2 -pady 3 -fill x -expand yes
+  # pack left frame
+  pack $upperleftframe $lowerleftframe -side top -padx 2 -pady 3 -fill both
+
+  # right frame
+  set rightframe [TitleFrame $top.rightframe -text "Trace List" -ipad 5]
+  set rf [$rightframe getframe]
+  set sw [ScrolledWindow $rf.sw]
+  set listbox [ListBox::create $sw.listbox -height 12 -width 50 \
+			    -highlightthickness 0 \
+			    -background white \
+			    -selectmode single \
+			    -multicolumn false]
+  $sw setwidget $listbox
+  pack $sw -fill both -expand yes
+  set deletebutton [Button $rf.delete -text "Delete Trace" -width 12 \
+			-command "[self] deleteTrace"]
+  pack $deletebutton -side bottom -padx 2 -pady 3 -fill x
+
+  # pack top-level frame
+  pack $leftframe -side left -padx 2 -fill both
+  pack $rightframe -side left -padx 2 -pady 3 -fill both
+
+  if {$obj != ""} {
+    $fromtypecombo configure -text "[string trimleft [$obj info class] :]"
+    foreach i [[$obj info class] info instances] {
+      lappend values [$i name]
+    }
+    $fromobjcombo configure -values "[lsort -dictionary $values]" -state normal -text "[$obj name]"
+    $rightframe configure -text "Traces starting from \
+                                 [string trimleft [$obj info class] :] [$obj name]"
+    foreach trace [$obj getAllTraces] {
+      set text "[lindex $trace 0] <<[lindex $trace 1]>> [lindex $trace 2]\
+                [lindex $trace 3] <<[lindex $trace 4]"
+      $listbox insert end [join $trace _] \
+	  -text "$text" \
+	  -image [Bitmap::get trace]\
+	  -data "$trace"
+    }
+  }
+
+  wm minsize $top 800 278
+  wm maxsize $top 800 278
+  wm withdraw $top
+  wm title $top "Manage traces"
+  BWidget::place $top 0 0 center
+  wm geometry $top 800x278+430+320
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Traces::Create instproc updateListbox {} {
+  my instvar pm listbox fromtypecombo fromobjcombo rightframe
+  set type [string trim [$fromtypecombo cget -text]]
+  set obj [string trim [$fromobjcombo cget -text]]
+  set traces [$pm getAllTracesStartingFrom $type $obj]
+  if {![string equal "$traces" "FAILED"]} {
+    $listbox delete [$listbox items]
+    foreach trace $traces {
+      set text "[lindex $trace 0] <<[lindex $trace 1]>> [lindex $trace 2]\
+                [lindex $trace 3] <<[lindex $trace 4]>>"
+      $listbox insert end [join $trace _] \
+	  -text "$text" \
+	  -image [Bitmap::get trace]\
+	  -data "$trace"
+    }
+    $rightframe configure -text "Traces starting from $type $obj"
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "An error occurred - it looks lide $type $obj\
+                                     does not exist in $pm. This, however, should\
+                                     never take place. Please send a bug report to\
+                                     strembeck@acm.org" error Ok
+  }
+}
+
+xoRET_GUI::Traces::Create instproc updateFromObjCombo {} {
+  my instvar fromtypecombo fromobjcombo
+  set type [string trim [$fromtypecombo cget -text]]
+  foreach i [$type info instances] {
+    lappend values [$i name]
+  }
+  $fromobjcombo configure -values "[lsort -dictionary $values]" -state normal -text ""
+  update idletasks
+}
+
+xoRET_GUI::Traces::Create instproc updateToObjCombo {} {
+  my instvar totypecombo toobjcombo
+  set type [string trim [$totypecombo cget -text]]
+  foreach i [$type info instances] {
+    lappend values [$i name]
+  }
+  $toobjcombo configure -values "[lsort -dictionary $values]" -state normal -text ""
+  update idletasks
+}
+
+xoRET_GUI::Traces::Create instproc addTrace {} {
+  my instvar pm fromtypecombo totypecombo ttcombo fromobjcombo toobjcombo treeobj listbox
+  set fromtype [string trim [$fromtypecombo cget -text]]
+  set fromobj [string trim [$fromobjcombo cget -text]]
+  set tracetype [string trim [$ttcombo cget -text]]
+  set totype [string trim [$totypecombo cget -text]]
+  set toobj [string trim [$toobjcombo cget -text]]
+  if {($fromtype != "") && ($fromobj != "") && ($tracetype != "") && ($totype != "") && ($toobj != "")} {
+    set success [$pm addTraceRelation $fromtype $fromobj $tracetype $totype $toobj]
+    if {$success} {
+      set trace "$fromtype $fromobj $tracetype $totype $toobj"
+      set text "$fromtype <<$fromobj>> $tracetype $totype <<$toobj>>"
+      if {![$listbox exists $trace]} {
+	$listbox insert end [join $trace _] \
+	    -text "$text" \
+	    -image [Bitmap::get trace] \
+	    -data "$trace"
+	$treeobj redrawTree
+      }
+    }
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You must enter a start object, a trace type, and a \
+                                     destination object in order to create a new trace." info Ok
+  }
+}
+
+xoRET_GUI::Traces::Create instproc deleteTrace {} {
+  my instvar pm listbox treeobj
+  set item [$listbox selection get]
+  if {$item != ""} {
+    set trace [$listbox itemcget $item -data]
+    set success [eval $pm removeTraceRelation $trace]
+    if {$success} {
+      $listbox delete $item
+      $treeobj redrawTree
+      update idletasks
+    }
+  } else {
+    xoRET_GUI::Dialog::MsgDialog md "You have to choose a trace first." info Ok
+  }
+}
+
+Class xoRET_GUI::Traces::Introspect -superclass xoRET_GUI::Traces
+
+xoRET_GUI::Traces::Introspect instproc init args {
+  next
+  my instvar pm top checkvar radiovar graph c font zoominfactor zoomoutfactor\
+      zoomdepth zoomfont tracecheck
+  set graph [dotnew digraph]
+
+  set descmenu [my buildTraceMenu]
+  set mainframe [MainFrame $top.mainframe -menu $descmenu]
+  $mainframe showstatusbar none
+  set main [$mainframe getframe]
+  
+  # left frame
+  set leftframe [TitleFrame $main.upperframe -text "Options" -ipad 2]
+  set f [$leftframe getframe]
+  # the object namespace is required to access the checkvar and radiovar variables
+  my requireNamespace
+  set objchk [checkbutton $f.objchk -text "Objectives" \
+		  -variable [self]::checkvar(Objective) -command "[self] redraw"]
+  set obschk [checkbutton $f.obschk -text "Obstacles" \
+		  -variable [self]::checkvar(Obstacle) -command "[self] redraw"]
+  set cndchk [checkbutton $f.cndchk -text "Conditions" \
+		  -variable [self]::checkvar(Condition) -command "[self] redraw"]
+  set cocchk [checkbutton $f.cocchk -text "Context Constraints" \
+		  -variable [self]::checkvar(ContextConstraint) -command "[self] redraw"]
+  set perchk [checkbutton $f.perchk -text "Permissions" \
+		  -variable [self]::checkvar(Permission) -command "[self] redraw"]
+  set scechk [checkbutton $f.scechk -text "Scenarios" \
+		  -variable [self]::checkvar(Scenario) -command "[self] redraw"]
+  set stechk [checkbutton $f.stechk -text "Steps" \
+		  -variable [self]::checkvar(Step) -command "[self] redraw"]
+  set taschk [checkbutton $f.taschk -text "Tasks" \
+		  -variable [self]::checkvar(Task) -command "[self] redraw"]
+  set wopchk [checkbutton $f.wopchk -text "Workprofiles" \
+		  -variable [self]::checkvar(WorkProfile) -command "[self] redraw"]
+  set rolchk [checkbutton $f.rolchk -text "Roles" \
+		  -variable [self]::checkvar(Role) -command "[self] redraw"]
+
+  pack  $cndchk $cocchk $objchk $obschk $perchk $scechk\
+      $stechk $rolchk $taschk $wopchk -side top -pady 2 -anchor w
+
+  set closebutton [Button $f.close -text "Close Dialog" -command "[self] destroy"]
+  set selcrdo [radiobutton $f.selcrdo -variable [self]::radiovar -indicator off \
+		   -value select -image pointer -command "[self] setmode"]
+  set zoomrdo [radiobutton $f.zoomrdo -variable [self]::radiovar -indicator off \
+		   -value zoom -image magnify -command "[self] setmode"]
+  pack $closebutton -side left -fill x -expand yes -pady 3 -anchor s
+  pack $selcrdo $zoomrdo -side left -anchor s -padx 2 -pady 3
+
+  # right frame
+  set rightframe [TitleFrame $main.right -text "Trace relations" -ipad 5]
+  set f [$rightframe getframe]
+  set canvasframe [frame $f.a]
+  set hscrollframe [frame $f.b]
+  set c [canvas $canvasframe.c -cursor crosshair \
+	     -relief sunken \
+	     -width 0 \
+	     -background white \
+	     -height 0 \
+	     -borderwidth 0]
+  set hscroll [scrollbar $hscrollframe.hs -orient horiz -relief sunken -command "$c xview"]
+  set vscroll [scrollbar $canvasframe.vs -relief sunken -command "$c yview"]
+  $c configure -xscrollcommand "$hscroll set" -yscrollcommand "$vscroll set" 
+  pack $vscroll -side right -fill y
+  pack $hscroll -side left -expand yes -fill x 
+  pack $c -expand yes -fill both   
+  pack $canvasframe -expand yes -fill both
+  pack $hscrollframe -side bottom -fill x
+  
+  # pack mainframe
+  pack $leftframe -side left -fill y -anchor w
+  pack $rightframe -side left -fill both -expand yes
+  pack $mainframe -fill both -expand yes
+
+  foreach v {Objective Obstacle Condition ContextConstraint\
+		 Permission Scenario Step Task WorkProfile Role} {
+    set checkvar($v) 1
+  }
+  foreach t [$pm getTraceTypes] {
+    set tracecheck($t) 1
+  }
+  set font "helvetica 11"
+  # initialize zoom factors
+  set zoominfactor 1.11
+  set zoomoutfactor [expr {1.0 / $zoominfactor}]
+  set zoomdepth 1.0
+  set zoomfont $font
+
+  set radiovar zoom
+  my setmode
+  my redraw
+
+  wm minsize $top 800 400
+  wm withdraw $top
+  wm title $top "Introspect trace relations"
+  BWidget::place $top 0 0 center
+  wm geometry $top 800x400+430+320
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Traces::Introspect instproc buildTraceMenu args {
+  my instvar pm tracecheck
+  set tracetypes [$pm getTraceTypes]
+  foreach t $tracetypes {
+    set m [my buildMenu checkbutton "$t" "" "Show/hide trace relations of type $t" {} \
+	       -variable "[self]::tracecheck($t)" -command "[self] redraw"]
+    lappend tracemenu $m
+  }
+  lappend filemenu [my buildMenu command {E&xit} {} Exit {} -command exit]
+  return [list "&File" all file 0 $filemenu "&TraceTypes" all tracetypes 1 $tracemenu]
+}
+
+xoRET_GUI::Traces::Introspect instproc allBoxesChecked {} {
+  my instvar checkvar tracecheck
+  foreach i [array names checkvar] {
+    if {![set checkvar($i)]} {
+      return 0
+    }
+  }
+  foreach i [array names tracecheck] {
+    if {![set tracecheck($i)]} {
+      return 0
+    }
+  }
+  return 1
+}
+
+xoRET_GUI::Traces::Introspect instproc getCheckedTypes {} {
+  my instvar checkvar
+  set checked ""
+  foreach t [array names checkvar] {
+    if {[set checkvar($t)]} {
+      lappend checked $t
+    }
+  }
+  return [lsort -dictionary $checked]
+}
+
+xoRET_GUI::Traces::Introspect instproc getCheckedTraces {} {
+  my instvar tracecheck
+  set checked ""
+  foreach t [array names tracecheck] {
+    if {[set tracecheck($t)]} {
+      lappend checked $t
+    }
+  }
+  return $checked
+}
+
+xoRET_GUI::Traces::Introspect instproc redraw {} {
+  my instvar checkvar pm graph
+  my clear
+  set dotfile "[pwd]/[string trimleft [self]-dot.dot :]"
+  if {[my allBoxesChecked]} {
+    $pm exportTailoredTraceDotFile $dotfile
+  } else {
+    set types [my getCheckedTypes]
+    set traces [my getCheckedTraces]
+    $pm exportTailoredTraceDotFile $dotfile "$types" "$traces"
+  }
+  if {[catch {open $dotfile r} fid]} {
+    xoRET_GUI::Dialog::MsgDialog md "Unable to open dot file: $dotfile" warning Ok
+    return
+  }
+  if {[catch {dotread $fid} graph]} {
+    xoRET_GUI::Dialog::MsgDialog md "Invalid dot file: $dotfile" warning Ok
+    close $fid
+    file delete $dotfile
+    return
+  }
+  close $fid
+  file delete $dotfile
+  my layout
+}
+
+xoRET_GUI::Traces::Introspect instproc clear {} {
+  my instvar graph c
+#  set f [open temp.dot w]
+#  $graph write $f dot
+#  close $f
+  $c delete all
+  $graph delete
+  set graph [dotnew digraph]
+}
+
+xoRET_GUI::Traces::Introspect instproc layout {} {
+  my instvar graph c
+  $c delete all
+  $graph layout
+  eval [$graph render]
+  $c configure -scrollregion [$c bbox all]
+}
+   
+xoRET_GUI::Traces::Introspect instproc setmode {} {
+  my instvar radiovar c repeat
+  switch $radiovar {
+    "select" {
+      $c configure -cursor {arrow black}
+      bind $c <ButtonPress-1> "[self] startPath %x %y"
+      bind $c <B1-Motion> "[self] extendPath %x %y"
+      bind $c <ButtonRelease-1> "[self] completePath %x %y"
+
+      bind $c <ButtonPress-2> ""
+      
+      bind $c <ButtonPress-3> ""
+      bind $c <ButtonRelease-3> ""
+    }
+    "zoom" {
+      $c configure -cursor {target black}
+      bind $c <ButtonPress-1> "[self] zoom in"
+      bind $c <B1-Motion> ""
+      bind $c <ButtonRelease-1> "catch {after cancel \$[self]::repeat}"
+
+      bind $c <ButtonPress-2> "[self] zoomReset"
+      
+      bind $c <ButtonPress-3> "[self] zoom out"
+      bind $c <ButtonRelease-3> "catch {after cancel \$[self]::repeat}"
+    }
+  }
+}
+
+xoRET_GUI::Traces::Introspect instproc zoom {inout} {
+  my instvar c zoominfactor zoomoutfactor zoomdepth zoomfont repeat font graph
+  if {$inout == "in"} {
+    set factor $zoominfactor 
+  } else {
+    set factor $zoomoutfactor
+  }
+  $c scale all 0 0 $factor $factor
+  set zoomdepth [expr {$zoomdepth * $factor}]
+  set zoomfont  [lreplace $font 1 1 [expr int([lindex $font 1] * $zoomdepth)]]
+  foreach n [$graph listnodes] {
+    set height [$n queryattributes height]
+    set width [$n queryattributes width]
+    set height [expr {$height * $factor}]
+    set width [expr {$width * $factor}]
+    $n setattributes fontsize [lindex $zoomfont 1] height $height width $width
+  }
+  foreach e [$graph listedges] {
+    set minlen [$e queryattributes minlen]
+    if {$zoomdepth > 2} {
+      $e setattributes fontsize [lindex $zoomfont 1] minlen 2
+    } else {
+      $e setattributes fontsize [lindex $zoomfont 1] minlen 1      
+    }
+  }
+  my layout
+  set repeat [after 100 "[self] zoom $inout"]
+}
+
+xoRET_GUI::Traces::Introspect instproc zoomReset {} {
+  my instvar zoomdepth zoomfont font c graph
+  set zoomdepth [expr 1.0/$zoomdepth]
+  $c scale all 0 0 $zoomdepth $zoomdepth
+  set zoomfont $font
+  foreach n [$graph listnodes] {
+    set height [$n queryattributes height]
+    set width [$n queryattributes width]
+    set height [expr {$height * $zoomdepth}]
+    set width [expr {$width * $zoomdepth}]
+    $n setattributes fontname [lindex $zoomfont 0] \
+ 	fontsize [lindex $zoomfont 1] height $height width $width
+  }
+  foreach e [$graph listedges] {
+    $e setattributes minlen 1 fontsize [lindex $zoomfont 1]
+  }
+  set zoomdepth 1.0
+  my layout
+  $c configure -scrollregion [$c bbox all]
+}
+
+xoRET_GUI::Traces::Introspect instproc clearSelectedPathElements {} {
+  my instvar c graph
+  foreach edge [$graph listedges] {
+    $edge setattributes color black
+  }
+  foreach node [$graph listnodes] {
+    $node setattributes fillcolor white
+  }
+  $c dtag selected
+  my layout
+}
+
+xoRET_GUI::Traces::Introspect instproc setSelectedPathElement {obj color} {
+  my instvar c
+  if {[string equal -length 4 "node" $obj]} {
+    $obj setattributes style filled fillcolor $color
+  } else {
+    $obj setattributes color $color
+  }
+  $c addtag selected withtag $obj
+}
+
+xoRET_GUI::Traces::Introspect instproc getOverlappingObj {x y} {
+  my instvar c
+  foreach item [$c find overlapping $x $y $x $y] {
+    foreach tag [$c gettags $item] {
+      if {[string first "node" $tag] == 1} {
+	return [string range $tag 1 end]
+      }
+    }
+  }
+  return ""
+}
+
+xoRET_GUI::Traces::Introspect instproc startPath {x y} {
+  my instvar startobj c pathtail 
+  set x [$c canvasx $x]
+  set y [$c canvasy $y]
+  set obj [my getOverlappingObj $x $y]
+  if {[string length $obj]} {
+    if {[lsearch [$c gettags $obj] selected] == -1
+	|| [string compare [$c itemcget $obj -fill] SkyBlue]} {
+      my clearSelectedPathElements
+      my setSelectedPathElement $obj green2
+    } else {
+      my setSelectedPathElement $obj gold
+    }
+    set startobj [$c create line $x $y $x $y -fill gold -arrow last]
+  } else {
+    # selection start is not over a node
+    my clearSelectedPathElements
+  }
+  set pathtail $obj
+}
+
+xoRET_GUI::Traces::Introspect instproc extendPath {x y} {
+  my instvar startobj pathtail c
+  set pos [$c coords $startobj]
+  if {$pathtail != {}} {
+    $c coords $startobj [lindex $pos 0] [lindex $pos 1] [$c canvasx $x] [$c canvasy $y]
+  }
+}
+
+xoRET_GUI::Traces::Introspect instproc completePath {x y} {
+  my instvar startobj pathtail c
+  set x [$c canvasx $x]
+  set y [$c canvasy $y]
+  $c delete $startobj 
+  set startobj ""
+  if {[string length $pathtail]} {
+    set obj [my getOverlappingObj $x $y]
+    if {[string equal $pathtail $obj]} {
+      set obj ""
+    }
+    set i 0
+    # if obj is "" we get the spanning tree
+    # else we get the shortest path
+    foreach {n e m} [[self] shortestPath $pathtail $obj] {
+      my setSelectedPathElement $m gold
+      my setSelectedPathElement $e gold
+      incr i
+    }
+    # only if non-zero shortest path
+    if {$i && [string length $obj]} {
+      my setSelectedPathElement $obj SkyBlue
+    }
+  }
+  my layout
+}
+
+xoRET_GUI::Traces::Introspect instproc getHeadNode {edge tail} {
+  set nodes [$edge listnodes]
+  set index [lsearch -exact $nodes $tail]
+  return [string trim [lreplace $nodes $index $index]]
+}
+
+# breadth first search for the shortest path;
+# if head parameter is empty for the spanning tree
+xoRET_GUI::Traces::Introspect instproc shortestPath {tail {head ""}} {
+  set visited($tail) [list {} {}]
+  set result ""
+  for {set this $tail} {[llength $this]} {set this $nextnode} {
+    set nextnode ""
+    foreach n $this {
+      foreach e [$n listoutedges] {
+	set m [[self] getHeadNode $e $n]
+	if {![info exists visited($m)]} {
+	  set visited($m) [list $n $e]
+	  lappend nextnode $m
+	}
+	if {[string equal $m $head]} {
+	  # return shortest path
+	  for {set m $head} {[string compare $m $tail]} {set m $n} {
+	    foreach {n e} $visited($m) {break}
+	    lappend result $n $e $m
+	  }
+	  return $result
+	}
+      }
+    }
+  }
+  if {[string equal $head {}]} {
+    # return spanning tree
+    foreach m [array names visited] {
+      foreach {n e} $visited($m) {break}
+      if {[string length $n]} {
+	lappend result $n $e $m
+      }
+    }
+    return $result
+  }
+  return ""
+}
+
+
+xoRET_GUI::Traces::Introspect instproc buildMenu {type name {tags ""} {description ""} {accelerator ""} args} {
+  set m [list $type $name $tags $description $accelerator]
+  foreach {option value} $args {
+    lappend m $option $value
+  }
+#  return [list $m]
+  return $m
+}

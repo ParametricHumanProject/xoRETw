@@ -1,0 +1,422 @@
+# (c) Mark Strembeck
+
+package provide xoRET::GUI::Tree 0.2
+
+Class xoRET_GUI::Tree
+
+xoRET_GUI::Tree instproc init args {
+  my instvar root frame tree lsw
+  set frame [lindex $args 0]; set root [lindex $args 1]
+
+  set pw    [PanedWindow $frame.pw -side top]
+  set pane  [$pw add -weight 1]
+  # tree
+  set title [TitleFrame $pane.lf -text "xoRET Browser" -ipad 5]
+  set sw    [ScrolledWindow [$title getframe].sw \
+		 -relief sunken -borderwidth 2]
+  set tree  [::Tree $sw.tree \
+		 -relief flat -borderwidth 0 -width 15 -highlightthickness 0\
+		 -redraw 0 -dropenabled 1 -dragenabled 1 \
+		 -dragevent 3 \
+		 -background white \
+		 -opencmd   "[self] moddir 1" \
+		 -closecmd  "[self] moddir 0"]
+  # the opened/closed node is appended to the "opencmd/closecmd" respectively
+  $sw setwidget $tree
+  pack $sw    -side top  -expand yes -fill both
+  pack $title -fill both -expand yes
+
+  # listbox
+  set pane [$pw add -weight 2]
+  set lf   [TitleFrame $pane.lf -text "Properties" -ipad 5]
+  set lsw   [ScrolledWindow [$lf getframe].lsw \
+		-scrollbar both -auto none -relief sunken -borderwidth 2]
+  my buildList
+  pack $lsw $lf -fill both -expand yes
+  pack $pw -fill both -expand yes
+
+  # note that for "bindText" the node idenfier that is associated 
+  # with an event is appended to the command
+  $tree bindText  <ButtonPress-1>        "[self] select tree 1"
+  $tree bindText  <Double-ButtonPress-1> "[self] select tree 2"
+  $tree bindImage <ButtonPress-1>        "[self] select tree 1"
+  $tree bindText  <ButtonPress-3>        "[self] create_cmenu %X %Y"
+  my draw
+}
+
+xoRET_GUI::Tree instproc buildList {} {
+  my instvar list lsw
+  set list [ListBox::create $lsw.lb \
+		-relief flat -borderwidth 0 \
+		-dragevent 3 \
+		-background white \
+		-dropenabled 1 -dragenabled 1 \
+		-width 20 -highlightthickness 0 -multicolumn true \
+		-redraw 1 -dragenabled 1]
+  $list bindText  <ButtonPress-1>        "[self] select list 1"
+  $list bindText  <Double-ButtonPress-1> "[self] select list 2"
+  $list bindImage <Double-ButtonPress-1> "[self] select list 2"
+  $lsw setwidget $list
+}
+
+xoRET_GUI::Tree instproc draw {} {
+  my instvar root tree lsw top
+
+  $tree insert end root home -text $root -data $root \
+      -open 1 -image [Bitmap::get openfold]
+  my getdir home $root
+  my select tree 1 home
+  $tree configure -redraw 1
+  
+  # ScrollView
+  set top [toplevel .top -relief raised -borderwidth 2]
+  wm protocol $top WM_DELETE_WINDOW "[self] destroy"
+  
+  wm overrideredirect $top 1
+  wm withdraw $top
+  wm transient $top .
+  ScrollView $top.sv -window $tree -fill black
+  pack $top.sv -fill both -expand yes
+}
+
+xoRET_GUI::Tree instproc redrawTree {} {
+  my instvar root tree list mclist
+  set selection [$tree selection get]
+  regsub -all "::" [list ${root}::objectives ${root}::obstacles  ${root}::conditions \
+			${root}::constraints ${root}::steps ${root}::scenarios \
+			${root}::permissions ${root}::tasks \
+			${root}::profiles ${root}::roles] _ categories
+  foreach w "list mclist" {
+    if {[info exists $w]} { 
+      destroy [set $w]
+      unset $w
+    }
+  }
+  foreach n $categories {
+    if {[$tree itemcget n:$n -open] == 1} {
+      lappend opennodes n:$n
+    }
+  }
+  foreach n $categories {
+    $tree delete [$tree nodes n:$n]
+  }
+  foreach n $categories {
+    my getdir n:$n [$tree itemcget n:$n -data]
+  }
+  if {[info exists opennodes]} {
+    foreach n $opennodes {
+      $tree opentree $n
+    }
+  }
+  if {[$tree exists $selection]} {
+    $tree selection set $selection
+    my select_node $selection
+  } else {
+    $tree selection set home
+    my select_node home
+  }
+}
+
+xoRET_GUI::Tree instproc expandDirs {} {
+  my instvar tree
+  $tree opentree home
+}
+
+xoRET_GUI::Tree instproc collapseDirs {} {
+  my instvar tree root
+  regsub -all "::" [list ${root}::objectives ${root}::obstacles ${root}::conditions \
+			${root}::constraints ${root}::steps ${root}::scenarios \
+			${root}::permissions ${root}::tasks \
+			${root}::profiles ${root}::roles] _ dirs
+  foreach d $dirs {
+    $tree closetree n:$d
+  }
+}
+
+xoRET_GUI::Tree instproc getdir {parent path} {
+  my instvar tree
+  set lentries {}
+  if {[$path istype "Manager"]} {
+    set nodes [list ${path}::objectives ${path}::obstacles ${path}::conditions \
+		   ${path}::constraints ${path}::steps ${path}::scenarios \
+		   ${path}::permissions ${path}::tasks \
+		   ${path}::profiles ${path}::roles]
+
+  } else {
+    set nodes [lsort -dictionary [$path info children]]
+  }
+  foreach n $nodes {
+    regsub -all "::" $n _ x
+    $tree insert end $parent n:$x \
+	-drawcross allways \
+	-data      $n
+   set type [$n info class]
+    switch $type {
+      "::Objective" {
+	$tree itemconfigure n:$x -image [Bitmap::get goal] -text "::[$n name]" 
+      }
+      "::Obstacle" {
+	$tree itemconfigure n:$x -image [Bitmap::get dynamite] -text "::[$n name]" 
+      }
+      "::Condition" {
+	$tree itemconfigure n:$x -image [Bitmap::get condition] -text "::[$n name]" 
+      }
+      "::ContextConstraint" {
+	$tree itemconfigure n:$x -image [Bitmap::get constraint] -text "::[$n name]" 
+      }
+      "::Scenario" {
+	$tree itemconfigure n:$x -image [Bitmap::get film] -text "::[$n name]"
+      }
+      "::Step" {
+	$tree itemconfigure n:$x -image [Bitmap::get hammer] -text "::[$n name]" 
+      }
+      "::Permission" {
+	$tree itemconfigure n:$x -image [Bitmap::get key] -text "::[$n name]" 
+      }
+      "::Role" {
+	$tree itemconfigure n:$x -image [Bitmap::get facemask] -text "::[$n name]" 
+      }
+      "::Task" {
+	$tree itemconfigure n:$x -image [Bitmap::get task] -text "::[$n name]" 
+      }
+      "::WorkProfile" {
+	$tree itemconfigure n:$x -image [Bitmap::get profile] -text "::[$n name]" 
+      }
+      default {
+	$tree itemconfigure n:$x -image [Bitmap::get folder] -text "$n" 
+      }
+    }
+  }
+  $tree itemconfigure $parent -drawcross auto
+}
+
+xoRET_GUI::Tree instproc moddir {idx node} {
+  my instvar tree
+  if { $idx && [$tree itemcget $node -drawcross] == "allways" } {
+    my getdir $node [$tree itemcget $node -data]
+    set type [[$tree itemcget $node -data] info class]
+    switch $type {
+      "::Objective" {
+	$tree itemconfigure $node -image [Bitmap::get goal] 
+      }
+      "::Obstacle" {
+	$tree itemconfigure $node -image [Bitmap::get dynamite] 
+      }
+      "::Condition" {
+	$tree itemconfigure $node -image [Bitmap::get condition] 
+      }
+      "::ContextConstraint" {
+	$tree itemconfigure $node -image [Bitmap::get constraint] 
+      }
+      "::Scenario" {
+	$tree itemconfigure $node -image [Bitmap::get film] 
+      }
+      "::Step" {
+	$tree itemconfigure $node -image [Bitmap::get hammer] 
+      }
+      "::Permission" {
+	$tree itemconfigure $node -image [Bitmap::get key] 
+      }
+      "::Role" {
+	$tree itemconfigure $node -image [Bitmap::get facemask] 
+      }
+      "::Task" {
+	$tree itemconfigure $node -image [Bitmap::get task] 
+      }
+      "::WorkProfile" {
+	$tree itemconfigure $node -image [Bitmap::get profile] 
+      }
+      default {
+	$tree itemconfigure $node -image [Bitmap::get folder] 
+      }
+    }
+  } else {
+    set type [[$tree itemcget $node -data] info class]
+    switch $type {
+      "::Objective" {
+	$tree itemconfigure $node -image [Bitmap::get goal] 
+      }
+      "::Obstacle" {
+	$tree itemconfigure $node -image [Bitmap::get dynamite] 
+      }
+      "::Condition" {
+	$tree itemconfigure $node -image [Bitmap::get condition] 
+      }
+      "::ContextConstraint" {
+	$tree itemconfigure $node -image [Bitmap::get constraint] 
+      }
+      "::Scenario" {
+	$tree itemconfigure $node -image [Bitmap::get film] 
+      }
+      "::Step" {
+	$tree itemconfigure $node -image [Bitmap::get hammer] 
+      }
+      "::Permission" {
+	$tree itemconfigure $node -image [Bitmap::get key] 
+      }
+      "::Role" {
+	$tree itemconfigure $node -image [Bitmap::get facemask] 
+      }
+      "::Task" {
+	$tree itemconfigure $node -image [Bitmap::get task] 
+      }
+      "::WorkProfile" {
+	$tree itemconfigure $node -image [Bitmap::get profile] 
+      }
+      default {
+	$tree itemconfigure $node -image [Bitmap::get [lindex {folder openfold} $idx]]
+      }
+    }
+  }
+}
+
+xoRET_GUI::Tree instproc create_cmenu {x y node} {
+  my instvar root tree top
+  set cmenu $top.m
+  set obj [$tree itemcget $node -data]
+  switch [$obj info class] {
+    "::Objective" {
+      xoRET_GUI::CMenu::ObjectiveMenu cm $cmenu $root $obj $x $y [self] $node
+    }
+    "::Obstacle" {
+      xoRET_GUI::CMenu::ObstMenu cm $cmenu $root $obj $x $y [self] $node
+    }
+    "::Condition" {
+      xoRET_GUI::CMenu::ConditionMenu cm $cmenu $root $obj $x $y [self] $node
+    }
+    "::ContextConstraint" {
+      xoRET_GUI::CMenu::CCMenu cm $cmenu $root $obj $x $y [self] $node
+    }
+    "::WorkProfile" {
+      xoRET_GUI::CMenu::WPMenu cm $cmenu $root $obj $x $y [self] $node
+    }
+    "::Role" {
+      xoRET_GUI::CMenu::RoleMenu cm $cmenu $root $obj $x $y [self] $node
+    }
+    "::Task" {
+      xoRET_GUI::CMenu::TaskMenu cm $cmenu $root $obj $x $y [self] $node
+    }
+    "::Scenario" {
+      xoRET_GUI::CMenu::ScenMenu cm $cmenu $root $obj $x $y [self] $node
+    }
+    "::Step" {
+      xoRET_GUI::CMenu::StepMenu cm $cmenu $root $obj $x $y [self] $node
+    }
+    "::Permission" {
+      xoRET_GUI::CMenu::PermMenu cm $cmenu $root $obj $x $y [self] $node
+    }
+  }
+}
+
+xoRET_GUI::Tree instproc select {where num node} {
+  my instvar tree list
+  if { $num == 1 } {
+    if { $where == "tree" } {
+      my select_node $node
+    } else {
+      $list selection set $node
+    }
+  } elseif { $where == "list" && [$tree exists $node] } {
+    set parent [$tree parent $node]
+    while { $parent != "root" } {
+      $tree itemconfigure $parent -open 1
+      set parent [$tree parent $parent]
+    }
+    my select_node $node
+  }
+}
+
+xoRET_GUI::Tree instproc select_node {node} {
+  my instvar root tree list mclist lsw
+  $tree selection set $node
+  update idletasks
+  foreach w {list mclist} {
+    if {[info exists $w]} {
+      destroy [set $w]
+      unset $w
+    }
+  }
+  set dir [$tree itemcget $node -data]
+  if { [$tree itemcget $node -drawcross] == "allways" } {
+    my getdir $node $dir
+  }  
+  set type [$dir info class]
+  set xoRET_types [list ::Objective ::Obstacle ::Condition ::ContextConstraint \
+		       ::Permission ::WorkProfile ::Task ::Role ::Scenario ::Step]
+  if {[lsearch -exact $xoRET_types $type] != -1} {
+    # mclistbox
+    # mclist shows the attribute/value pairs of a specific xoRET object
+    # depending on the current tree-selection either list or mclist are displayed
+    set mclist [mclistbox $lsw.mclb -borderwidth 0 -relief flat -columnrelief flat \
+		  -labelanchor w -fillcolumn value -resizablecolumns 0 -background white]
+    $lsw setwidget $mclist
+    $mclist column add attribute -label "Attribute" -width 30 
+    $mclist column add value -label "Value" -width 140 -foreground blue3
+    foreach a [$root getAllAttributes $type $dir] {
+      $mclist insert end [list [lindex $a 0] [lindex $a 1]]
+    }
+    pack $mclist -fill both -expand yes
+    pack $lsw -expand yes -fill both
+  } else {
+    my buildList
+    foreach subnode [$tree nodes $node] {
+      $list insert end $subnode \
+	  -text  [$tree itemcget $subnode -text] 
+      set type [[$tree itemcget $subnode -data] info class]
+      switch $type {
+	"::Objective" {
+	  $list itemconfigure $subnode -image [Bitmap::get goal] 
+	}
+	"::Obstacle" {
+	  $list itemconfigure $subnode -image [Bitmap::get dynamite] 
+	}
+	"::Condition" {
+	  $tree itemconfigure $subnode -image [Bitmap::get condition] 
+	}
+	"::ContextConstraint" {
+	  $tree itemconfigure $subnode -image [Bitmap::get constraint] 
+	}
+	"::Scenario" {
+	  $list itemconfigure $subnode -image [Bitmap::get film] 
+	}
+	"::Step" {
+	  $list itemconfigure $subnode -image [Bitmap::get hammer] 
+	}
+	"::Permission" {
+	  $list itemconfigure $subnode -image [Bitmap::get key] 
+	}
+	"::Role" {
+	  $list itemconfigure $subnode -image [Bitmap::get facemask] 
+	}
+	"::Task" {
+	  $list itemconfigure $subnode -image [Bitmap::get task] 
+	}
+	"::WorkProfile" {
+	  $list itemconfigure $subnode -image [Bitmap::get profile] 
+	}
+	default {
+	  $list itemconfigure $subnode -image [Bitmap::get folder] 
+	}
+      }
+    }
+    pack $lsw -fill both -expand yes
+  }
+  update idletasks
+}
+
+xoRET_GUI::Tree instproc expand {but} {
+  my instvar tree
+  if { [set cur [$tree selection get]] != "" } {
+    if { $but == 0 } {
+      $tree opentree $cur
+    } else {
+      $tree closetree $cur
+    }
+  }
+}
+
+xoRET_GUI::Tree instproc destroy args {
+  my instvar top 
+  destroy $top
+  next
+}
