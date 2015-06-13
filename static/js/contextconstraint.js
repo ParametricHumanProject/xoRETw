@@ -1,4 +1,8 @@
-    
+/*
+It depends on the context, but in most cases it is different. And usually one implies the other.
+If a user clicks on "Edit" , he/she can change the values, but the Update is not performed until they click on "Save". In 99% of the cases , a user who edits a record will want to update it...
+*  * */
+ 
 // Handler for .ready() called.
 $(function() {
     
@@ -7,21 +11,26 @@ $(function() {
     $('#constraint_modal').on('show.bs.modal', function(e) {
         
         if (mode == 1) {
-            $('#constraint_modal_title').text("Create New Condition"); 
+            $('#constraint_modal_title').text("Create New Context Constraint"); 
         } else {
-            $('#constraint_modal_title').text("Edit Condition");   
+            $('#constraint_modal_title').text("Edit Context Constraint");   
         }
     })
     
-    $( '#save_condition_btn' ).click(function() {
+    $( '#save_constraint_btn' ).click(function() {
         // validate all fields
-        var id = $('#condition_id').val();
-        var name = $('#condition_name').val().split(' ').join('_');
+        
+        // used for edit
+        alert('mode is ' + mode);
+        
+        var id = $('#constraint_id').val();
+        alert(id)
+        var name = $('#constraint_name').val().split(' ').join('_');
 
         if (!name) {
             alert('Error: constraint name cannot be empty.');
-            $("#constraint_name").focus();
-            $( '#constraint_name' ).flash();
+            $('#constraint_name').focus();
+            $('#constraint_name').flash();
             return;
         }
         
@@ -31,30 +40,30 @@ $(function() {
         });    
 
         // create data
-        var obstacle_data = new Obstacle(id, name, type, conditions, mode);
-
+        var constraint_data = new Constraint(id, name, conditions, mode);
+        
+        alert('a')
         // post data
         $.ajax({
             method: "POST",
             url: url_dashboard,
             dataType: "json",
-            data: obstacle_data
+            data: constraint_data
         }).done(function( msg ) {
             
-            var obstacle_name = msg['obstacle_name'];
+            var obstacle_name = msg['constraint_name'];
             var created = msg['created'];
             created = (created === "true");
             
             if (created) {
-                $('#obstacle_modal').modal('toggle');
-                //location.reload();            
+                $('#constraint_modal').modal('toggle');
             } else {    // created is false
                 
                 // create new mode
                 if (mode == 1) {
-                    alert('Error - failed to create obstacle: '+ obstacle_name);
+                    alert('Error - failed to create constraint: '+ constraint_name);
                 } else {
-                    $('#obstacle_modal').modal('toggle');
+                    $('#constraint_modal').modal('toggle');
                 }
             }
             location.reload();            
@@ -67,7 +76,7 @@ $(function() {
 $( '#create_constraint_btn' ).click(function() {
 
     // set to new mode
-    mode = 1;
+    mode = MODE_CREATE;
     
     // reset all fields
     $('#constraint_name').val('');
@@ -82,8 +91,6 @@ $( '#create_constraint_btn' ).click(function() {
         
         var conditions = msg['conditions'];
         
-        //alert(conditions.length);
-
         // set input values
         var value = ''
         for (var i = 0; i < conditions.length; i++) {
@@ -97,9 +104,7 @@ $( '#create_constraint_btn' ).click(function() {
         } else {
             $("#add_constraint_condition").prop('disabled', true);
         }
-        
-        //$('#obstacle_modal').modal('show');
-                        
+                                
     }).fail(function() {
         alert( "Error - Edit context constraint failed." );
   });        
@@ -108,24 +113,14 @@ $( '#create_constraint_btn' ).click(function() {
 $("#add_constraint_condition").click(function(e){
     
     var value = $('#constraint_available_conditions').val();
-    //alert(value)
         
     if (!value) {
         alert('Error: no option selected');
         return;
     }
-    //alert('you selected ' + value)
     
-    if (!$.trim(value)) {
-        // error
-        alert('Error: condition value cannot be empty.');
-        $( "#constraint_conditions" ).focus();
-        return;
-    }
-
     var option_values = [];
     $('#constraint_conditions option').each(function() {
-        //alert($(this).val())
         option_values.push($(this).val());
     });    
         
@@ -137,33 +132,12 @@ $("#add_constraint_condition").click(function(e){
         }
     }
 
+    // all good - add condition
     var option = '<option value=' + value + '>' + value + '</option>';
     $("#constraint_conditions").append(option);
     
     $("#remove_constraint_condition").prop('disabled', false);
 
-/*
-    var option_values = [];
-    $('#condition_list2 option').each(function() {
-        option_values.push($(this).val());
-    });    
-        
-    for (i = 0; i < option_values.length; i++) { 
-        if (option_values[i] == value.split(' ').join('_')) {
-            alert('Error: ' + value.split(' ').join('_') + ' already exists');
-            $( "#condition_input2" ).focus();
-            return;
-        }
-    }
-
-    // add to list
-    var option = '<option value=' + value.split(' ').join('_') + '>' + value + '</option>';
-    $("#condition_list2").append(option);
-
-    // clear input value
-    $('#condition_input2').val('');
-    $("#remove_condition2").prop('disabled', false);
-*/
     return;
 });
 
@@ -188,16 +162,16 @@ $("#remove_constraint_condition").click(function(e){
 });
     
 
-function delete_obstacle(id) {
+function delete_constraint(id) {
     
     // fade out then remove
-    $('#obstacle-' + id).fadeOut('slow', function(){ $(this).remove(); });    
+    $('#constraint-' + id).fadeOut('slow', function(){ $(this).remove(); });    
 
     $.ajax({
         method: "POST",
-        url: url_delete_obstacle,
+        url: url_delete_constraint,
         dataType: "json",
-        data: {obstacle_id: id},
+        data: {constraint_id: id},
     }).done(function( msg ) {
         var deleted = msg['deleted'];
         deleted = (deleted === "true");
@@ -209,57 +183,62 @@ function delete_obstacle(id) {
   });  
 }
 
-function edit_obstacle(id) {
+function edit_constraint(id) {
 
-    mode = 2; // edit
+    mode = MODE_UPDATE; // edit
     
     // get existing data and populate dialog
     $.ajax({
         method: "GET",
-        url: url_edit_obstacle,
+        url: url_edit_constraint,
         dataType: "json",
-        data: {obstacle_id: id},
+        data: {constraint_id: id},
     }).done(function( msg ) {
-
+        alert('done');
         // reset all fields
-        $('#obstacle_id').val('');
-        $('#obstacle_name').val('');
-        $('#obstacle_type_label').text('Avoid');
-        $('#condition_input2').val('');
-        $('#condition_list2').find('option').remove();
+        $('#constraint_id').val('');
+        $('#constraint_name').val('');
+        $('#constraint_available_conditions').find('option').remove();
+        $('#constraint_conditions').find('option').remove();
+        alert('aaaaaa')
         
-        var obstacle_name = msg['name'];
-        var obstacle_type = msg['type'];
+        var constraint_name = msg['name'];
+        alert('d')
         var conditions = msg['conditions'];
+        
+        alert(conditions);
 
         // set input values
-        $('#obstacle_id').val(id); //hidden
-        $('#obstacle_name').val(obstacle_name);
-        $('#obstacle_type_label').text(obstacle_type);
+        $('#constraint_id').val(id); //hidden
+        $('#constraint_name').val(constraint_name);
 
         var value = ''
         for (var i = 0; i < conditions.length; i++) {
             value = conditions[i];
-            var option = '<option value=' + value.split(' ').join('_') + '>' + value + '</option>';
-            $("#condition_list2").append(option);
+            var option = '<option value=' + value + '>' + value + '</option>';
+            $("#constraint_conditions").append(option);
         }        
 
         if (conditions.length) {
-            $("#remove_condition2").prop('disabled', false);
+            $("#remove_constraint_condition").prop('disabled', false);
         } else {
-            $("#remove_condition2").prop('disabled', true);
+            $("#remove_constraint_condition").prop('disabled', true);
         }
         
-        $('#obstacle_modal').modal('show');
+        $('#constraint_modal').modal('show');
                 
     }).fail(function() {
-        alert( "Error - Edit obstacle failed." );
+        alert( "Error - Edit constraint failed." );
   });    
     
 }
 
 function Constraint(id, name, conditions, mode) {
-    this.id = id;
+    
+    if (mode == MODE_UPDATE) {
+        this.id = id;    
+    }
+    
     this.name = name;
     this.conditions = conditions;
     this.mode = mode;

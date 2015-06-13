@@ -21,6 +21,10 @@ urlpatterns = patterns('',
 
     url(r'^views/delete_condition$', views.delete_condition, name='delete_condition'),
     url(r'^views/edit_condition$', views.edit_condition, name='edit_condition'),
+    
+    url(r'^views/delete_constraint$', views.delete_constraint, name='delete_constraint'),
+    url(r'^views/edit_constraint$', views.edit_constraint, name='edit_constraint'),
+    
     url(r'^views/get_conditions$', views.get_conditions, name='get_conditions'),
 
     #url(r'^views/delete_permission$', views.delete_permission, name='delete_permission'),

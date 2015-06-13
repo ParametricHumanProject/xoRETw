@@ -22,12 +22,14 @@ OBJECT_TYPE_OBJECTIVE = 1
 OBJECT_TYPE_OBSTACLE = 2
 OBJECT_TYPE_CONDITION = 3
 OBJECT_TYPE_CONTEXT_CONSTRAINT = 4
+
+
 OBJECT_TYPE_PERMISSION = 4
 OBJECT_TYPE_ROLE = 5
 OBJECT_TYPE_STEP = 6
 OBJECT_TYPE_SCENARIO = 7
 OBJECT_TYPE_TASK = 8
-OBJECT_TYPE_CONTEXTCONSTRAINT = 9
+#OBJECT_TYPE_CONTEXTCONSTRAINT = 9
 
 
 def home(request):
@@ -61,12 +63,15 @@ def dashboard(request):
     object_type = request.GET.get('object_type', 1) # default to Objective tab
     object_type = int(object_type)
     
+    print '--------object_type  is ', object_type
+    
 
     # if this is a POST request we need to process the data
     if request.method == 'POST':
         
         object_type = request.POST.get('object_type', None)
         object_type = int(object_type)
+        print 'object type is ', object_type
         
         # TODO: handle each object_type       
         
@@ -207,6 +212,56 @@ def dashboard(request):
             data['condition_name'] = condition_name
             json_data = json.dumps(data)
             return HttpResponse(json_data, content_type='application/json')
+
+        elif object_type == OBJECT_TYPE_CONTEXT_CONSTRAINT:
+            constraint_id = request.POST.get('id', None)
+            constraint_name = request.POST.get('name', None)
+            condition_names = request.POST.getlist('conditions[]', None)
+
+            mode = request.POST.get('mode', None)
+            mode = int(mode)
+            if constraint_id:
+                constraint_id = int(constraint_id)
+            constraint_created = False
+            if mode == CREATE_NEW:
+                # use constraint name as an exact lookup
+                constraint, constraint_created = ContextConstraint.objects.get_or_create(name__exact=constraint_name, user__exact=user, defaults={'name':constraint_name, 'user':user})
+                if constraint_created:
+                    constraint.save()       
+                    
+                for condition_name in condition_names:
+                    condition, condition_created = Condition.objects.get_or_create(name=condition_name, is_abstract=False, user=user)
+                    
+                    if condition_created:
+                        condition.save()
+                    
+                    constraint.conditions.add(condition)
+                                                 
+            # edit mode
+            else:
+                constraint, constraint_created = ContextConstraint.objects.get_or_create(id__exact=constraint_id, user__exact=user, defaults={'name':constraint_name, 'user':user})
+
+                if not constraint_created:
+                    constraint.name = constraint_name
+                    constraint.save()
+
+                    # remove conditions then add
+                    conditions = constraint.conditions.all()
+                    
+                    for condition in conditions:
+                        constraint.conditions.remove(condition)
+                    
+                    for condition_name in condition_names:
+                        condition, condition_created = Condition.objects.get_or_create(name=condition_name, is_abstract=False, user=user)
+                        if condition_created:
+                            condition.save()
+                        constraint.conditions.add(condition)
+                    
+            data = {}
+            data['created'] = str(constraint_created).lower()
+            data['constraint_name'] = constraint_name
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
         
     # if a GET (or any other method)
     else:    
@@ -219,6 +274,9 @@ def dashboard(request):
         elif object_type == OBJECT_TYPE_CONDITION:
             conditions = Condition.objects.all().filter(user=user).filter(is_abstract=False)
             return render_to_response('dashboard.html', {'object_type':object_type, 'conditions':conditions}, context_instance=RequestContext(request))
+        elif object_type == OBJECT_TYPE_CONTEXT_CONSTRAINT:
+            constraints = ContextConstraint.objects.all().filter(user=user)
+            return render_to_response('dashboard.html', {'object_type':object_type, 'constraints':constraints}, context_instance=RequestContext(request))
             
     return render_to_response('dashboard.html', {'object_type':object_type}, context_instance=RequestContext(request))
 
@@ -326,5 +384,45 @@ def edit_condition(request):
     
     data['name'] = condition.name
     
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
+def delete_constraint(request):
+    user = request.user
+
+    data = {}
+        
+    if request.method == 'POST':      
+        constraint_id = request.POST.get('constraint_id', None)
+        
+        if constraint_id:
+            o = ContextConstraint.objects.get(id=constraint_id, user=user)
+            o.delete()
+            
+            data['deleted'] = 'true'
+            data['objective_id'] = constraint_id
+            
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
+
+def edit_constraint(request):
+    user = request.user
+    
+    if request.method == 'GET':        
+        constraint_id = request.GET.get('constraint_id', None)
+        
+        if constraint_id:
+            constraint = ContextConstraint.objects.get(id=constraint_id, user=user)
+
+    # get name, type and conditions
+    data = {}
+    data['name'] = constraint.name
+    data['conditions'] = []
+
+    for condition in constraint.conditions.all():
+        data['conditions'].append(condition.name)
+    
+    print "constraint.conditions - data ", data
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')

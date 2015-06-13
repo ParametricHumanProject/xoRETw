@@ -228,26 +228,27 @@
                     </tbody>
                     </table>
                 {% endif %}
-
+                
+                <!-- OBJECT_TYPE_CONTEXT_CONSTRAINT -->
                 {% if object_type == 4 %}  
                     <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
                     <thead>
                     <tr>
                     <th class="col-md-1">#</th>
-                    <th class="col-md-3">Condition</th>
+                    <th class="col-md-3">Constraint</th>
                     <th class="col-md-8">&nbsp;</th> <!-- toolbar: edit/remove -->
                     </tr>
                     </thead>
                     <tbody>
                     
-                    {% for condition in conditions %}
-                        <tr id='condition-{{condition.id}}'>
+                    {% for constraint in constraints %}
+                        <tr id='constraint-{{constraint.id}}'>
                         <th scope="row">{{forloop.counter}}</th>
-                        <td data-toggle="context" data-target="#context-menu">{{condition.name}}</td>
+                        <td data-toggle="context" data-target="#context-menu">{{constraint.name}}</td>
                         <td>
                             <div class="btn-group" role="group" aria-label="First group">
-                                <a class="btn" onclick="edit_condition({{condition.id}});" href="#" role="button" title='Edit condition'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
-                                <a class="btn" onclick="delete_condition({{condition.id}});" href="#" role="button" title='Delete condition'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                <a class="btn" onclick="edit_constraint({{constraint.id}});" href="#" role="button" title='Edit constraint'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                                <a class="btn" onclick="delete_constraint({{constraint.id}});" href="#" role="button" title='Delete constraint'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                             </div>                
                         </td>
                         </tr>
@@ -431,7 +432,6 @@
   </div>
 </div>
 
-
 <!-- 3. Create Condition Modal -->
 <div class="modal fade" id="condition_modal" tabindex="-1" role="dialog" aria-labelledby="condition_modal_title" aria-hidden="true">
   <div class="modal-dialog">
@@ -460,7 +460,6 @@
     </div>
   </div>
 </div>
-
 
 <!-- 4. Context Constraint Modal -->
 <div class="modal fade" id="constraint_modal" tabindex="-1" role="dialog" aria-labelledby="constraint_modal_title" aria-hidden="true">
@@ -504,7 +503,7 @@
         </form>      </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button id="save_constraint_btn" type="button" class="btn btn-primary">Save</button>
       </div>
     </div>
   </div>
@@ -810,6 +809,8 @@
 $(function() {
 
 });
+var MODE_CREATE = 1;
+var MODE_UPDATE = 2;
 
 // obstacle
 $( '#create_obstacle_btn' ).click(function() {
@@ -823,15 +824,20 @@ $( '#create_obstacle_btn' ).click(function() {
     $('#condition_list2').find('option').remove();
 });
 
-var OBJECT_TYPE_OBJECTIVE = '1'
-var OBJECT_TYPE_OBSTACLE = '2'
-var OBJECT_TYPE_CONDITION = Number(3)
-var OBJECT_TYPE_PERMISSION = '4'
-var OBJECT_TYPE_ROLE = '5'
+var OBJECT_TYPE_OBJECTIVE = 1
+var OBJECT_TYPE_OBSTACLE = 2
+var OBJECT_TYPE_CONDITION = 3
+var OBJECT_TYPE_CONTEXT_CONSTRAINT = 4
+
+
+
+
+var OBJECT_TYPE_PERMISSION = 5
+var OBJECT_TYPE_ROLE = 6
 var OBJECT_TYPE_STEP = '6'
 var OBJECT_TYPE_SCENARIO = '7'
 var OBJECT_TYPE_TASK = '8'
-var OBJECT_TYPE_CONTEXT_CONSTRAINT = '9'
+//var OBJECT_TYPE_CONTEXT_CONSTRAINT = '9'
 
 // common to all
 var url_dashboard = "{% url 'dashboard' %}"
@@ -844,6 +850,11 @@ var url_edit_obstacle = "{% url 'edit_obstacle' %}"
 
 var url_delete_condition = "{% url 'delete_condition' %}"
 var url_edit_condition = "{% url 'edit_condition' %}"
+
+var url_delete_constraint = "{% url 'delete_constraint' %}"
+var url_edit_constraint = "{% url 'edit_constraint' %}"
+
+
 var url_get_conditions = "{% url 'get_conditions' %}"
 
 var mode = 0; // edit mode, common var to all
