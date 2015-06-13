@@ -27,7 +27,6 @@ $( '#create_objective_btn' ).click(function() {
 });
 
 $( '#save_objective_btn' ).click(function() {
-    alert('a');
     // validate all fields
     var id = $('#objective_id').val();
     var name = $('#objective_name').val().split(' ').join('_');
@@ -53,7 +52,6 @@ $( '#save_objective_btn' ).click(function() {
 
     // create data
     var objective_data = new Objective(id, name, type, conditions, mode);
-    alert('a1');
     // post data
     $.ajax({
         method: "POST",
@@ -61,10 +59,8 @@ $( '#save_objective_btn' ).click(function() {
         dataType: "json",
         data: objective_data
     }).done(function( msg ) {
-        alert('ll')
         var objective_name = msg['objective_name'];
         var created = msg['created'];
-        //alert(created);
         
         created = (created === "true");
         

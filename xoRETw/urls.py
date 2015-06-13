@@ -21,6 +21,7 @@ urlpatterns = patterns('',
 
     url(r'^views/delete_condition$', views.delete_condition, name='delete_condition'),
     url(r'^views/edit_condition$', views.edit_condition, name='edit_condition'),
+    url(r'^views/get_conditions$', views.get_conditions, name='get_conditions'),
 
     #url(r'^views/delete_permission$', views.delete_permission, name='delete_permission'),
     #url(r'^views/edit_permission$', views.edit_permission, name='edit_permission'),

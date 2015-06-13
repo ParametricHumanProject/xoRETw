@@ -4,11 +4,12 @@ $(function() {
     
     
     // set modal title for obstacle dialog
-    $('#obstacle_modal').on('show.bs.modal', function(e) {
+    $('#constraint_modal').on('show.bs.modal', function(e) {
+        
         if (mode == 1) {
-            $('#obstacle_modal_title').text("Create New Condition"); 
+            $('#constraint_modal_title').text("Create New Condition"); 
         } else {
-            $('#obstacle_modal_title').text("Edit Condition");   
+            $('#constraint_modal_title').text("Edit Condition");   
         }
     })
     
@@ -18,16 +19,14 @@ $(function() {
         var name = $('#condition_name').val().split(' ').join('_');
 
         if (!name) {
-            alert('Error: obstacle name cannot be empty.');
-            $("#obstacle_name").focus();
-            $( '#obstacle_name' ).flash();
+            alert('Error: constraint name cannot be empty.');
+            $("#constraint_name").focus();
+            $( '#constraint_name' ).flash();
             return;
         }
         
-        var type = $('#obstacle_type_label').text();
-
         var conditions = [];
-        $('#condition_list2 option').each(function() {
+        $('#constraint_conditions option').each(function() {
             conditions.push($(this).val().split(' ').join('_'));
         });    
 
@@ -64,29 +63,86 @@ $(function() {
 
 });
 
-// obstacle
-$( '#create_obstacle_btn' ).click(function() {
+// constraint
+$( '#create_constraint_btn' ).click(function() {
 
     // set to new mode
     mode = 1;
     
     // reset all fields
-    $('#obstacle_name').val('');
-    $('#condition_input2').val('');
-    $('#condition_list2').find('option').remove();
+    $('#constraint_name').val('');
+    $('#constraint_available_conditions').find('option').remove();
+    $('#constraint_conditions').find('option').remove();
+    
+    // get all available conditions
+    $.ajax({
+        method: "GET",
+        url: url_get_conditions,
+    }).done(function( msg ) {
+        
+        var conditions = msg['conditions'];
+        
+        //alert(conditions.length);
+
+        // set input values
+        var value = ''
+        for (var i = 0; i < conditions.length; i++) {
+            value = conditions[i];
+            var option = '<option value=' + value.name.split(' ').join('_') + '>' + value.name + '</option>';
+            $("#constraint_available_conditions").append(option);
+        }        
+        
+        if (conditions.length) {
+            $("#add_constraint_condition").prop('disabled', false);
+        } else {
+            $("#add_constraint_condition").prop('disabled', true);
+        }
+        
+        //$('#obstacle_modal').modal('show');
+                        
+    }).fail(function() {
+        alert( "Error - Edit context constraint failed." );
+  });        
 });
 
-$("#add_condition2").click(function(e){
+$("#add_constraint_condition").click(function(e){
     
-    var value = $('#condition_input2').val();
+    var value = $('#constraint_available_conditions').val();
+    //alert(value)
+        
+    if (!value) {
+        alert('Error: no option selected');
+        return;
+    }
+    //alert('you selected ' + value)
     
     if (!$.trim(value)) {
         // error
         alert('Error: condition value cannot be empty.');
-        $( "#condition_input2" ).focus();
+        $( "#constraint_conditions" ).focus();
         return;
     }
 
+    var option_values = [];
+    $('#constraint_conditions option').each(function() {
+        //alert($(this).val())
+        option_values.push($(this).val());
+    });    
+        
+    for (i = 0; i < option_values.length; i++) { 
+        if (option_values[i] == value) {
+            alert('Error: ' + value + ' already exists');
+            $("#constraint_available_conditions").focus();
+            return;
+        }
+    }
+
+    var option = '<option value=' + value + '>' + value + '</option>';
+    $("#constraint_conditions").append(option);
+    
+    $("#remove_constraint_condition").prop('disabled', false);
+
+/*
     var option_values = [];
     $('#condition_list2 option').each(function() {
         option_values.push($(this).val());
@@ -107,25 +163,25 @@ $("#add_condition2").click(function(e){
     // clear input value
     $('#condition_input2').val('');
     $("#remove_condition2").prop('disabled', false);
-
+*/
     return;
 });
 
-$("#remove_condition2").click(function(e){
+$("#remove_constraint_condition").click(function(e){
  
-    var value = $('#condition_list2').val();
+    var value = $('#constraint_conditions').val();
         
     if (!value) {
         alert('Error: no option selected');
         return;
     }
     
-    var selector = "#condition_list2 option[value='" + value + "']";
+    var selector = "#constraint_conditions option[value='" + value + "']";
     $(selector).remove();
     
-    var size = $('#condition_list2 option').size()
+    var size = $('#constraint_conditions option').size()
     if (!size) {
-        $("#remove_condition2").prop('disabled', true);
+        $("#remove_constraint_condition").prop('disabled', true);
     }
 
     return;
@@ -202,11 +258,10 @@ function edit_obstacle(id) {
     
 }
 
-function Obstacle(id, name, type, conditions, mode) {
+function Constraint(id, name, conditions, mode) {
     this.id = id;
     this.name = name;
-    this.type = type;
     this.conditions = conditions;
     this.mode = mode;
-    this.object_type = OBJECT_TYPE_OBSTACLE;
+    this.object_type = OBJECT_TYPE_CONTEXT_CONSTRAINT;
 }

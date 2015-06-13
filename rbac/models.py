@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 class Condition(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
+    is_abstract = models.BooleanField(default=False)
 
 class Step(models.Model):
     user = models.ForeignKey(User)

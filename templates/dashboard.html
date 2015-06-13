@@ -42,13 +42,23 @@
                     <button id="create_objective_btn" type="button" class="btn btn-default" title='Create Objective' data-toggle="modal" data-target="#objective_modal"><img src="{% static 'img/goal.gif' %}" align="absmiddle"></button>
                     <button id="create_obstacle_btn" type="button" class="btn btn-default" title='Create Obstacle' data-toggle="modal" data-target="#obstacle_modal"><img src="{% static 'img/dynamite.gif' %}" align="absmiddle"></button>
                     <button id="create_condition_btn" type="button" class="btn btn-default" title='Create Condition' data-toggle="modal" data-target="#condition_modal"><img src="{% static 'img/condition.gif' %}" align="absmiddle"></button>
+                    <button id="create_constraint_btn" type="button" class="btn btn-default" title='Create Context Constraint' data-toggle="modal" data-target="#constraint_modal"><img src="{% static 'img/constraint.gif' %}" align="absmiddle"></button>
+                    <button id="create_scenario_btn" type="button" class="btn btn-default" title='Create Scenario' data-toggle="modal" data-target="#scenario_modal"><img src="{% static 'img/film.gif' %}" align="absmiddle"></button>
+                    <button id="create_permission_btn" type="button" class="btn btn-default" title='Create Permission' data-toggle="modal" data-target="#permission_modal"><img src="{% static 'img/key.gif' %}" align="absmiddle"></button>
+                    <button id="create_task_btn" type="button" class="btn btn-default" title='Create Task' data-toggle="modal" data-target="#task_modal"><img src="{% static 'img/task.gif' %}" align="absmiddle"></button>
+                    <button id="create_work_profile_btn" type="button" class="btn btn-default" title='Create Work Profile' data-toggle="modal" data-target="#work_profile_modal"><img src="{% static 'img/profile.gif' %}" align="absmiddle"></button>
+                    <button id="create_role_btn" type="button" class="btn btn-default" title='Create Role' data-toggle="modal" data-target="#role_modal"><img src="{% static 'img/facemask.gif' %}" align="absmiddle"></button>
+                    
+                    <!-- DELETE AFTER
                     
                     <button type="button" class="btn btn-default" title='Create Context Constraint' data-toggle="modal" data-target="#create_constraint_modal"><img src="{% static 'img/constraint.gif' %}" align="absmiddle"></button>
                     <button type="button" class="btn btn-default" title='Create Scenario' data-toggle="modal" data-target="#create_scenario_modal"><img src="{% static 'img/film.gif' %}" align="absmiddle"></button>
+                    
                     <button type="button" class="btn btn-default" title='Create Permission' data-toggle="modal" data-target="#create_permission_modal"><img src="{% static 'img/key.gif' %}" align="absmiddle"></button>
                     <button type="button" class="btn btn-default" title='Create Task' data-toggle="modal" data-target="#create_task_modal"><img src="{% static 'img/task.gif' %}" align="absmiddle"></button>
                     <button type="button" class="btn btn-default" title='Create Work Profile' data-toggle="modal" data-target="#create_work_profile_modal"><img src="{% static 'img/profile.gif' %}" align="absmiddle"></button>
                     <button type="button" class="btn btn-default" title='Create Role' data-toggle="modal" data-target="#create_role_modal"><img src="{% static 'img/facemask.gif' %}" align="absmiddle"></button>
+                    -->
 				</div>
 				<div class="btn-group" role="group" aria-label="...">
                     <button type="button" class="btn btn-default" title='Define Trace-Links' data-toggle="modal" data-target="#define_trace_links_modal"><img src="{% static 'img/trace.gif' %}" align="absmiddle"></button>
@@ -220,17 +230,31 @@
                 {% endif %}
 
                 {% if object_type == 4 %}  
-                    <br>
-                    <p>Placeholder for Constraints</p>
-                    <ul>
-                      <li>Test data 1</li>
-                      <li>Test data 2</li>
-                      <li>Test data 3</li>
-                      <li>Test data 4</li>
-                      <li>Test data 5</li>
-                      <li>Test data 6</li>
-                      <li>Test data 7</li>
-                    </ul>                                
+                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <thead>
+                    <tr>
+                    <th class="col-md-1">#</th>
+                    <th class="col-md-3">Condition</th>
+                    <th class="col-md-8">&nbsp;</th> <!-- toolbar: edit/remove -->
+                    </tr>
+                    </thead>
+                    <tbody>
+                    
+                    {% for condition in conditions %}
+                        <tr id='condition-{{condition.id}}'>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td data-toggle="context" data-target="#context-menu">{{condition.name}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a class="btn" onclick="edit_condition({{condition.id}});" href="#" role="button" title='Edit condition'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                                <a class="btn" onclick="delete_condition({{condition.id}});" href="#" role="button" title='Delete condition'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                            </div>                
+                        </td>
+                        </tr>
+                    {% endfor %}
+                    
+                    </tbody>
+                    </table>
                 {% endif %}
 
                 {% if object_type == 5 %}  
@@ -438,42 +462,42 @@
 </div>
 
 
-<!-- 4. Create Context Constraint Modal -->
-<div class="modal fade" id="create_constraint_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<!-- 4. Context Constraint Modal -->
+<div class="modal fade" id="constraint_modal" tabindex="-1" role="dialog" aria-labelledby="constraint_modal_title" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Create Context Constraint</h4>
+        <h4 class="modal-title" id="constraint_modal_title"></h4>
       </div>
       <div class="modal-body">
         <form>
             <div class="row">
                 <div class="col-md-9">
                   <div class="form-group">
-                    <label for="obstacle_name">Constraint Name</label>
-                    <input type="text" class="form-control" id="obstacle_name" placeholder="Enter constraint name" required>
-                    <input type="hidden" id="obstacle_id" value="">
+                    <label for="constraint_name">Constraint Name</label>
+                    <input type="text" class="form-control" id="constraint_name" placeholder="Enter constraint name" required>
+                    <input type="hidden" id="constraint_id" value="">
                   </div>              
                 </div>  
             </div>
             <div class="row">
                 <div class="col-md-9">
                   <div class="form-group">
-                    <label for="abstract_context_condition2">Available Conditions</label>
-                    <select id="condition_list2" multiple class="form-control">
+                    <label for="constraint_available_conditions">Available Conditions</label>
+                    <select id="constraint_available_conditions" multiple class="form-control">
                     </select>     
-                    <input id="add_condition2" class="btn btn-default" type="button" value="Link Condition">
+                    <input id="add_constraint_condition" class="btn btn-default" type="button" value="Link Condition">
                   </div>
                 </div>  
             </div>
             <div class="row">
                 <div class="col-md-9">
                   <div class="form-group">
-                    <label for="condition_list2">Linked Conditions</label>
-                    <select id="condition_list2" multiple class="form-control">
+                    <label for="constraint_conditions">Linked Conditions</label>
+                    <select id="constraint_conditions" multiple class="form-control">
                     </select>     
-                    <input id="remove_condition2" class="btn btn-default" type="button" disabled="false" value="Unlink Condition">     
+                    <input id="remove_constraint_condition" class="btn btn-default" type="button" disabled="false" value="Unlink Condition">     
                   </div>
                 </div>  
             </div>
@@ -807,7 +831,7 @@ var OBJECT_TYPE_ROLE = '5'
 var OBJECT_TYPE_STEP = '6'
 var OBJECT_TYPE_SCENARIO = '7'
 var OBJECT_TYPE_TASK = '8'
-var OBJECT_TYPE_CONTEXTCONSTRAINT = '9'
+var OBJECT_TYPE_CONTEXT_CONSTRAINT = '9'
 
 // common to all
 var url_dashboard = "{% url 'dashboard' %}"
@@ -820,6 +844,7 @@ var url_edit_obstacle = "{% url 'edit_obstacle' %}"
 
 var url_delete_condition = "{% url 'delete_condition' %}"
 var url_edit_condition = "{% url 'edit_condition' %}"
+var url_get_conditions = "{% url 'get_conditions' %}"
 
 var mode = 0; // edit mode, common var to all
 
