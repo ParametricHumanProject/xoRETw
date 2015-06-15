@@ -63,7 +63,9 @@ class Role(models.Model):
 class Permission(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
-    step = models.OneToOneField(Step)
+    operation = models.CharField(max_length=50, unique=True)
+    object = models.CharField(max_length=50, unique=True)
+    #step = models.OneToOneField(Step)
     roles = models.ManyToManyField(Role)
     context_constraints = models.ManyToManyField(ContextConstraint)
     

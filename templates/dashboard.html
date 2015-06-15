@@ -258,9 +258,33 @@
                     </table>
                 {% endif %}
 
-                {% if object_type == 5 %}  
-                    <br>
-                    <p>Placeholder for Steps</p>
+                <!-- OBJECT_TYPE_CONTEXT_PERMISSION -->
+                {% if object_type == 7 %}  
+                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <thead>
+                    <tr>
+                    <th class="col-md-1">#</th>
+                    <th class="col-md-3">Permission</th>
+                    <th class="col-md-8">&nbsp;</th> <!-- toolbar: edit/remove -->
+                    </tr>
+                    </thead>
+                    <tbody>
+                    
+                    {% for permission in permissions %}
+                        <tr id='permission-{{permission.id}}'>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td data-toggle="context" data-target="#context-menu">{{permission.name}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a class="btn" onclick="edit_permission({{permission.id}});" href="#" role="button" title='Edit constraint'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                                <a class="btn" onclick="delete_permission({{permission.id}});" href="#" role="button" title='Delete constraint'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                            </div>                
+                        </td>
+                        </tr>
+                    {% endfor %}
+                    
+                    </tbody>
+                    </table>
                 {% endif %}
 
                 {% if object_type == 6 %}  
@@ -268,14 +292,37 @@
                     <p>Placeholder for Scenarios</p>
                 {% endif %}
 
-                {% if object_type == 7 %}  
+                {% if object_type == 77 %}  
                     <br>
                     <p>Placeholder for Permissions</p>                
                 {% endif %}
 
                 {% if object_type == 8 %}
-                    <br>
-                    <p>Placeholder for Tasks</p>                
+                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <thead>
+                    <tr>
+                    <th class="col-md-1">#</th>
+                    <th class="col-md-3">Task</th>
+                    <th class="col-md-8">&nbsp;</th> <!-- toolbar: edit/remove -->
+                    </tr>
+                    </thead>
+                    <tbody>
+                    
+                    {% for task in tasks %}
+                        <tr id='task-{{task.id}}'>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td data-toggle="context" data-target="#context-menu">{{task.name}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a class="btn" onclick="edit_task({{task.id}});" href="#" role="button" title='Edit task'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                                <a class="btn" onclick="delete_task({{task.id}});" href="#" role="button" title='Delete task'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                            </div>                
+                        </td>
+                        </tr>
+                    {% endfor %}
+                    
+                    </tbody>
+                    </table>
                 {% endif %}
 
                 {% if object_type == 9 %} 
@@ -529,15 +576,17 @@
 </div>
 
 <!-- 6. Create Permission Modal -->
-<div class="modal fade" id="create_permission_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="permission_modal" tabindex="-1" role="dialog" aria-labelledby="permission_modal_title" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Create New Permission</h4>
+        <h4 class="modal-title" id="permission_modal_title"></h4>
       </div>
       <div class="modal-body">
         <form>
+            <input type="hidden" id="permission_id" value="">
+            <!--
             <div class="row">
                 <div class="col-md-9">
                   <div class="form-group">
@@ -547,21 +596,22 @@
                   </div>              
                 </div>  
             </div>
+            -->
             <div class="row">
                 <div class="col-md-9">
                   <div class="form-group">
-                    <label for="objective_name">Operation Name</label>
-                    <input type="text" class="form-control" id="objective_name" placeholder="Enter operation name" required>
-                    <input type="hidden" id="objective_id" value="">
+                    <label for="permission_operation_name">Operation Name</label>
+                    <input type="text" class="form-control" id="permission_operation_name" placeholder="Enter operation name" required>
+                    <!-- <input type="hidden" id="objective_id" value=""> -->
                   </div>              
                 </div>  
             </div>
             <div class="row">
                 <div class="col-md-9">
                   <div class="form-group">
-                    <label for="objective_name">Object Name</label>
-                    <input type="text" class="form-control" id="objective_name" placeholder="Enter object name" required>
-                    <input type="hidden" id="objective_id" value="">
+                    <label for="permission_object_name">Object Name</label>
+                    <input type="text" class="form-control" id="permission_object_name" placeholder="Enter object name" required>
+                    <!-- <input type="hidden" id="objective_id" value=""> -->
                   </div>              
                 </div>  
             </div>
@@ -569,27 +619,27 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button id="save_permission_btn" type="button" class="btn btn-primary">Save changes</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- 7. Create Task Modal -->
-<div class="modal fade" id="create_task_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="task_modal" tabindex="-1" role="dialog" aria-labelledby="task_modal_title" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Create New Task</h4>
+        <h4 class="modal-title" id="task_modal_title"></h4>
       </div>
       <div class="modal-body">
         <form>
             <div class="row">
                 <div class="col-md-9">
                   <div class="form-group">
-                    <label for="obstacle_name">Task Name</label>
-                    <input type="text" class="form-control" id="obstacle_name" placeholder="Enter task name" required>
+                    <label for="task_name">Task Name</label>
+                    <input type="text" class="form-control" id="task_name" placeholder="Enter task name" required>
                     <input type="hidden" id="task_id" value="">
                   </div>              
                 </div>  
@@ -597,28 +647,28 @@
             <div class="row">
                 <div class="col-md-9">
                   <div class="form-group">
-                    <label for="abstract_context_condition2">Attached Scenarios</label>
-                    <select id="condition_list2" multiple class="form-control">
+                    <label for="task_available_scenarios">Available Scenarios</label>
+                    <select id="task_available_scenarios" multiple class="form-control">
                     </select>     
-                    <input id="add_condition2" class="btn btn-default" type="button" value="Remove Scenario from Task">
+                    <input id="add_task_scenario" class="btn btn-default" type="button" value="Add Scenario to Task">
                   </div>
                 </div>  
             </div>
             <div class="row">
                 <div class="col-md-9">
                   <div class="form-group">
-                    <label for="condition_list2">Currently Available Scenarios</label>
-                    <select id="condition_list2" multiple class="form-control">
+                    <label for="task_scenarios">Attached Scenarios</label>
+                    <select id="task_scenarios" multiple class="form-control">
                     </select>     
-                    <input id="remove_condition2" class="btn btn-default" type="button" disabled="false" value="Add Scenario to Task">     
+                    <input id="remove_task_scenario" class="btn btn-default" type="button" disabled="false" value="Remove Scenario from Task">     
                   </div>
                 </div>  
             </div>
-        </form>
+        </form>      
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button id="save_task_btn" type="button" class="btn btn-primary">Save</button>
       </div>
     </div>
   </div>
@@ -792,12 +842,10 @@
 
 
 <div id="context-menu">
-<!--
   <ul class="dropdown-menu" role="menu">
     <li><a tabindex="-1" href="#">Edit</a></li>
     <li><a tabindex="-1" href="#">Delete</a></li>
   </ul>
--->  
 </div>
 
 
@@ -828,16 +876,15 @@ var OBJECT_TYPE_OBJECTIVE = 1
 var OBJECT_TYPE_OBSTACLE = 2
 var OBJECT_TYPE_CONDITION = 3
 var OBJECT_TYPE_CONTEXT_CONSTRAINT = 4
+var OBJECT_TYPE_PERMISSION = 7
+var OBJECT_TYPE_TASK = 8
 
 
 
-
-var OBJECT_TYPE_PERMISSION = 5
 var OBJECT_TYPE_ROLE = 6
 var OBJECT_TYPE_STEP = '6'
 var OBJECT_TYPE_SCENARIO = '7'
-var OBJECT_TYPE_TASK = '8'
-//var OBJECT_TYPE_CONTEXT_CONSTRAINT = '9'
+
 
 // common to all
 var url_dashboard = "{% url 'dashboard' %}"

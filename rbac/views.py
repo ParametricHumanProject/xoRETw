@@ -2,7 +2,7 @@ from django.shortcuts import render, render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-
+import sys
 import json
 
 from .models import Objective
@@ -22,13 +22,13 @@ OBJECT_TYPE_OBJECTIVE = 1
 OBJECT_TYPE_OBSTACLE = 2
 OBJECT_TYPE_CONDITION = 3
 OBJECT_TYPE_CONTEXT_CONSTRAINT = 4
-
-
-OBJECT_TYPE_PERMISSION = 4
-OBJECT_TYPE_ROLE = 5
-OBJECT_TYPE_STEP = 6
-OBJECT_TYPE_SCENARIO = 7
+OBJECT_TYPE_PERMISSION = 7
 OBJECT_TYPE_TASK = 8
+
+
+OBJECT_TYPE_ROLE = 55
+OBJECT_TYPE_STEP = 65
+OBJECT_TYPE_SCENARIO = 75
 #OBJECT_TYPE_CONTEXTCONSTRAINT = 9
 
 
@@ -256,13 +256,114 @@ def dashboard(request):
                         if condition_created:
                             condition.save()
                         constraint.conditions.add(condition)
-                    
             data = {}
             data['created'] = str(constraint_created).lower()
             data['constraint_name'] = constraint_name
             json_data = json.dumps(data)
             return HttpResponse(json_data, content_type='application/json')
-        
+                        
+        elif object_type == OBJECT_TYPE_PERMISSION:
+            print 'A'
+            permission_id = request.POST.get('id', None)
+            operation_name = request.POST.get('operation_name', None)
+            object_name = request.POST.get('object_name', None)
+            print 'A1'
+            permission_name = operation_name + '_' + object_name
+            print 'A2'
+            mode = request.POST.get('mode', None)
+            
+            mode = int(mode)
+            print 'A3'
+            if permission_id:
+                permission_id = int(permission_id)
+            print 'A4'
+            permission_created = False
+            print 'A4a'
+            if mode == CREATE_NEW:
+                print 'A4b'
+                # use permission name as an exact lookup
+                print 'permission_name ', permission_name
+                print 'operation_name ', operation_name
+                print 'object_name ', object_name
+                try:
+                    permission, permission_created = Permission.objects.get_or_create(name__exact=permission_name, user__exact=user, defaults={'name':permission_name, 'operation':operation_name, 'object':object_name, 'user':user})
+                except: # catch *all* exceptions
+                    e = sys.exc_info()[0]
+                    print "<p>Error: %s</p>" % e
+                    #write_to_page( "<p>Error: %s</p>" % e )
+                
+                print 'A5'
+                if permission_created:
+                    print 'A6'
+                    permission.save()    
+                    print 'A7'   
+                                                                     
+            # edit mode - none for permissions
+            else:
+                pass
+                    
+            data = {}
+            data['created'] = str(permission_created).lower()
+            data['permission_name'] = permission_name
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
+            
+        elif object_type == OBJECT_TYPE_TASK:
+            print 'A'
+            task_id = request.POST.get('id', None)
+            task_name = request.POST.get('name', None)
+            scenarios = request.POST.getlist('scenarios[]', None)
+
+            mode = request.POST.get('mode', None)
+            mode = int(mode)
+            print 'A1'
+            if task_id:
+                task_id = int(task_id)
+                
+            task_created = False
+            if mode == CREATE_NEW:
+                print 'A2'
+                # use constraint name as an exact lookup
+                task, task_created = Task.objects.get_or_create(name__exact=task_name, user__exact=user, defaults={'name':task_name, 'user':user})
+                print 'A3'
+                if task_created:
+                    print 'A4'
+                    task.save()       
+                    print 'A5'
+                    
+                for i in scenarios:
+                    scenario, scenario_created = Scenario.objects.get_or_create(name=i.name, user=user)
+                    
+                    if scenario_created:
+                        scenario.save()
+                    
+                    task.scenarios.add(scenario)
+                print 'A6'
+            # edit mode
+            else:
+                constraint, constraint_created = ContextConstraint.objects.get_or_create(id__exact=constraint_id, user__exact=user, defaults={'name':constraint_name, 'user':user})
+
+                if not constraint_created:
+                    constraint.name = constraint_name
+                    constraint.save()
+
+                    # remove conditions then add
+                    conditions = constraint.conditions.all()
+                    
+                    for condition in conditions:
+                        constraint.conditions.remove(condition)
+                    
+                    for condition_name in condition_names:
+                        condition, condition_created = Condition.objects.get_or_create(name=condition_name, is_abstract=False, user=user)
+                        if condition_created:
+                            condition.save()
+                        constraint.conditions.add(condition)
+            data = {}
+            data['created'] = str(task_created).lower()
+            data['task_name'] = task_name
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
+                                
     # if a GET (or any other method)
     else:    
         if object_type == OBJECT_TYPE_OBJECTIVE:
@@ -277,7 +378,13 @@ def dashboard(request):
         elif object_type == OBJECT_TYPE_CONTEXT_CONSTRAINT:
             constraints = ContextConstraint.objects.all().filter(user=user)
             return render_to_response('dashboard.html', {'object_type':object_type, 'constraints':constraints}, context_instance=RequestContext(request))
-            
+        elif object_type == OBJECT_TYPE_PERMISSION:
+            permissions = Permission.objects.all().filter(user=user)
+            return render_to_response('dashboard.html', {'object_type':object_type, 'permissions':permissions}, context_instance=RequestContext(request))
+        elif object_type == OBJECT_TYPE_TASK:
+            tasks = Task.objects.all().filter(user=user)
+            return render_to_response('dashboard.html', {'object_type':object_type, 'tasks':tasks}, context_instance=RequestContext(request))
+
     return render_to_response('dashboard.html', {'object_type':object_type}, context_instance=RequestContext(request))
 
 

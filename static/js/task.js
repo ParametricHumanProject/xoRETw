@@ -1,66 +1,60 @@
-/*
-It depends on the context, but in most cases it is different. And usually one implies the other.
-If a user clicks on "Edit" , he/she can change the values, but the Update is not performed until they click on "Save". In 99% of the cases , a user who edits a record will want to update it...
-*  * */
- 
-// Handler for .ready() called.
+ // Handler for .ready() called.
 $(function() {
     
     
     // set modal title for obstacle dialog
-    $('#constraint_modal').on('show.bs.modal', function(e) {
+    $('#task_modal').on('show.bs.modal', function(e) {
         
         if (mode == 1) {
-            $('#constraint_modal_title').text("Create New Context Constraint"); 
+            $('#task_modal_title').text("Create New Task"); 
         } else {
-            $('#constraint_modal_title').text("Edit Context Constraint");   
+            $('#task_modal_title').text("Edit Task");   
         }
     })
     
-    $( '#save_constraint_btn' ).click(function() {
+    $( '#save_task_btn' ).click(function() {
         // validate all fields
         
-        // used for edit
-        var id = $('#constraint_id').val();
-        
-        var name = $('#constraint_name').val().split(' ').join('_');
+        // used for edit        
+        var id = $('#task_id').val();
+        var name = $('#task_name').val().split(' ').join('_');
 
         if (!name) {
-            alert('Error: constraint name cannot be empty.');
-            $('#constraint_name').focus();
-            $('#constraint_name').flash();
+            alert('Error: task name cannot be empty.');
+            $('#task_name').focus();
+            $('#task_name').flash();
             return;
         }
         
-        var conditions = [];
-        $('#constraint_conditions option').each(function() {
-            conditions.push($(this).val().split(' ').join('_'));
+        var scenarios = [];
+        $('#task_scenarios option').each(function() {
+            scenarios.push($(this).val().split(' ').join('_'));
         });    
 
         // create data
-        var constraint_data = new Constraint(id, name, conditions, mode);
+        var task_data = new Task(id, name, scenarios, mode);
         
         // post data
         $.ajax({
             method: "POST",
             url: url_dashboard,
             dataType: "json",
-            data: constraint_data
+            data: task_data
         }).done(function( msg ) {
             
-            var obstacle_name = msg['constraint_name'];
+            var task_name = msg['task_name'];
             var created = msg['created'];
             created = (created === "true");
             
             if (created) {
-                $('#constraint_modal').modal('toggle');
+                $('#task_modal').modal('toggle');
             } else {    // created is false
                 
                 // create new mode
                 if (mode == 1) {
-                    alert('Error - failed to create constraint: '+ constraint_name);
+                    alert('Error - failed to create task: '+ task_name);
                 } else {
-                    $('#constraint_modal').modal('toggle');
+                    $('#task_modal').modal('toggle');
                 }
             }
             location.reload();            
@@ -70,23 +64,24 @@ $(function() {
 });
 
 // constraint
-$( '#create_constraint_btn' ).click(function() {
+$( '#create_task_btn' ).click(function() {
 
     // set to new mode
     mode = MODE_CREATE;
     
     // reset all fields
-    $('#constraint_name').val('');
-    $('#constraint_available_conditions').find('option').remove();
-    $('#constraint_conditions').find('option').remove();
-    
-    // get all available conditions
+    $('#task_name').val('');
+    $('#task_available_scenarios').find('option').remove();
+    $('#task_scenarios').find('option').remove();
+
+/*    
+    // get all available scenarios
     $.ajax({
         method: "GET",
-        url: url_get_conditions,
+        url: url_get_scenarios,
     }).done(function( msg ) {
         
-        var conditions = msg['conditions'];
+        var scenarios = msg['scenarios'];
         
         // set input values
         var value = ''
@@ -104,10 +99,11 @@ $( '#create_constraint_btn' ).click(function() {
                                 
     }).fail(function() {
         alert( "Error - Edit context constraint failed." );
-  });        
+  });     
+  */  
 });
 
-$("#add_constraint_condition").click(function(e){
+$("#add_task_scenario").click(function(e){
     
     var value = $('#constraint_available_conditions').val();
         
@@ -138,7 +134,7 @@ $("#add_constraint_condition").click(function(e){
     return;
 });
 
-$("#remove_constraint_condition").click(function(e){
+$("#remove_task_scenario").click(function(e){
  
     var value = $('#constraint_conditions').val();
         
@@ -159,7 +155,7 @@ $("#remove_constraint_condition").click(function(e){
 });
     
 
-function delete_constraint(id) {
+function delete_task(id) {
     
     // fade out then remove
     $('#constraint-' + id).fadeOut('slow', function(){ $(this).remove(); });    
@@ -191,7 +187,6 @@ function edit_constraint(id) {
         dataType: "json",
         data: {constraint_id: id},
     }).done(function( msg ) {
-        alert('done');
         // reset all fields
         $('#constraint_id').val('');
         $('#constraint_name').val('');
@@ -201,6 +196,8 @@ function edit_constraint(id) {
         var constraint_name = msg['name'];
         var conditions = msg['conditions'];
         
+        alert(conditions);
+
         // set input values
         $('#constraint_id').val(id); //hidden
         $('#constraint_name').val(constraint_name);
@@ -226,14 +223,14 @@ function edit_constraint(id) {
     
 }
 
-function Constraint(id, name, conditions, mode) {
+function Task(id, name, scenarios, mode) {
     
     if (mode == MODE_UPDATE) {
         this.id = id;    
     }
     
     this.name = name;
-    this.conditions = conditions;
+    this.scenarios = scenarios;
     this.mode = mode;
-    this.object_type = OBJECT_TYPE_CONTEXT_CONSTRAINT;
+    this.object_type = OBJECT_TYPE_TASK;
 }
