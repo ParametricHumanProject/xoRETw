@@ -533,3 +533,22 @@ def edit_constraint(request):
     print "constraint.conditions - data ", data
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
+
+def delete_permission(request):
+    user = request.user
+    print 'A'
+    data = {}
+    if request.method == 'POST':      
+        print 'A1'
+        permission_id = request.POST.get('permission_id', None)
+        print 'A2'
+        if permission_id:
+            print 'A3'
+            o = Permission.objects.get(id=permission_id, user=user)
+            print 'A4'
+            o.delete()
+            print 'A5'
+            data['deleted'] = 'true'
+            data['permission_id'] = permission_id
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')

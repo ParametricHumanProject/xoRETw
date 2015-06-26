@@ -76,23 +76,23 @@ $( '#create_permission_btn' ).click(function() {
     
 });
 
-function delete_condition(id) {
+function delete_permission(id) {
     
     // fade out then remove
-    $('#condition-' + id).fadeOut('slow', function(){ $(this).remove(); });    
+    $('#permission-' + id).fadeOut('slow', function(){ $(this).remove(); });    
     $.ajax({
         method: "POST",
-        url: url_delete_condition,
+        url: url_delete_permission,
         dataType: "json",
-        data: {condition_id: id},
+        data: {permission_id: id},
     }).done(function( msg ) {
         var deleted = msg['deleted'];
         deleted = (deleted === "true");
         if (!deleted) {
-            alert( "Error - failed to delete condition" );
+            alert( "Error - failed to delete permission" );
         }
     }).fail(function() {
-        alert( "Error - failed to delete condition" );
+        alert( "Error - failed to delete permission" );
   });  
 }
 
