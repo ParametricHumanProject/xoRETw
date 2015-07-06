@@ -273,7 +273,7 @@
                     {% for permission in permissions %}
                         <tr id='permission-{{permission.id}}'>
                         <th scope="row">{{forloop.counter}}</th>
-                        <td data-toggle="context" data-target="#context-menu">{{permission.name}}</td>
+                        <td data-toggle="context" data-target="#context-menu-permission">{{permission.name}}</td>
                         <td>
                             <div class="btn-group" role="group" aria-label="First group">
                                 <a class="btn" onclick="edit_permission({{permission.id}});" href="#" role="button" title='Edit constraint'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
@@ -675,53 +675,53 @@
 </div>
 
 <!-- 8. Create Work Profile Modal -->
-<div class="modal fade" id="create_work_profile_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="work_profile_modal" tabindex="-1" role="dialog" aria-labelledby="work_profile_modal_title" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Create New Work Profile</h4>
+        <h4 class="modal-title" id="work_profile_modal_title"></h4>
       </div>
       <div class="modal-body">
         <form>
             <div class="row">
                 <div class="col-md-9">
                   <div class="form-group">
-                    <label for="obstacle_name">Work Profile Name</label>
-                    <input type="text" class="form-control" id="obstacle_name" placeholder="Enter work profile name" required>
-                    <input type="hidden" id="task_id" value="">
+                    <label for="work_profile_name">Work Profile Name</label>
+                    <input type="text" class="form-control" id="work_profile_name" placeholder="Enter work profile name" required>
+                    <input type="hidden" id="work_profile_id" value="">
                   </div>              
                 </div>  
             </div>
             <div class="row">
                 <div class="col-md-9">
                   <div class="form-group">
-                    <label for="abstract_context_condition2">Attached Tasks</label>
-                    <select id="condition_list2" multiple class="form-control">
+                    <label for="work_profile_available_tasks">Currently Available Tasks</label>
+                    <select id="work_profile_available_tasks" multiple class="form-control">
                     </select>     
-                    <input id="add_condition2" class="btn btn-default" type="button" value="Remove Task from Work Profile">
+                    <input id="work_profile_add_task" class="btn btn-default" type="button" value="Add Task to Profile">
                   </div>
                 </div>  
             </div>
             <div class="row">
                 <div class="col-md-9">
                   <div class="form-group">
-                    <label for="condition_list2">Currently Available Tasks</label>
-                    <select id="condition_list2" multiple class="form-control">
+                    <label for="work_profile_attached_tasks">Attached Tasks</label>
+                    <select id="work_profile_attached_tasks" multiple class="form-control">
                     </select>     
-                    <input id="remove_condition2" class="btn btn-default" type="button" disabled="false" value="Add Task to Work Profile">     
+                    <input id="work_profile_remove_task" class="btn btn-default" type="button" disabled="false" value="Remove Task from Profile">     
                   </div>
                 </div>  
             </div>
-        </form>
-      </div>
+        </form>      </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button id="save_work_profile_btn" type="button" class="btn btn-primary">Save</button>
       </div>
     </div>
   </div>
 </div>
+
 
 <!-- 9. Create Role Modal -->
 <div class="modal fade" id="create_role_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -837,6 +837,24 @@
   </div>
 </div>
 
+<!-- Permission Cardinality Constraints modal-->
+<div class="modal fade" id="perm_cardinality_constraint_modal" tabindex="-1" role="dialog" aria-labelledby="perm_cardinality_constraint_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="perm_cardinality_constraint_title">Cardinality Constraints</h4>
+      </div>
+      <div class="modal-body">
+            Add layout and widgets here ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!------- context menu ------>
 
@@ -848,6 +866,17 @@
   </ul>
 </div>
 
+<div id="context-menu-permission">
+  <ul class="dropdown-menu" role="menu">
+    <li><a tabindex="-1" href="#">Create Permission</a></li>
+    <li><hr style="margin:5px;"></li>
+    <li><a id="perm_cardinality_constraint" href="#" onclick="permission_cardinality_constraints()">Cardinality Constraints</a></li>
+    <li><a tabindex="-1" href="#">SSD Constraints</a></li>
+    <li><a tabindex="-1" href="#">Context Constraints</a></li>
+    <li><hr style="margin:5px;"></li>
+    <li><a tabindex="-1" href="#">Delete Permission</a></li>
+  </ul>
+</div>
 
 {% endblock content %}
 

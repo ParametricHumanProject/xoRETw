@@ -286,8 +286,10 @@ def dashboard(request):
                 print 'operation_name ', operation_name
                 print 'object_name ', object_name
                 try:
-                    permission, permission_created = Permission.objects.get_or_create(name__exact=permission_name, user__exact=user, defaults={'name':permission_name, 'operation':operation_name, 'object':object_name, 'user':user})
+                    permission, permission_created = Permission.objects.get_or_create(name__exact=permission_name, user__exact=user, defaults={'name':permission_name, 'operation':operation_name, 'object':object_name, 'user':user, 'mincardinality':0, 'maxcardinality':0})
+                    print 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                 except: # catch *all* exceptions
+                    print 'Error!!!!!!!!!!!!!!!!!!!!!!!!!'
                     e = sys.exc_info()[0]
                     print "<p>Error: %s</p>" % e
                     #write_to_page( "<p>Error: %s</p>" % e )

@@ -46,12 +46,13 @@ class Obstacle(models.Model):
     conditions = models.ManyToManyField(Condition)
     objective = models.ManyToManyField(Objective)
 
+
 # done
 class ContextConstraint(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
     conditions = models.ManyToManyField(Condition)
-
+    
 # done    
 class Role(models.Model):
     user = models.ForeignKey(User)
@@ -65,8 +66,10 @@ class Permission(models.Model):
     name = models.CharField(max_length=50, unique=True)
     operation = models.CharField(max_length=50, unique=True)
     object = models.CharField(max_length=50, unique=True)
-    #step = models.OneToOneField(Step)
+    step = models.OneToOneField(Step, null=True, blank=True)
     roles = models.ManyToManyField(Role)
     context_constraints = models.ManyToManyField(ContextConstraint)
-    
+    mincardinality = models.IntegerField(default=0)  # same as blank=True, null=True
+    maxcardinality = models.IntegerField(default=0)  # same as blank=True, null=True    
+
 

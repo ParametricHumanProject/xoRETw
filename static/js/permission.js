@@ -10,7 +10,7 @@ $(function() {
             $('#permission_modal_title').text("Create New Permission"); 
         } 
     })
-    
+        
     $( '#save_permission_btn' ).click(function() {
         
         // validate all fields
@@ -125,6 +125,10 @@ function edit_condition(id) {
         alert( "Error - Edit condition failed." );
   });    
     
+}
+
+function cardinality_constraints() {
+    $('#perm_cardinality_constraint_modal').modal('show');
 }
 
 function Permission(id, operation_name, object_name, mode) {
