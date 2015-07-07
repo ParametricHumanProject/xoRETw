@@ -10,6 +10,9 @@ class Condition(models.Model):
 
 class Step(models.Model):
     user = models.ForeignKey(User)
+    actor = models.CharField(max_length=50, unique=True)
+    action = models.CharField(max_length=50, unique=True)
+    target = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=50, unique=True)
     step = models.ManyToManyField('self')
 
@@ -69,6 +72,7 @@ class Permission(models.Model):
     step = models.OneToOneField(Step, null=True, blank=True)
     roles = models.ManyToManyField(Role)
     context_constraints = models.ManyToManyField(ContextConstraint)
+    ssd_constraints = models.TextField(blank=True)
     mincardinality = models.IntegerField(default=0)  # same as blank=True, null=True
     maxcardinality = models.IntegerField(default=0)  # same as blank=True, null=True    
 

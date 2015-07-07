@@ -76,6 +76,22 @@ $( '#create_permission_btn' ).click(function() {
     
 });
 
+function permission_cardinality_constraints() {
+    //alert('helloworld');
+    $('#perm_cardinality_constraint_modal').modal('toggle');
+    
+}
+
+function permission_SSD_constraints() {
+    //alert('helloworld');
+    $('#perm_ssd_constraint_modal').modal('toggle');
+    
+}
+
+function permission_CC() {
+    $('#permission_CC_modal').modal('toggle');
+}
+
 function delete_permission(id) {
     
     // fade out then remove
