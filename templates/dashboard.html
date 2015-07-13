@@ -265,8 +265,8 @@
                         <td data-toggle="context" data-target="#context-menu-permission">{{permission.name}}</td>
                         <td>
                             <div class="btn-group" role="group" aria-label="First group">
-                                <a class="btn" onclick="edit_permission({{permission.id}});" href="#" role="button" title='Edit constraint'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
-                                <a class="btn" onclick="delete_permission({{permission.id}});" href="#" role="button" title='Delete constraint'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                <!-- <a class="btn" onclick="" href="#" role="button" title='Edit constraint'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a> -->
+                                <a class="btn" onclick="delete_permission({{permission.id}});" href="#" role="button" title='Delete permission'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                             </div>                
                         </td>
                         </tr>
@@ -335,7 +335,7 @@
 <!-- 1. Create Objective Modal -->
 <div class="modal fade" id="objective_modal" tabindex="-1" role="dialog" aria-labelledby="objective_modal_title" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content">
+    <div class="modal-content modal-content-width-450" >
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="objective_modal_title"></h4>
@@ -378,7 +378,7 @@
                 <div class="col-md-9"></div>
             </div>
             <div class="row">
-                <div class="col-md-9">
+                <div class="col-md-12">
                   <div class="form-group">
                     <label for="abstract_context_condition">Abstract Context Condition (Text)</label>
                     <input id="condition_input" type="text" class="form-control" id="abstract_context_condition" placeholder="Enter text">
@@ -387,7 +387,7 @@
                 </div>  
             </div>
             <div class="row">
-                <div class="col-md-9">
+                <div class="col-md-12">
                   <div class="form-group">
                     <label for="condition_list">List of Abstract Context Conditions</label>
                     <select id="condition_list" multiple class="form-control">
@@ -409,7 +409,7 @@
 <!-- 2. Create Obstacle Modal -->
 <div class="modal fade" id="obstacle_modal" tabindex="-1" role="dialog" aria-labelledby="obstacle_modal_title" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content">
+    <div class="modal-content modal-content-width-450">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="obstacle_modal_title"></h4>
@@ -471,7 +471,7 @@
 <!-- 3. Create Condition Modal -->
 <div class="modal fade" id="condition_modal" tabindex="-1" role="dialog" aria-labelledby="condition_modal_title" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content">
+    <div class="modal-content modal-content-width-450">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="condition_modal_title"></h4>
@@ -500,7 +500,7 @@
 <!-- 4. Context Constraint Modal -->
 <div class="modal fade" id="constraint_modal" tabindex="-1" role="dialog" aria-labelledby="constraint_modal_title" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content">
+    <div class="modal-content modal-content-width-450">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="constraint_modal_title"></h4>
@@ -555,9 +555,51 @@
       </div>
       <div class="modal-body">
         <div class="row">
-        <div class="col-md-3">A</div>
+        <div class="col-md-3">
+        <form>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="scenario_name">Scenario Name</label>
+                    <input type="text" class="form-control" id="scenario_name" placeholder="Enter scenario name" required>
+                  </div>              
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="scenario_available_steps">Currently Available Steps</label>
+                    <select id="scenario_available_steps" multiple class="form-control" style="height:400px;">
+                    </select>
+                    <div class="row"><p></p></div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="btn-group">
+                              <a id="scenario_modal_add_step" href="#" class="btn btn-default" onclick="add_step()">Add selected step</a>
+                             </div>
+                            <div class="btn-group">
+                              <a id="scenario_modal_create_new_step" href="#" class="btn btn-default" onclick="create_new_step()">Create new step</a>
+                            </div>
+                        </div>
+                    </div>       
+                  </div>
+                </div>  
+            </div>
+        </form>
+        </div>
         <div class="col-md-9">
-            <div id="digraph" style='background-color:yellow; height: 500px; width:100%;left:0px;'></div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="digraph"></div>
+                </div>
+            </div>
+            <div class="row"><p></p></div>
+            <div class="row">
+                <div class="col-md-10"></div>
+                <div class="col-md-2">
+                    <a href="#" class="btn btn-default pull-right">Clear graph</a>
+                </div>
+            </div>
         </div>
         </div>
       </div>
@@ -572,7 +614,7 @@
 <!-- 6. Create Permission Modal -->
 <div class="modal fade" id="permission_modal" tabindex="-1" role="dialog" aria-labelledby="permission_modal_title" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content">
+    <div class="modal-content modal-content-width-450">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="permission_modal_title"></h4>
@@ -580,32 +622,19 @@
       <div class="modal-body">
         <form>
             <input type="hidden" id="permission_id" value="">
-            <!--
             <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="objective_name">Permission Name</label>
-                    <input type="text" class="form-control" id="objective_name" placeholder="Enter permission name" required>
-                    <input type="hidden" id="permission_id" value="">
-                  </div>              
-                </div>  
-            </div>
-            -->
-            <div class="row">
-                <div class="col-md-9">
+                <div class="col-md-12">
                   <div class="form-group">
                     <label for="permission_operation_name">Operation Name</label>
                     <input type="text" class="form-control" id="permission_operation_name" placeholder="Enter operation name" required>
-                    <!-- <input type="hidden" id="objective_id" value=""> -->
                   </div>              
                 </div>  
             </div>
             <div class="row">
-                <div class="col-md-9">
+                <div class="col-md-12">
                   <div class="form-group">
                     <label for="permission_object_name">Object Name</label>
                     <input type="text" class="form-control" id="permission_object_name" placeholder="Enter object name" required>
-                    <!-- <input type="hidden" id="objective_id" value=""> -->
                   </div>              
                 </div>  
             </div>
@@ -613,7 +642,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_permission_btn" type="button" class="btn btn-primary">Save changes</button>
+        <button id="permission_modal_save_btn" type="button" class="btn btn-primary">Save changes</button>
       </div>
     </div>
   </div>
@@ -978,7 +1007,7 @@
   </div>
 </div>
 
-<!------- context menu ------>
+<!------- context menus ------>
 
 <div id="context-menu">
   <ul class="dropdown-menu" role="menu">
@@ -987,6 +1016,7 @@
   </ul>
 </div>
 
+<!-- permission -->
 <div id="context-menu-permission">
   <ul class="dropdown-menu" role="menu">
     <li><a tabindex="-1" href="#">Create Permission</a></li>
@@ -1070,5 +1100,40 @@ jQuery.fn.extend({
   }
 });
 
+</script>
+<script>
+    // create an array with nodes
+    var nodes = new vis.DataSet([
+        {id: 1, label: 'Node 1'},
+        {id: 2, label: 'Node 2'},
+        {id: 3, label: 'Node 3'},
+        {id: 4, label: 'Node 4'},
+        {id: 5, label: 'Node 5'}
+    ]);
+
+    nodes.add({id: 6, label: 'Node 6', x:1200, y:1500});
+    
+    // create an array with edges
+    var edges = new vis.DataSet([
+        {from: 1, to: 3},
+        {from: 1, to: 2},
+        {from: 2, to: 4},
+        {from: 2, to: 5}
+    ]);
+
+    // create a network
+    var container = document.getElementById('digraph');
+
+    // provide the data in the vis format
+    var data = {
+        nodes: nodes,
+        edges: edges
+    };
+    // these are all options in full.
+    var options = { }
+
+
+    // initialize your network!
+    var network = new vis.Network(container, data, options);
 </script>
 {% endblock scripts %}

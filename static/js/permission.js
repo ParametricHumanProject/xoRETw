@@ -11,30 +11,34 @@ $(function() {
         } 
     })
         
-    $( '#save_permission_btn' ).click(function() {
+    $('#permission_modal_save_btn').click(function() {
         
         // validate all fields
         var id = $('#permission_id').val();
-        var operation_name = $('#permission_operation_name').val().split(' ').join('_');
-        var object_name = $('#permission_object_name').val().split(' ').join('_');
+        var permission_operation_name = $('#permission_operation_name').val().split(' ').join('_');
+        
+        alert(permission_operation_name);
+        
+        var permission_object_name = $('#permission_object_name').val().split(' ').join('_');
+        alert(permission_object_name);
 
-        if (!object_name) {
+        if (!permission_operation_name) {
             alert('Error: operation name cannot be empty.');
-            $("#permission_operation_name").focus();
-            $( '#permission_operation_name' ).flash();
+            $('#permission_operation_name').focus();
+            $('#permission_operation_name').flash();
             return;
         }
         
-        if (!operation_name) {
+        if (!permission_object_name) {
             alert('Error: object name cannot be empty.');
-            $("#permission_object_name").focus();
-            $( '#permission_object_name' ).flash();
+            $('#permission_object_name').focus();
+            $('#permission_object_name').flash();
             return;
         }
         
 
         // create data
-        var permission_data = new Permission(id, operation_name, object_name, mode);
+        var permission_data = new Permission(id, permission_operation_name, permission_object_name, mode);
 
         // post data
         $.ajax({

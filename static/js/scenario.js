@@ -14,6 +14,11 @@ $(function() {
 });
 
 
+$('#scenario_modal_create_new_step').click(function() {
+    $('#step_modal').modal('toggle');
+});
+
+
 // scenario
 $( '#create_scenario_btn' ).click(function() {
 

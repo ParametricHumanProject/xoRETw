@@ -17,6 +17,18 @@
 
         <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
         <style>
+            #digraph {
+                width: 100%;
+                height: 500px;
+                background-color:whitesmoke;
+                border: 1px solid lightgray;
+            }
+        </style>        
+        <style>
+            
+            .modal-content-width-450 {
+                width: 450px;
+            }
             .modal.modal-wide .modal-dialog {
               width: 90%;
             }
@@ -46,6 +58,7 @@
         </style>
         <link rel="stylesheet" href="{% static 'css/bootstrap-theme.min.css' %}">
         <link rel="stylesheet" href="{% static 'css/main.css' %}">
+        <link rel="stylesheet" href="{% static 'css/vis.min.css' %}">
         <script src="{% static 'js/vendor/modernizr-2.8.3-respond-1.4.2.min.js' %}"></script>
     </head>
     <body>
@@ -76,6 +89,8 @@
     </div> <!-- /container -->      
       
 		<script src="{% static 'js/vendor/jquery-1.11.2.min.js' %}"></script>
+        <script src="{% static 'js/vendor/vis.min.js' %}"></script>
+        
         <script src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
 		<script src="{% static 'js/vendor/jquery-ui.js' %}"></script>
         <script src="{% static 'js/vendor/bootstrap-contextmenu.js' %}"></script>
@@ -89,6 +104,7 @@
         <script src="{% static 'js/task.js' %}"></script>
         <script src="{% static 'js/work_profile.js' %}"></script>
         <script src="{% static 'js/scenario.js' %}"></script>
+        <script src="{% static 'js/step.js' %}"></script>
         
 <!--        
         <script src="{% static 'js/permission.js' %}"></script>
