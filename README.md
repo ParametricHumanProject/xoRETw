@@ -20,7 +20,12 @@ we would like to begin by porting the xoRET tool to being a web-based database-d
 ## Tests
 
 
-## Contributors
+## Contributors 
+Azam Khan
+
+Dave Kanter
+
+Ian Carreon 
 
 ## Videos
 
