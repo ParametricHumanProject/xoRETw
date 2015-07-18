@@ -246,6 +246,35 @@
                     </tbody>
                     </table>
                 {% endif %}
+                
+                <!-- OBJECT_TYPE_STEP -->
+                {% if object_type == 5 %}  
+                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <thead>
+                    <tr>
+                    <th class="col-md-1">#</th>
+                    <th class="col-md-3">Step</th>
+                    <th class="col-md-8">&nbsp;</th> <!-- toolbar: edit/remove -->
+                    </tr>
+                    </thead>
+                    <tbody>
+                    
+                    {% for step in steps %}
+                        <tr id='step-{{step.id}}'>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td data-toggle="context" data-target="#context-menu">{{step.name}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a class="btn" onclick="edit_step({{step.id}});" href="#" role="button" title='Edit step'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                                <a class="btn" onclick="delete_step({{step.id}});" href="#" role="button" title='Delete step'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                            </div>                
+                        </td>
+                        </tr>
+                    {% endfor %}
+                    
+                    </tbody>
+                    </table>
+                {% endif %}
 
                 <!-- OBJECT_TYPE_CONTEXT_PERMISSION -->
                 {% if object_type == 7 %}  
@@ -578,7 +607,7 @@
                               <a id="scenario_modal_add_step" href="#" class="btn btn-default" onclick="add_step()">Add selected step</a>
                              </div>
                             <div class="btn-group">
-                              <a id="scenario_modal_create_new_step" href="#" class="btn btn-default" onclick="create_new_step()">Create new step</a>
+                              <a id="scenario_modal_create_new_step" href="#" class="btn btn-default">Create new step</a>
                             </div>
                         </div>
                     </div>       
@@ -871,6 +900,7 @@
       </div>
       <div class="modal-body">
         <form>
+            <input type="hidden" id="step_id" value="">
             <div class="row">
                 <div class="col-md-9">
                   <div class="form-group">
@@ -899,7 +929,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        <button id="save_objective_btn" type="button" class="btn btn-primary">Save</button>
+        <button id="save_step_btn" type="button" class="btn btn-primary">Save</button>
       </div>
     </div>
   </div>
@@ -1035,7 +1065,7 @@
 <script>
 // onready
 $(function() {
-
+ 
 });
 var MODE_CREATE = 1;
 var MODE_UPDATE = 2;
@@ -1056,14 +1086,12 @@ var OBJECT_TYPE_OBJECTIVE = 1
 var OBJECT_TYPE_OBSTACLE = 2
 var OBJECT_TYPE_CONDITION = 3
 var OBJECT_TYPE_CONTEXT_CONSTRAINT = 4
+var OBJECT_TYPE_STEP = 5
+var OBJECT_TYPE_SCENARIO = 6
 var OBJECT_TYPE_PERMISSION = 7
 var OBJECT_TYPE_TASK = 8
-
-
-
-var OBJECT_TYPE_ROLE = 6
-var OBJECT_TYPE_STEP = '6'
-var OBJECT_TYPE_SCENARIO = '7'
+var OBJECT_TYPE_WORK_PROFILE = 9
+var OBJECT_TYPE_ROLE = 10
 
 
 // common to all
@@ -1084,6 +1112,9 @@ var url_edit_constraint = "{% url 'edit_constraint' %}"
 var url_delete_permission = "{% url 'delete_permission' %}"
 
 var url_get_conditions = "{% url 'get_conditions' %}"
+
+var url_delete_step = "{% url 'delete_step' %}"
+
 
 var mode = 0; // edit mode, common var to all
 
@@ -1130,9 +1161,31 @@ jQuery.fn.extend({
         edges: edges
     };
     // these are all options in full.
-    var options = { }
-
-
+ var options = {
+  manipulation: {
+    enabled: true,
+    //initiallyActive: false,
+    addEdge: true,
+    addNode: true,
+    
+    //editNode: false,
+    //editEdge: true,
+    //deleteNode: true,
+    //deleteEdge: true,
+  },
+edges:{
+    arrows: 'to',
+    color: 'red',
+    font: '12px arial #ff0000',
+    scaling:{
+      label: true,
+    },
+    shadow: true,
+    smooth: true,
+  }  
+  
+};
+$(".vis-button.vis-add").css("display", "none");
     // initialize your network!
     var network = new vis.Network(container, data, options);
 </script>

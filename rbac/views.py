@@ -22,12 +22,13 @@ OBJECT_TYPE_OBJECTIVE = 1
 OBJECT_TYPE_OBSTACLE = 2
 OBJECT_TYPE_CONDITION = 3
 OBJECT_TYPE_CONTEXT_CONSTRAINT = 4
+OBJECT_TYPE_STEP = 5
 OBJECT_TYPE_PERMISSION = 7
 OBJECT_TYPE_TASK = 8
 
 
 OBJECT_TYPE_ROLE = 55
-OBJECT_TYPE_STEP = 65
+
 OBJECT_TYPE_SCENARIO = 75
 #OBJECT_TYPE_CONTEXTCONSTRAINT = 9
 
@@ -63,15 +64,12 @@ def dashboard(request):
     object_type = request.GET.get('object_type', 1) # default to Objective tab
     object_type = int(object_type)
     
-    print '--------object_type  is ', object_type
-    
-
     # if this is a POST request we need to process the data
     if request.method == 'POST':
         
         object_type = request.POST.get('object_type', None)
         object_type = int(object_type)
-        print 'object type is ', object_type
+        print 'hellow object type is ', object_type
         
         # TODO: handle each object_type       
         
@@ -311,7 +309,7 @@ def dashboard(request):
             return HttpResponse(json_data, content_type='application/json')
             
         elif object_type == OBJECT_TYPE_TASK:
-            print 'A'
+            print 'OBJECT_TYPE_TASK'
             task_id = request.POST.get('id', None)
             task_name = request.POST.get('name', None)
             scenarios = request.POST.getlist('scenarios[]', None)
@@ -365,6 +363,55 @@ def dashboard(request):
             data['task_name'] = task_name
             json_data = json.dumps(data)
             return HttpResponse(json_data, content_type='application/json')
+            
+        elif object_type == OBJECT_TYPE_STEP:
+            print '11'
+            step_id = request.POST.get('id', None)
+            actor = request.POST.get('actor', None)
+            action = request.POST.get('action', None)
+            target = request.POST.get('target', None)
+            print '22'
+            step_name = actor + '_' + action + '_' + target
+            mode = request.POST.get('mode', None)
+            
+            mode = int(mode)
+            
+            if step_id:
+                step_id = int(step_id)
+                
+            step_created = False
+            
+            if mode == CREATE_NEW:
+                
+                # use step name as an exact lookup
+                #print 'permission_name ', step_name
+                #print 'operation_name ', operation_name
+                #print 'object_name ', object_name
+                try:
+                    print '33'
+                    step, step_created = Step.objects.get_or_create(name__exact=step_name, user__exact=user, defaults={'name':step_name, 'actor':actor, 'action':action, 'target':target, 'user':user})
+        
+                except: # catch *all* exceptions
+                    print 'Error!!!!!!!!!!!!!!!!!!!!!!!!!'
+                    e = sys.exc_info()[0]
+                    print "<p>Error: %s</p>" % e
+                    #write_to_page( "<p>Error: %s</p>" % e )
+                
+                print 'A5'
+                if step_created:
+                    print 'A6'
+                    step.save()    
+                    print 'A7'   
+                                                                     
+            # edit mode - none for permissions
+            else:
+                pass
+                    
+            data = {}
+            data['created'] = str(step_created).lower()
+            data['step_name'] = step_name
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
                                 
     # if a GET (or any other method)
     else:    
@@ -386,6 +433,9 @@ def dashboard(request):
         elif object_type == OBJECT_TYPE_TASK:
             tasks = Task.objects.all().filter(user=user)
             return render_to_response('dashboard.html', {'object_type':object_type, 'tasks':tasks}, context_instance=RequestContext(request))
+        elif object_type == OBJECT_TYPE_STEP:
+            steps = Step.objects.all().filter(user=user)
+            return render_to_response('dashboard.html', {'object_type':object_type, 'steps':steps}, context_instance=RequestContext(request))
 
     return render_to_response('dashboard.html', {'object_type':object_type}, context_instance=RequestContext(request))
 
@@ -552,5 +602,18 @@ def delete_permission(request):
             print 'A5'
             data['deleted'] = 'true'
             data['permission_id'] = permission_id
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
+def delete_step(request):
+    user = request.user
+    data = {}
+    if request.method == 'POST':      
+        step_id = request.POST.get('step_id', None)
+        if step_id:
+            o = Step.objects.get(id=step_id, user=user)
+            o.delete()
+            data['deleted'] = 'true'
+            data['step_id'] = step_id
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')

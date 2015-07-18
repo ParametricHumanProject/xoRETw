@@ -29,7 +29,8 @@ urlpatterns = patterns('',
 
     url(r'^views/delete_permission$', views.delete_permission, name='delete_permission'),
     #url(r'^views/edit_permission$', views.edit_permission, name='edit_permission'),
-
+    
+    url(r'^views/delete_step$', views.delete_step, name='delete_step'),
 
     (r'^accounts/', include('registration.backends.simple.urls')),
 )
