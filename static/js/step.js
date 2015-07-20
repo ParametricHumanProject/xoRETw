@@ -15,7 +15,7 @@ $(function() {
 });
 
 
-// objective
+// step
 $( '#scenario_modal_create_new_step' ).click(function() {
 
     // set to new mode
@@ -27,7 +27,8 @@ $( '#scenario_modal_create_new_step' ).click(function() {
     $('#step_target').val('');
 });
 
-$( '#save_step_btn' ).click(function() {
+$( '#save_step' ).click(function() {
+    alert('save_step_btn')
     // validate all fields
     var id = $('#step_id').val();
     var step_actor = $('#step_actor').val().split(' ').join('_');
@@ -59,29 +60,39 @@ $( '#save_step_btn' ).click(function() {
 
     // create data
     var step_data = new Step(id, step_actor, step_action, step_target, mode);
+    
     // post data
+    alert('about to post data');
     $.ajax({
         method: "POST",
         url: url_dashboard,
         dataType: "json",
         data: step_data
-    }).done(function( msg ) {
-        var step_name = msg['step_name'];
-        var created = msg['created'];
+    }).done(function(data) {
+        alert('11111')
+        var step_name = data['step_name'];
+        var created = data['created'];
         
+        var s = 'created is ' + created;
+        alert(s);
         created = (created === "true");
         
         if (created) {
             $('#step_modal').modal('toggle');
+            
+            // add new step to list of all available steps in the scenario modal
+            var option = '<option value=' + step_name + '>' + step_name + '</option>';
+            $("#scenario_available_steps").append(option);
+            $("#scenario_modal_add_step").prop('disabled', false);
+            
         } else {    
-            // and mode is create
+            // and was the mode set to create
             if (mode == 1) {
                 alert('Error - failed to create step: '+ step_name);
             } else {
-                $('#step_modal').modal('toggle');
+                //$('#step_modal').modal('toggle');
             }
         }
-        location.reload();            
     }); 
 
 });
@@ -115,134 +126,4 @@ function delete_step(id) {
   });  
 }
 
-/*
 
-$("#add_condition").click(function(e){
-    
-    var value = $('#condition_input').val();
-    
-    if (!$.trim(value)) {
-        // error
-        alert('Error: condition value cannot be empty.');
-        $( "#condition_input" ).focus();
-        return;
-    }
-
-    var option_values = [];
-    $('#condition_list option').each(function() {
-        option_values.push($(this).val());
-    });    
-        
-    for (i = 0; i < option_values.length; i++) { 
-        if (option_values[i] == value.split(' ').join('_')) {
-            alert('Error: ' + value.split(' ').join('_') + ' already exists');
-            $( "#condition_input" ).focus();
-            return;
-        }
-    }
-
-    // add to list
-    var option = '<option value=' + value.split(' ').join('_') + '>' + value + '</option>';
-    $("#condition_list").append(option);
-
-    // clear input value
-    $('#condition_input').val('');
-    $("#remove_condition").prop('disabled', false);
-
-    return;
-});
-
-$("#remove_condition").click(function(e){
- 
-    var value = $('#condition_list').val();
-        
-    if (!value) {
-        alert('Error: no option selected');
-        return;
-    }
-    
-    var selector = "#condition_list option[value='" + value + "']";
-    $(selector).remove();
-    
-    var size = $('#condition_list option').size()
-    if (!size) {
-        $("#remove_condition").prop('disabled', true);
-    }
-
-    return;
-});
-
-
-// helper
-function change_select_label(e) {
-    var property_value = $( '#'+e.target.id ).text();
-    $('#objective_type_label').text(property_value);
-}
-
-function delete_objective(id) {
-    
-    // fade out then remove
-    $('#objective-' + id).fadeOut('slow', function(){ $(this).remove(); });    
-
-    
-    $.ajax({
-        method: "POST",
-        url: url_delete_objective,
-        dataType: "json",
-        data: {objective_id: id},
-    }).done(function( msg ) {
-        var message = JSON.parse(msg);
-    }).fail(function() {
-        alert( "Error - failed to delete objective" );
-  });    
-}
-
-function edit_objective_btn(id) {
-
-    mode = 2; // edit
-    
-    // get existing data and populate dialog
-    $.ajax({
-        method: "GET",
-        url: url_edit_objective,
-        dataType: "json",
-        data: {objective_id: id},
-    }).done(function( msg ) {
-
-        // reset all fields
-        $('#objective_id').val('');
-        $('#objective_name').val('');
-        $('#objective_type_label').text('Select');
-        $('#condition_input').val('');
-        $('#condition_list').find('option').remove();
-        
-        var objective_name = msg['name'];
-        var objective_type = msg['type'];
-        var conditions = msg['conditions'];
-
-        // set input values
-        $('#objective_id').val(id); //hidden
-        $('#objective_name').val(objective_name);
-        $('#objective_type_label').text(objective_type);
-
-        var value = ''
-        for (var i = 0; i < conditions.length; i++) {
-            value = conditions[i];
-            var option = '<option value=' + value.split(' ').join('_') + '>' + value + '</option>';
-            $("#condition_list").append(option);
-        }        
-
-        if (conditions.length) {
-            $("#remove_condition").prop('disabled', false);
-        } else {
-            $("#remove_condition").prop('disabled', true);
-        }
-        
-        $('#objective_modal').modal('show');
-                
-    }).fail(function() {
-        alert( "Error - Edit objective failed." );
-  });    
-    
-}
-*/

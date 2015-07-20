@@ -306,8 +306,30 @@
                 {% endif %}
 
                 {% if object_type == 6 %}  
-                    <br>
-                    <p>Placeholder for Scenarios</p>
+                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <thead>
+                    <tr>
+                    <th class="col-md-1">#</th>
+                    <th class="col-md-3">Scenario</th>
+                    <th class="col-md-8">&nbsp;</th> <!-- toolbar: edit/remove -->
+                    </tr>
+                    </thead>
+                    <tbody>
+                    
+                    {% for scenario in scenarios %}
+                        <tr id='scenario-{{scenario.id}}'>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td data-toggle="context" data-target="#context-menu">{{scenario.name}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a class="btn" onclick="edit_scenario({{scenario.id}});" href="#" role="button" title='Edit scenario'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                                <a class="btn" onclick="delete_scenario({{scenario.id}});" href="#" role="button" title='Delete scenario'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                            </div>                
+                        </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                    </table>
                 {% endif %}
 
                 {% if object_type == 77 %}  
@@ -586,6 +608,7 @@
         <div class="row">
         <div class="col-md-3">
         <form>
+            <input type="hidden" id="scenario_id" value="">
             <div class="row">
                 <div class="col-md-12">
                   <div class="form-group">
@@ -604,7 +627,8 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="btn-group">
-                              <a id="scenario_modal_add_step" href="#" class="btn btn-default" onclick="add_step()">Add selected step</a>
+                              <!-- <a id="scenario_modal_add_step" href="#" class="btn btn-default">Add selected step</a> -->
+                                <input id="scenario_modal_add_step" class="btn btn-default" type="button" value="Add selected step" disabled="">                              
                              </div>
                             <div class="btn-group">
                               <a id="scenario_modal_create_new_step" href="#" class="btn btn-default">Create new step</a>
@@ -634,7 +658,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button id="save_scenario_btn" type="button" class="btn btn-primary">Save changes</button>
       </div>
     </div>
   </div>
@@ -906,7 +930,7 @@
                   <div class="form-group">
                     <label for="step_actor">Actor</label>
                     <input type="text" class="form-control" id="step_actor" placeholder="Enter actor name" required>
-                  </div>              
+                  </div>
                 </div>  
             </div>
             <div class="row">
@@ -929,7 +953,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        <button id="save_step_btn" type="button" class="btn btn-primary">Save</button>
+        <button id="save_step" type="button" class="btn btn-primary">Save</button>
       </div>
     </div>
   </div>
@@ -1112,9 +1136,15 @@ var url_edit_constraint = "{% url 'edit_constraint' %}"
 var url_delete_permission = "{% url 'delete_permission' %}"
 
 var url_get_conditions = "{% url 'get_conditions' %}"
+var url_get_steps = "{% url 'get_steps' %}"
+var url_get_scenarios = "{% url 'get_scenarios' %}"
 
 var url_delete_step = "{% url 'delete_step' %}"
+var url_delete_scenario = "{% url 'delete_scenario' %}"
 
+var url_delete_task = "{% url 'delete_task' %}"
+
+var url_edit_scenario = "{% url 'edit_scenario' %}"
 
 var mode = 0; // edit mode, common var to all
 

@@ -23,13 +23,15 @@ OBJECT_TYPE_OBSTACLE = 2
 OBJECT_TYPE_CONDITION = 3
 OBJECT_TYPE_CONTEXT_CONSTRAINT = 4
 OBJECT_TYPE_STEP = 5
+OBJECT_TYPE_SCENARIO = 6
 OBJECT_TYPE_PERMISSION = 7
 OBJECT_TYPE_TASK = 8
+OBJECT_TYPE_WORK_PROFILE = 9
+OBJECT_TYPE_ROLE = 10
 
 
-OBJECT_TYPE_ROLE = 55
 
-OBJECT_TYPE_SCENARIO = 75
+
 #OBJECT_TYPE_CONTEXTCONSTRAINT = 9
 
 
@@ -53,6 +55,48 @@ def get_conditions(request):
         condition['name'] = i.name
         condition['id'] = i.id
         data['conditions'].append(condition)
+    
+    json_data = json.dumps(data)
+    print 'json_data ', json_data
+    return HttpResponse(json_data, content_type='application/json')
+
+# get all available steps 
+def get_steps(request):
+    user = request.user
+    print 'a'
+    # get name, type and conditions
+    data = {}
+    data['steps'] = []
+    print 'b'
+    steps = Step.objects.all().filter(user=user)
+    print 'c'
+    for i in steps:
+        print 'get steps - ', i.name
+        step = {}
+        step['name'] = i.name
+        step['id'] = i.id
+        data['steps'].append(step)
+    
+    json_data = json.dumps(data)
+    print 'json_data ', json_data
+    return HttpResponse(json_data, content_type='application/json')
+
+# get all available scenarios
+def get_scenarios(request):
+    user = request.user
+
+    # get name, type and conditions
+    data = {}
+    data['scenarios'] = []
+    
+    scenarios = Scenario.objects.all().filter(user=user)
+    
+    for i in scenarios:
+        print 'get scenario - ', i.name
+        scenario = {}
+        scenario['name'] = i.name
+        scenario['id'] = i.id
+        data['scenarios'].append(scenario)
     
     json_data = json.dumps(data)
     print 'json_data ', json_data
@@ -382,7 +426,7 @@ def dashboard(request):
             step_created = False
             
             if mode == CREATE_NEW:
-                
+                print 'mode create new step'
                 # use step name as an exact lookup
                 #print 'permission_name ', step_name
                 #print 'operation_name ', operation_name
@@ -398,18 +442,55 @@ def dashboard(request):
                     #write_to_page( "<p>Error: %s</p>" % e )
                 
                 print 'A5'
+                print 'step_created is ', step_created
                 if step_created:
                     print 'A6'
                     step.save()    
                     print 'A7'   
                                                                      
-            # edit mode - none for permissions
-            else:
-                pass
-                    
+            # TODO: edit mode
+            #else:
+            #    pass
+            print 'bbb'
             data = {}
             data['created'] = str(step_created).lower()
+            print "data['created'] ", data['created']
             data['step_name'] = step_name
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
+            
+        elif object_type == OBJECT_TYPE_SCENARIO:
+            
+            scenario_id = request.POST.get('id', None)
+            scenario_name = request.POST.get('name', None)
+            
+            mode = request.POST.get('mode', None)
+            mode = int(mode)
+            
+            if scenario_id != '':
+                scenario_id = int(scenario_id)
+                
+            scenario_created = False
+                        
+            if mode == CREATE_NEW:
+                # use scenario name as an exact lookup
+                scenario, scenario_created = Scenario.objects.get_or_create(name__exact=scenario_name, user__exact=user, defaults={'name':scenario_name, 'user':user})
+
+                if scenario_created:
+                    scenario.save()
+                                    
+            # edit mode
+            else:
+                scenario, scenario_created = Scenario.objects.get_or_create(id__exact=scenario_id, user__exact=user, defaults={'name':scenario_name, 'user':user})
+
+                # should already exist since we're doing an update
+                if not scenario_created:
+                    scenario.name = scenario_name
+                    scenario.save()
+                    
+            data = {}
+            data['created'] = str(scenario_created).lower()
+            data['scenario_name'] = scenario_name
             json_data = json.dumps(data)
             return HttpResponse(json_data, content_type='application/json')
                                 
@@ -436,6 +517,9 @@ def dashboard(request):
         elif object_type == OBJECT_TYPE_STEP:
             steps = Step.objects.all().filter(user=user)
             return render_to_response('dashboard.html', {'object_type':object_type, 'steps':steps}, context_instance=RequestContext(request))
+        elif object_type == OBJECT_TYPE_SCENARIO:
+            scenarios = Scenario.objects.all().filter(user=user)
+            return render_to_response('dashboard.html', {'object_type':object_type, 'scenarios':scenarios}, context_instance=RequestContext(request))
 
     return render_to_response('dashboard.html', {'object_type':object_type}, context_instance=RequestContext(request))
 
@@ -586,20 +670,38 @@ def edit_constraint(request):
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
 
+def edit_scenario(request):
+    user = request.user
+    
+    if request.method == 'GET':        
+        scenario_id = request.GET.get('scenario_id', None)
+        
+        if scenario_id:
+            scenario = Scenario.objects.get(id=scenario_id, user=user)
+
+    # get name, type and conditions
+    data = {}
+    data['name'] = scenario.name
+    data['steps'] = []
+
+    steps = Step.objects.all().filter(user=user)
+    for i in steps:
+        step = {}
+        step['name'] = i.name
+        step['id'] = i.id
+        data['steps'].append(step)
+
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
 def delete_permission(request):
     user = request.user
-    print 'A'
     data = {}
     if request.method == 'POST':      
-        print 'A1'
         permission_id = request.POST.get('permission_id', None)
-        print 'A2'
         if permission_id:
-            print 'A3'
             o = Permission.objects.get(id=permission_id, user=user)
-            print 'A4'
             o.delete()
-            print 'A5'
             data['deleted'] = 'true'
             data['permission_id'] = permission_id
     json_data = json.dumps(data)
@@ -615,5 +717,63 @@ def delete_step(request):
             o.delete()
             data['deleted'] = 'true'
             data['step_id'] = step_id
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
+def delete_scenario(request):
+    user = request.user
+    data = {}
+    if request.method == 'POST':      
+        scenario_id = request.POST.get('scenario_id', None)
+        if scenario_id:
+            o = Scenario.objects.get(id=scenario_id, user=user)
+            o.delete()
+            data['deleted'] = 'true'
+            data['scenario_id'] = scenario_id
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
+def delete_task(request):
+    print 'a'
+    user = request.user
+    data = {}
+    print 'b'
+    if request.method == 'POST':      
+        print 'c'
+        task_id = request.POST.get('task_id', None)
+        if task_id:
+            print 'd'
+            o = Task.objects.get(id=task_id, user=user)
+            o.delete()
+            print 'e'
+            data['deleted'] = 'true'
+            data['task_id'] = task_id
+            print 'f'
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+    
+def delete_role(request):
+    user = request.user
+    data = {}
+    if request.method == 'POST':      
+        role_id = request.POST.get('role_id', None)
+        if role_id:
+            o = Role.objects.get(id=role_id, user=user)
+            o.delete()
+            data['deleted'] = 'true'
+            data['role_id'] = role_id
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
+def delete_work_profile(request):
+    user = request.user
+    data = {}
+    if request.method == 'POST':      
+        work_profile_id = request.POST.get('work_profile_id', None)
+        if work_profile_id:
+            o = WorkProfile.objects.get(id=work_profile_id, user=user)
+            o.delete()
+            data['deleted'] = 'true'
+            data['work_profile_id'] = work_profile_id
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')

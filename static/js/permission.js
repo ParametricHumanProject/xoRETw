@@ -17,10 +17,10 @@ $(function() {
         var id = $('#permission_id').val();
         var permission_operation_name = $('#permission_operation_name').val().split(' ').join('_');
         
-        alert(permission_operation_name);
+        //alert(permission_operation_name);
         
         var permission_object_name = $('#permission_object_name').val().split(' ').join('_');
-        alert(permission_object_name);
+        //alert(permission_object_name);
 
         if (!permission_operation_name) {
             alert('Error: operation name cannot be empty.');

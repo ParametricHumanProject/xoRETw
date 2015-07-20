@@ -104,7 +104,8 @@ $( '#create_constraint_btn' ).click(function() {
                                 
     }).fail(function() {
         alert( "Error - Edit context constraint failed." );
-  });        
+  });
+         
 });
 
 $("#add_constraint_condition").click(function(e){

@@ -74,38 +74,38 @@ $( '#create_task_btn' ).click(function() {
     $('#task_available_scenarios').find('option').remove();
     $('#task_scenarios').find('option').remove();
 
-/*    
+    
     // get all available scenarios
     $.ajax({
         method: "GET",
         url: url_get_scenarios,
-    }).done(function( msg ) {
+    }).done(function(data) {
         
-        var scenarios = msg['scenarios'];
+        var scenarios = data['scenarios'];
         
         // set input values
         var value = ''
-        for (var i = 0; i < conditions.length; i++) {
-            value = conditions[i];
+        for (var i = 0; i < scenarios.length; i++) {
+            value = scenarios[i];
             var option = '<option value=' + value.name.split(' ').join('_') + '>' + value.name + '</option>';
-            $("#constraint_available_conditions").append(option);
+            $("#task_available_scenarios").append(option);
         }        
         
-        if (conditions.length) {
-            $("#add_constraint_condition").prop('disabled', false);
+        if (scenarios.length) {
+            $("#add_task_scenario").prop('disabled', false);
         } else {
-            $("#add_constraint_condition").prop('disabled', true);
+            $("#add_task_scenario").prop('disabled', true);
         }
                                 
     }).fail(function() {
         alert( "Error - Edit context constraint failed." );
   });     
-  */  
+
 });
 
 $("#add_task_scenario").click(function(e){
     
-    var value = $('#constraint_available_conditions').val();
+    var value = $('#task_available_scenarios').val();
         
     if (!value) {
         alert('Error: no option selected');
@@ -113,42 +113,42 @@ $("#add_task_scenario").click(function(e){
     }
     
     var option_values = [];
-    $('#constraint_conditions option').each(function() {
+    $('#task_scenarios option').each(function() {
         option_values.push($(this).val());
     });    
         
     for (i = 0; i < option_values.length; i++) { 
         if (option_values[i] == value) {
             alert('Error: ' + value + ' already exists');
-            $("#constraint_available_conditions").focus();
+            $("#task_available_scenarios").focus();
             return;
         }
     }
 
     // all good - add condition
     var option = '<option value=' + value + '>' + value + '</option>';
-    $("#constraint_conditions").append(option);
+    $("#task_scenarios").append(option);
     
-    $("#remove_constraint_condition").prop('disabled', false);
+    $("#remove_task_scenario").prop('disabled', false);
 
     return;
 });
 
 $("#remove_task_scenario").click(function(e){
  
-    var value = $('#constraint_conditions').val();
+    var value = $('#task_scenarios').val();
         
     if (!value) {
         alert('Error: no option selected');
         return;
     }
     
-    var selector = "#constraint_conditions option[value='" + value + "']";
+    var selector = "#task_scenarios option[value='" + value + "']";
     $(selector).remove();
     
-    var size = $('#constraint_conditions option').size()
+    var size = $('#task_scenarios option').size()
     if (!size) {
-        $("#remove_constraint_condition").prop('disabled', true);
+        $("#remove_task_scenario").prop('disabled', true);
     }
 
     return;
@@ -158,34 +158,34 @@ $("#remove_task_scenario").click(function(e){
 function delete_task(id) {
     
     // fade out then remove
-    $('#constraint-' + id).fadeOut('slow', function(){ $(this).remove(); });    
+    $('#task-' + id).fadeOut('slow', function(){ $(this).remove(); });    
 
     $.ajax({
         method: "POST",
-        url: url_delete_constraint,
+        url: url_delete_task,
         dataType: "json",
-        data: {constraint_id: id},
+        data: {task_id: id},
     }).done(function( msg ) {
         var deleted = msg['deleted'];
         deleted = (deleted === "true");
         if (!deleted) {
-            alert( "Error - failed to delete obstacle" );
+            alert( "Error - failed to delete task" );
         }
     }).fail(function() {
-        alert( "Error - failed to delete obstacle" );
+        alert( "Error - failed to delete task" );
   });  
 }
 
-function edit_constraint(id) {
+function edit_task(id) {
 
     mode = MODE_UPDATE; // edit
     
     // get existing data and populate dialog
     $.ajax({
         method: "GET",
-        url: url_edit_constraint,
+        url: url_edit_task,
         dataType: "json",
-        data: {constraint_id: id},
+        data: {task_id: id},
     }).done(function( msg ) {
         // reset all fields
         $('#constraint_id').val('');

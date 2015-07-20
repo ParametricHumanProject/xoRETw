@@ -26,11 +26,19 @@ urlpatterns = patterns('',
     url(r'^views/edit_constraint$', views.edit_constraint, name='edit_constraint'),
     
     url(r'^views/get_conditions$', views.get_conditions, name='get_conditions'),
+    url(r'^views/get_steps$', views.get_steps, name='get_steps'),
+    url(r'^views/get_scenarios$', views.get_scenarios, name='get_scenarios'),
 
     url(r'^views/delete_permission$', views.delete_permission, name='delete_permission'),
     #url(r'^views/edit_permission$', views.edit_permission, name='edit_permission'),
     
     url(r'^views/delete_step$', views.delete_step, name='delete_step'),
+    url(r'^views/delete_scenario$', views.delete_scenario, name='delete_scenario'),
+    url(r'^views/delete_task$', views.delete_task, name='delete_task'),
+    
+    url(r'^views/edit_scenario$', views.edit_scenario, name='edit_scenario'),
+    
+    
 
     (r'^accounts/', include('registration.backends.simple.urls')),
 )

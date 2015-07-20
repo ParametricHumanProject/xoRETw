@@ -127,7 +127,7 @@ $("#work_profile_remove_task").click(function(e){
 });
     
 
-function delete_task(id) {
+function delete_work_profile(id) {
     
     // fade out then remove
     $('#work_profile-' + id).fadeOut('slow', function(){ $(this).remove(); });    
