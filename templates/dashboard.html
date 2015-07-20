@@ -628,7 +628,7 @@
                         <div class="col-md-12">
                             <div class="btn-group">
                               <!-- <a id="scenario_modal_add_step" href="#" class="btn btn-default">Add selected step</a> -->
-                                <input id="scenario_modal_add_step" class="btn btn-default" type="button" value="Add selected step" disabled="">                              
+                                <input id="scenario_modal_add_step" class="btn btn-default" type="button" value="Add selected step" disabled="" >                              
                              </div>
                             <div class="btn-group">
                               <a id="scenario_modal_create_new_step" href="#" class="btn btn-default">Create new step</a>
@@ -648,9 +648,16 @@
             </div>
             <div class="row"><p></p></div>
             <div class="row">
-                <div class="col-md-10"></div>
+                <div class="col-md-10">
+                    <label class="radio-inline"><input id="graph_edit_mode" type="radio" name="graph_mode">Edit mode</label>
+                    <label class="radio-inline"><input id="graph_select_mode" type="radio" name="graph_mode">Select mode</label>
+                </div>
                 <div class="col-md-2">
-                    <a href="#" class="btn btn-default pull-right">Clear graph</a>
+                    <button id="scenario_modal_clear_graph" type="button" class="btn btn-default pull-right" >Clear graph</button>
+<!--                    <button id="scenario_modal_select_mode" type="button" class="btn btn-default pull-right" data-toggle="button" aria-pressed="false" autocomplete="off">Select mode</button>
+                    <button id="scenario_modal_edit_mode" type="button" class="btn btn-default pull-right" data-toggle="button" aria-pressed="false" autocomplete="off">Edit mode</button>
+    -->                
+                    <!-- <a href="#" class="btn btn-default pull-right">Clear graph</a> -->
                 </div>
             </div>
         </div>
@@ -1163,24 +1170,15 @@ jQuery.fn.extend({
 
 </script>
 <script>
+    /*
     // create an array with nodes
-    var nodes = new vis.DataSet([
-        {id: 1, label: 'Node 1'},
-        {id: 2, label: 'Node 2'},
-        {id: 3, label: 'Node 3'},
-        {id: 4, label: 'Node 4'},
-        {id: 5, label: 'Node 5'}
-    ]);
+    var nodes = new vis.DataSet([]);
 
-    nodes.add({id: 6, label: 'Node 6', physics: false, x:50, y:50});
+    //nodes.add({id: 6, label: 'Node 6', physics: false, x:50, y:50});//
+    nodes.add({id: 7, label: 'Node 7', physics: false, x:50, y:150});
     
     // create an array with edges
-    var edges = new vis.DataSet([
-        {from: 1, to: 3},
-        {from: 1, to: 2},
-        {from: 2, to: 4},
-        {from: 2, to: 5}
-    ]);
+    var edges = new vis.DataSet([]);
 
     // create a network
     var container = document.getElementById('digraph');
@@ -1192,17 +1190,7 @@ jQuery.fn.extend({
     };
     // these are all options in full.
  var options = {
-  manipulation: {
-    enabled: true,
-    //initiallyActive: false,
-    addEdge: true,
-    addNode: true,
-    
-    //editNode: false,
-    //editEdge: true,
-    //deleteNode: true,
-    //deleteEdge: true,
-  },
+nodes:{shape: 'box'},
 edges:{
     arrows: 'to',
     color: 'red',
@@ -1215,8 +1203,23 @@ edges:{
   }  
   
 };
-$(".vis-button.vis-add").css("display", "none");
-    // initialize your network!
-    var network = new vis.Network(container, data, options);
+
+    // initialize your network! - global var
+    var network = null;// = new vis.Network(container, data, options);
+    
+    // by default
+    //network.addEdgeMode();
+    /*
+    network.on("release", function (params) {
+            alert('a');
+        });    
+    network.on("dragging", function (params) {
+            alert('dragging');
+
+    });
+    network.on("dragEnd", function (params) {
+        network.addEdgeMode();
+    });
+    */    
 </script>
 {% endblock scripts %}

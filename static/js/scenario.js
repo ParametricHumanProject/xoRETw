@@ -30,11 +30,18 @@ $('#scenario_modal_add_step').click(function() {
         return;
     }
     
-    alert('adding step ' + value);
+    
+    nodes.add({id: value[0], label:value[0], physics: false, x:100, y:(nodeIds.length*50) + 50});
+    nodeIds.push(value[0]);
+    network.addEdgeMode();
 });
 
 // scenario
 $( '#create_scenario_btn' ).click(function() {
+    //alert('init here');
+    
+    // default to edit mode
+    $('#graph_edit_mode').click();
 
     // set to new mode
     mode = 1;
@@ -44,6 +51,88 @@ $( '#create_scenario_btn' ).click(function() {
     $('#scenario_available_steps').find('option').remove();
     
     $("#scenario_modal_add_step").prop('disabled', true);
+    
+    // destroy graph
+    if (network === null || network === undefined) {
+
+        
+        // create an array with nodes
+        nodes = new vis.DataSet([]);
+
+        //nodes.add({id: 7, label: 'Node 7', physics: false, x:50, y:150});
+        
+        // create an array with edges
+        edges = new vis.DataSet([]);
+
+        // create a network
+        container = document.getElementById('digraph');
+
+        // provide the data in the vis format
+        data = {
+            nodes: nodes,
+            edges: edges
+        };
+        
+        // these are all options in full.
+        options = {
+        nodes:{shape: 'box'},
+        edges:{
+            arrows: 'to',
+            color: 'red',
+            font: '12px arial #ff0000',
+            scaling:{
+              label: true,
+            },
+        shadow: true,
+        smooth: true,
+      } , 
+        manipulation: {
+            enabled: false,
+        }
+    };
+
+    // initialize your network! - global var
+    network = null;// = new vis.Network(container, data, options);
+    
+    // initialize your network!
+    network = new vis.Network(container, data, options);
+    
+    //network.addEdgeMode();
+    
+    //network.on("dragStart", function (params) {
+    //    network.addEdgeMode();
+    //});
+
+    network.on("dragEnd", function (params) {
+        if (scenario_graph_mode == 1) {
+            network.addEdgeMode();
+        }
+    });
+
+    
+    /*
+    network.on("release", function (params) {
+            alert('a');
+        });    
+    network.on("dragging", function (params) {
+            alert('dragging');
+
+    });
+    network.on("dragEnd", function (params) {
+        network.addEdgeMode();
+    });
+    */
+    
+ 
+        
+        // by default
+        //network.addEdgeMode();
+        
+    } else {
+        // initialize and create graph
+        alert('iancrrn');
+    
+    }
     
     // get all available steps
     $.ajax({
@@ -71,6 +160,19 @@ $( '#create_scenario_btn' ).click(function() {
         alert( "Error - Edit context constraint failed." );
   });
       
+});
+
+
+$('#scenario_modal_clear_graph').click(function() {
+alert('hhhh');
+alert(network);
+    if (network !== null) {
+        alert('destroy');
+        network.destroy();
+        network = null;
+        nodes.clear();
+        nodeIds = [];
+    }
 });
 
 $('#save_scenario_btn').click(function() {
@@ -189,8 +291,21 @@ function edit_scenario(id) {
         alert( "Error - Edit scenario failed." );
   });    
   
-        
-          
 }
 
+$('#graph_edit_mode').click(function(){
+    if ($(this).is(':checked'))
+    {
+      scenario_graph_mode = 1; // set to edit mode
+      network.addEdgeMode();
+    }
+});
+
+$('#graph_select_mode').click(function(){
+    if ($(this).is(':checked'))
+    {
+      scenario_graph_mode = 2; // set to select mode
+      network.disableEditMode();
+    }
+});
 
