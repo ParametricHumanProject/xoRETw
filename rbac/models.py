@@ -19,6 +19,7 @@ class Step(models.Model):
 class Scenario(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
+    graph = models.TextField(blank=True)
     steps = models.ManyToManyField(Step)
 
 class Task(models.Model):

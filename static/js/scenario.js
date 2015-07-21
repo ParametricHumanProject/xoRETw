@@ -1,140 +1,70 @@
-    
+
 // Handler for .ready() called.
 $(function() {
     
-    // set modal title for objective dialog
-    $('#scenario_modal').on('show.bs.modal', function(e) {
-        if (mode == 1) {
-            $('#scenario_modal_title').text("Create New Scenario"); 
-        } else {
-            $('#scenario_modal_title').text("Edit Scenario");   
-        }
-    })
-
 });
+
+// set modal title for scenario modal
+$('#scenario_modal').on('show.bs.modal', function(e) {
+    if (mode == CREATE_MODE) {
+        $('#scenario_modal_title').text("Create New Scenario"); 
+    } else {
+        $('#scenario_modal_title').text("Edit Scenario");   
+    }
+})
 
 $('#scenario_modal_create_new_step').click(function() {
     $('#step_modal').modal('toggle');
 });
 
-
 $('#scenario_modal_add_step').click(function() {
 
-    var value = $('#scenario_available_steps').val();
+    var selected_options = $('#scenario_available_steps').val();
         
-    if (!value) {
-        alert('Error: no option selected - please select of the currently available steps.');
+    // TODO: check if more than one selected option; that is an error
+    if (!selected_options) {
+        alert('Error: no option selected - please select one of the currently available steps.');
         $('#scenario_available_steps').focus();
         $('#scenario_available_steps').flash();
 
         return;
     }
+
+    // check if selected step already added
+    var node = null;
+    node = nodes.get(selected_options[0]);
     
+    if (node !== null) {
+        alert('Error: the step ' + '"' + selected_options[0] + '"' +  ' already exists in the graph.');
+        return;
+    }
     
-    nodes.add({id: value[0], label:value[0], physics: false, x:100, y:(nodeIds.length*50) + 50});
-    nodeIds.push(value[0]);
+    // add step to graph
+    nodes.add({id: selected_options[0], label:selected_options[0], physics: false, x:100, y:(nodeIds.length*50) + 50});
+    nodeIds.push(selected_options[0]);
+    
+    // edit mode/add edge
     network.addEdgeMode();
 });
 
-// scenario
+// create new scenario
 $( '#create_scenario_btn' ).click(function() {
-    //alert('init here');
     
     // default to edit mode
     $('#graph_edit_mode').click();
 
     // set to new mode
-    mode = 1;
+    mode = CREATE_MODE;
     
     // reset all fields
     $('#scenario_name').val('');
     $('#scenario_available_steps').find('option').remove();
-    
     $("#scenario_modal_add_step").prop('disabled', true);
-    
-    // destroy graph
-    if (network === null || network === undefined) {
 
-        
-        // create an array with nodes
-        nodes = new vis.DataSet([]);
-
-        //nodes.add({id: 7, label: 'Node 7', physics: false, x:50, y:150});
-        
-        // create an array with edges
-        edges = new vis.DataSet([]);
-
-        // create a network
-        container = document.getElementById('digraph');
-
-        // provide the data in the vis format
-        data = {
-            nodes: nodes,
-            edges: edges
-        };
-        
-        // these are all options in full.
-        options = {
-        nodes:{shape: 'box'},
-        edges:{
-            arrows: 'to',
-            color: 'red',
-            font: '12px arial #ff0000',
-            scaling:{
-              label: true,
-            },
-        shadow: true,
-        smooth: true,
-      } , 
-        manipulation: {
-            enabled: false,
-        }
-    };
-
-    // initialize your network! - global var
-    network = null;// = new vis.Network(container, data, options);
+    clear_graph();
+    init_graph();
     
-    // initialize your network!
-    network = new vis.Network(container, data, options);
-    
-    //network.addEdgeMode();
-    
-    //network.on("dragStart", function (params) {
-    //    network.addEdgeMode();
-    //});
-
-    network.on("dragEnd", function (params) {
-        if (scenario_graph_mode == 1) {
-            network.addEdgeMode();
-        }
-    });
-
-    
-    /*
-    network.on("release", function (params) {
-            alert('a');
-        });    
-    network.on("dragging", function (params) {
-            alert('dragging');
-
-    });
-    network.on("dragEnd", function (params) {
-        network.addEdgeMode();
-    });
-    */
-    
- 
-        
-        // by default
-        //network.addEdgeMode();
-        
-    } else {
-        // initialize and create graph
-        alert('iancrrn');
-    
-    }
-    
-    // get all available steps
+    // get all available steps from the server
     $.ajax({
         method: "GET",
         url: url_get_steps,
@@ -142,7 +72,7 @@ $( '#create_scenario_btn' ).click(function() {
         
         var steps = data['steps'];
         
-        // set input values
+        // populate available step select
         var value = ''
         for (var i = 0; i < steps.length; i++) {
             value = steps[i];
@@ -164,20 +94,13 @@ $( '#create_scenario_btn' ).click(function() {
 
 
 $('#scenario_modal_clear_graph').click(function() {
-alert('hhhh');
-alert(network);
-    if (network !== null) {
-        alert('destroy');
-        network.destroy();
-        network = null;
-        nodes.clear();
-        nodeIds = [];
-    }
+    clear_graph();
+    init_graph();
 });
 
 $('#save_scenario_btn').click(function() {
     
-    // validate all fields    
+    // get and validate all fields    
     var id = $('#scenario_id').val();
     var scenario_name = $('#scenario_name').val().split(' ').join('_');
 
@@ -188,8 +111,32 @@ $('#save_scenario_btn').click(function() {
         return;
     }
 
+    // get step graph
+    // DOT string
+    var graph_dot = '';
+    graph_dot = 'graph {'
+    var all_edges = edges.get(); 
+    
+    var i;
+    var edge;
+    //var temp;
+    
+    for (i = 0; i < all_edges.length; i++) { 
+        edge = all_edges[i];
+
+        if (i == all_edges.length - 1) {
+            graph_dot = graph_dot + String(edge['from']) + '->' + String(edge['to']);
+        } else {
+            graph_dot = graph_dot + String(edge['from']) + '->' + String(edge['to']) + ',';
+        }
+    }
+    graph_dot = graph_dot + '}';
+    
+    alert(graph_dot);
+    alert(typeof(graph_dot));
+    
     // create data
-    var scenario_data = new Scenario(id, scenario_name, mode);
+    var scenario_data = new Scenario(id, scenario_name, graph_dot, mode);
     
     // post data
     $.ajax({
@@ -207,7 +154,7 @@ $('#save_scenario_btn').click(function() {
             $('#scenario_modal').modal('toggle');
         } else {    
             // and was the mode set to create
-            if (mode == 1) {
+            if (mode == CREATE_MODE) {
                 alert('Error - failed to create scenario: '+ scenario_name);
             } else {
                 // do nothing
@@ -237,16 +184,17 @@ function delete_scenario(id) {
   });  
 }
 
-function Scenario(id, name, mode) {
+function Scenario(id, name, graph_dot, mode) {
     this.id = id;
     this.name = name;
+    this.graph_dot = graph_dot;
     this.mode = mode;
     this.object_type = OBJECT_TYPE_SCENARIO;
 }
 
 function edit_scenario(id) {
 
-    mode = 2; // edit
+    mode = EDIT_MODE; // edit
     
     // get existing data and populate dialog
     $.ajax({
@@ -259,7 +207,6 @@ function edit_scenario(id) {
         // reset all fields
         $('#scenario_name').val('');
         $('#scenario_available_steps').find('option').remove();
-        
         $("#scenario_modal_add_step").prop('disabled', true);
         
         var scenario_name = data['name'];
@@ -296,7 +243,7 @@ function edit_scenario(id) {
 $('#graph_edit_mode').click(function(){
     if ($(this).is(':checked'))
     {
-      scenario_graph_mode = 1; // set to edit mode
+      scenario_graph_mode = GRAPH_EDIT_MODE; // set to edit mode
       network.addEdgeMode();
     }
 });
@@ -304,8 +251,71 @@ $('#graph_edit_mode').click(function(){
 $('#graph_select_mode').click(function(){
     if ($(this).is(':checked'))
     {
-      scenario_graph_mode = 2; // set to select mode
+      scenario_graph_mode = GRAPH_SELECT_MODE; // set to select mode
       network.disableEditMode();
     }
 });
 
+function clear_graph() {
+    
+    if (network !== null) {
+        network.destroy();
+        network = null;
+    }
+    if (nodes !== null) {
+        nodes.clear();
+        nodes = null;
+    }
+    if (edges !== null) {
+        edges.clear();
+        edges = null;
+    }
+    
+    data = {};
+    options = {};
+    nodeIds = [];
+}
+
+function init_graph() {
+    
+    // create an array with nodes
+    nodes = new vis.DataSet([]);
+
+    // create an array with edges
+    edges = new vis.DataSet([]);
+
+    // create a network
+    container = document.getElementById('digraph');
+
+    // provide the data in the vis format
+    data = {
+        nodes: nodes,
+        edges: edges
+    };
+        
+    options = {
+        nodes:{shape: 'box'},
+        edges:{
+        arrows: 'to',
+        color: 'red',
+        font: '12px arial #ff0000',
+        scaling:{
+          label: true,
+        },
+        shadow: true,
+        smooth: true,
+        } , 
+        manipulation: {
+            enabled: false,
+        }
+    };
+    
+    // initialize your network!
+    network = new vis.Network(container, data, options);
+    
+    network.on("dragEnd", function (params) {
+        if (scenario_graph_mode == 1) {
+            network.addEdgeMode();
+        }
+    });
+}

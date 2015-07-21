@@ -30,11 +30,6 @@ OBJECT_TYPE_WORK_PROFILE = 9
 OBJECT_TYPE_ROLE = 10
 
 
-
-
-#OBJECT_TYPE_CONTEXTCONSTRAINT = 9
-
-
 def home(request):
 	return render_to_response('index.html', {}, context_instance=RequestContext(request))
 
@@ -460,27 +455,29 @@ def dashboard(request):
             return HttpResponse(json_data, content_type='application/json')
             
         elif object_type == OBJECT_TYPE_SCENARIO:
-            
             scenario_id = request.POST.get('id', None)
             scenario_name = request.POST.get('name', None)
-            
+            scenario_graph_dot = request.POST.get('graph_dot', None)
             mode = request.POST.get('mode', None)
+
             mode = int(mode)
-            
+
             if scenario_id != '':
                 scenario_id = int(scenario_id)
-                
+            
             scenario_created = False
                         
             if mode == CREATE_NEW:
+                
                 # use scenario name as an exact lookup
-                scenario, scenario_created = Scenario.objects.get_or_create(name__exact=scenario_name, user__exact=user, defaults={'name':scenario_name, 'user':user})
-
+                scenario, scenario_created = Scenario.objects.get_or_create(name__exact=scenario_name, user__exact=user, defaults={'name':scenario_name, 'graph':scenario_graph_dot, 'user':user})
+                
                 if scenario_created:
                     scenario.save()
                                     
             # edit mode
             else:
+                print '7'
                 scenario, scenario_created = Scenario.objects.get_or_create(id__exact=scenario_id, user__exact=user, defaults={'name':scenario_name, 'user':user})
 
                 # should already exist since we're doing an update
