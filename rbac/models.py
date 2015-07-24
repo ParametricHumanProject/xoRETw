@@ -56,13 +56,6 @@ class ContextConstraint(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
     conditions = models.ManyToManyField(Condition)
-    
-# done    
-class Role(models.Model):
-    user = models.ForeignKey(User)
-    name = models.CharField(max_length=50, unique=True)
-    role = models.ManyToManyField('self')
-    work_profile = models.OneToOneField(WorkProfile)
 
 # done
 class Permission(models.Model):
@@ -71,10 +64,21 @@ class Permission(models.Model):
     operation = models.CharField(max_length=50, unique=True)
     object = models.CharField(max_length=50, unique=True)
     step = models.OneToOneField(Step, null=True, blank=True)
-    roles = models.ManyToManyField(Role)
+#    roles = models.ManyToManyField(Role)
     context_constraints = models.ManyToManyField(ContextConstraint)
     ssd_constraints = models.TextField(blank=True)
     mincardinality = models.IntegerField(default=0)  # same as blank=True, null=True
     maxcardinality = models.IntegerField(default=0)  # same as blank=True, null=True    
+        
+# done    
+class Role(models.Model):
+    user = models.ForeignKey(User)
+    name = models.CharField(max_length=50, unique=True)
+    junior_roles = models.ManyToManyField('self', null=True, blank=True)
+    senior_roles = models.ManyToManyField('self', null=True, blank=True)
+    permissions = models.ManyToManyField(Permission, null=True, blank=True)
+    work_profile = models.OneToOneField(WorkProfile, null=True, blank=True)
+
+
 
 

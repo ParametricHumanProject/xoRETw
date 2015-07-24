@@ -97,6 +97,28 @@ def get_scenarios(request):
     print 'json_data ', json_data
     return HttpResponse(json_data, content_type='application/json')
 
+# get all available roles 
+def get_roles(request):
+    user = request.user
+    print 'user - get roles ', user
+    
+    # get name, type and conditions
+    data = {}
+    data['roles'] = []
+    
+    roles = Role.objects.filter(user=user)
+    print 'roles/length ', len(roles)
+    
+    for i in roles:
+        role = {}
+        role['name'] = i.name
+        role['id'] = i.id
+        data['roles'].append(role)
+    
+    json_data = json.dumps(data)
+    print 'json_data ', json_data
+    return HttpResponse(json_data, content_type='application/json')
+    
 @login_required
 def dashboard(request):
     user = request.user
@@ -348,10 +370,12 @@ def dashboard(request):
             return HttpResponse(json_data, content_type='application/json')
             
         elif object_type == OBJECT_TYPE_TASK:
+            
             print 'OBJECT_TYPE_TASK'
             task_id = request.POST.get('id', None)
             task_name = request.POST.get('name', None)
-            scenarios = request.POST.getlist('scenarios[]', None)
+            scenario_names = request.POST.getlist('scenarios[]', None)
+            #condition_names = request.POST.getlist('conditions[]', None)
 
             mode = request.POST.get('mode', None)
             mode = int(mode)
@@ -370,33 +394,50 @@ def dashboard(request):
                     task.save()       
                     print 'A5'
                     
-                for i in scenarios:
-                    scenario, scenario_created = Scenario.objects.get_or_create(name=i.name, user=user)
+                for scenario_name in scenario_names:
+                    print 'scenario_name is ', scenario_name
                     
+                    try:
+                        scenario, scenario_created = Scenario.objects.get_or_create(name__exact=scenario_name, user__exact=user)
+                    except: # catch *all* exceptions
+                        print 'Error!!!!!!!!!!!!!!!!!!!!!!!!!'
+                        e = sys.exc_info()[0]
+                        print "<p>Error: %s</p>" % e
+                        #write_to_page( "<p>Error: %s</p>" % e )
+                    
+                    print '7'
                     if scenario_created:
+                        print 'created'
                         scenario.save()
-                    
+                    print 'adddd'
                     task.scenarios.add(scenario)
                 print 'A6'
             # edit mode
             else:
-                constraint, constraint_created = ContextConstraint.objects.get_or_create(id__exact=constraint_id, user__exact=user, defaults={'name':constraint_name, 'user':user})
-
-                if not constraint_created:
-                    constraint.name = constraint_name
-                    constraint.save()
-
+                print 'B1'
+                task, task_created = Task.objects.get_or_create(id__exact=task_id, user__exact=user, defaults={'name':task_name, 'user':user})
+                print 'B2'
+                if not task_created:
+                    task.name = task_name
+                    task.save()
+                    print 'B3'
                     # remove conditions then add
-                    conditions = constraint.conditions.all()
-                    
-                    for condition in conditions:
-                        constraint.conditions.remove(condition)
-                    
-                    for condition_name in condition_names:
-                        condition, condition_created = Condition.objects.get_or_create(name=condition_name, is_abstract=False, user=user)
-                        if condition_created:
-                            condition.save()
-                        constraint.conditions.add(condition)
+                    scenarios = task.scenarios.all()
+                    print 'B4'
+                    for scenario in scenarios:
+                        task.scenarios.remove(scenario)
+                    print 'B5'
+                    print 'scenario_names is ', scenario_names
+                    for scenario_name in scenario_names:
+                        print 'scenario_name'
+                        scenario, scenario_created = Scenario.objects.get_or_create(name=scenario_name, user=user)
+                        print 'A7'
+                        if not scenario_created:
+                            print 'A8'
+                            scenario.save()
+                            print 'A9'
+                        task.scenarios.add(scenario)
+                    print 'B7'
             data = {}
             data['created'] = str(task_created).lower()
             data['task_name'] = task_name
@@ -458,6 +499,7 @@ def dashboard(request):
             scenario_id = request.POST.get('id', None)
             scenario_name = request.POST.get('name', None)
             scenario_graph_dot = request.POST.get('graph_dot', None)
+            print 'scenario_graph_dot is ', scenario_graph_dot
             mode = request.POST.get('mode', None)
 
             mode = int(mode)
@@ -478,16 +520,73 @@ def dashboard(request):
             # edit mode
             else:
                 print '7'
-                scenario, scenario_created = Scenario.objects.get_or_create(id__exact=scenario_id, user__exact=user, defaults={'name':scenario_name, 'user':user})
+                scenario, scenario_created = Scenario.objects.get_or_create(id__exact=scenario_id, user__exact=user, defaults={'name':scenario_name, 'graph':scenario_graph_dot, 'user':user})
 
                 # should already exist since we're doing an update
                 if not scenario_created:
                     scenario.name = scenario_name
+                    scenario.graph = scenario_graph_dot
                     scenario.save()
                     
             data = {}
             data['created'] = str(scenario_created).lower()
             data['scenario_name'] = scenario_name
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
+
+        elif object_type == OBJECT_TYPE_ROLE:
+            print '1'
+            role_id = request.POST.get('id', None)
+            role_name = request.POST.get('name', None)
+            print '2'
+            mode = request.POST.get('mode', None)
+            mode = int(mode)
+            print '3'
+            
+            if role_id:
+                print '3a'
+                print 'role_id is', role_id
+                role_id = int(role_id)
+            
+            print '4'
+            role_created = False
+                        
+            if mode == CREATE_NEW:
+                print '5'
+                # use role name as an exact lookup
+                
+                
+                try:
+                    print '6'
+                    role, role_created = Role.objects.get_or_create(name__exact=role_name, user__exact=user, defaults={'name':role_name, 'user':user})
+                    print '7'
+                except: # catch *all* exceptions
+                    print 'Error!!!!!!!!!!!!!!!!!!!!!!!!!'
+                    e = sys.exc_info()[0]
+                    print "<p>Error: %s</p>" % e                
+                
+                
+                #role, role_created = Role.objects.get_or_create(name__exact=role_name, user__exact=user, defaults={'name':role_name, 'user':user})
+                print '8'
+                if role_created:
+                    print '9'
+                    role.save()
+                    print '10'
+                                    
+            # edit mode
+            else:
+                print '7'
+                scenario, scenario_created = Scenario.objects.get_or_create(id__exact=scenario_id, user__exact=user, defaults={'name':scenario_name, 'graph':scenario_graph_dot, 'user':user})
+
+                # should already exist since we're doing an update
+                if not scenario_created:
+                    scenario.name = scenario_name
+                    scenario.graph = scenario_graph_dot
+                    scenario.save()
+                    
+            data = {}
+            data['created'] = str(role_created).lower()
+            data['role_created'] = role_created
             json_data = json.dumps(data)
             return HttpResponse(json_data, content_type='application/json')
                                 
@@ -667,6 +766,28 @@ def edit_constraint(request):
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
 
+def edit_task(request):
+    user = request.user
+    
+    if request.method == 'GET':        
+        task_id = request.GET.get('task_id', None)
+        
+        if task_id:
+            task = Task.objects.get(id=task_id, user=user)
+
+    # get name, type and conditions
+    print 'task.name  is  ', task.name
+    data = {}
+    data['name'] = task.name
+    data['scenarios'] = []
+
+    for scenario in task.scenarios.all():
+        data['scenarios'].append(scenario.name)
+    
+    print "task.scenarios - data ", data
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
 def edit_scenario(request):
     user = request.user
     
@@ -676,9 +797,10 @@ def edit_scenario(request):
         if scenario_id:
             scenario = Scenario.objects.get(id=scenario_id, user=user)
 
-    # get name, type and conditions
+    # get name, type and steps
     data = {}
     data['name'] = scenario.name
+    data['graph_dot'] = scenario.graph
     data['steps'] = []
 
     steps = Step.objects.all().filter(user=user)

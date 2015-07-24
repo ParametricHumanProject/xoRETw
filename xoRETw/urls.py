@@ -28,6 +28,7 @@ urlpatterns = patterns('',
     url(r'^views/get_conditions$', views.get_conditions, name='get_conditions'),
     url(r'^views/get_steps$', views.get_steps, name='get_steps'),
     url(r'^views/get_scenarios$', views.get_scenarios, name='get_scenarios'),
+    url(r'^views/get_roles$', views.get_roles, name='get_roles'),
 
     url(r'^views/delete_permission$', views.delete_permission, name='delete_permission'),
     #url(r'^views/edit_permission$', views.edit_permission, name='edit_permission'),
@@ -37,6 +38,7 @@ urlpatterns = patterns('',
     url(r'^views/delete_task$', views.delete_task, name='delete_task'),
     
     url(r'^views/edit_scenario$', views.edit_scenario, name='edit_scenario'),
+    url(r'^views/edit_task$', views.edit_task, name='edit_task'),
     
     
 

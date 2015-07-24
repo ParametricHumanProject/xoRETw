@@ -28,7 +28,7 @@ $( '#scenario_modal_create_new_step' ).click(function() {
 });
 
 $( '#save_step' ).click(function() {
-    alert('save_step_btn')
+    //alert('save_step_btn')
     // validate all fields
     var id = $('#step_id').val();
     var step_actor = $('#step_actor').val().split(' ').join('_');
@@ -62,19 +62,19 @@ $( '#save_step' ).click(function() {
     var step_data = new Step(id, step_actor, step_action, step_target, mode);
     
     // post data
-    alert('about to post data');
+    //alert('about to post data');
     $.ajax({
         method: "POST",
         url: url_dashboard,
         dataType: "json",
         data: step_data
     }).done(function(data) {
-        alert('11111')
+        //alert('11111')
         var step_name = data['step_name'];
         var created = data['created'];
         
         var s = 'created is ' + created;
-        alert(s);
+        //alert(s);
         created = (created === "true");
         
         if (created) {

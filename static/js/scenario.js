@@ -29,7 +29,7 @@ $('#scenario_modal_add_step').click(function() {
 
         return;
     }
-
+    //alert(selected_options[0]);
     // check if selected step already added
     var node = null;
     node = nodes.get(selected_options[0]);
@@ -43,16 +43,13 @@ $('#scenario_modal_add_step').click(function() {
     nodes.add({id: selected_options[0], label:selected_options[0], physics: false, x:100, y:(nodeIds.length*50) + 50});
     nodeIds.push(selected_options[0]);
     
-    // edit mode/add edge
-    network.addEdgeMode();
+    // default to edit mode
+    $('#graph_edit_mode').click();    
 });
 
 // create new scenario
 $( '#create_scenario_btn' ).click(function() {
     
-    // default to edit mode
-    $('#graph_edit_mode').click();
-
     // set to new mode
     mode = CREATE_MODE;
     
@@ -92,6 +89,101 @@ $( '#create_scenario_btn' ).click(function() {
       
 });
 
+function edit_scenario(id) {
+
+    mode = EDIT_MODE; // edit
+    
+    // get existing data and populate dialog
+    $.ajax({
+        method: "GET",
+        url: url_edit_scenario,
+        dataType: "json",
+        data: {scenario_id: id},
+    }).done(function(data) {
+
+        // reset all fields and step graph
+        $('#scenario_name').val('');
+        $('#scenario_available_steps').find('option').remove();
+        $("#scenario_modal_add_step").prop('disabled', true);
+
+        clear_graph();
+        init_graph();
+        
+        var scenario_name = data['name'];
+        var scenario_graph_dot = data['graph_dot'];
+        var steps = data['steps'];
+        
+        // set input values
+        $('#scenario_id').val(id); //hidden
+        $('#scenario_name').val(scenario_name);
+
+        // steps
+        var value = ''
+        for (var i = 0; i < steps.length; i++) {
+            value = steps[i];
+            var option = '<option value=' + value.name.split(' ').join('_') + '>' + value.name + '</option>';
+            $("#scenario_available_steps").append(option);
+        }
+             
+        if (steps.length) {
+            $("#scenario_modal_add_step").prop('disabled', false);
+        } else {
+            $("#scenario_modal_add_step").prop('disabled', true);
+        }
+                
+        // import DOT into graph
+        
+        var parsedData = vis.network.convertDot(scenario_graph_dot);//scenario_graph_dot);
+        
+        for (var i = 0; i < parsedData.nodes.length; i++) {
+            nodes.add(parsedData.nodes[i]);
+        }
+        
+        for (var i = 0; i < parsedData.edges.length; i++) {
+            edges.add(parsedData.edges[i]);
+        }
+
+        // provide the data in the vis format
+        data = {
+          nodes: nodes,
+          edges: edges
+        }
+
+        // create a network
+        container = document.getElementById('digraph');
+            
+        options = {
+            nodes:{shape: 'box'},
+            edges:{
+            arrows: 'to',
+            color: 'red',
+            font: '12px arial #ff0000',
+            scaling:{
+              label: true,
+            },
+            shadow: true,
+            smooth: true,
+            } , 
+            manipulation: {
+                enabled: false,
+            }
+        };
+        
+        // create a network
+        network = new vis.Network(container, data, options);    
+
+        // default to select mode
+        $('#graph_select_mode').click();    
+
+        // show scenario modal
+        $('#scenario_modal').modal('show');
+        
+
+    }).fail(function() {
+        alert( "Error - Edit scenario failed." );
+  });    
+  
+}
 
 $('#scenario_modal_clear_graph').click(function() {
     clear_graph();
@@ -127,13 +219,13 @@ $('#save_scenario_btn').click(function() {
         if (i == all_edges.length - 1) {
             graph_dot = graph_dot + String(edge['from']) + '->' + String(edge['to']);
         } else {
-            graph_dot = graph_dot + String(edge['from']) + '->' + String(edge['to']) + ',';
+            graph_dot = graph_dot + String(edge['from']) + '->' + String(edge['to']) + ';';
         }
     }
     graph_dot = graph_dot + '}';
     
-    alert(graph_dot);
-    alert(typeof(graph_dot));
+    //alert(graph_dot);
+    //alert(typeof(graph_dot));
     
     // create data
     var scenario_data = new Scenario(id, scenario_name, graph_dot, mode);
@@ -162,90 +254,15 @@ $('#save_scenario_btn').click(function() {
         }
         location.reload();
     }); 
+    
 });
 
-function delete_scenario(id) {
-    
-    // fade out then remove
-    $('#scenario-' + id).fadeOut('slow', function(){ $(this).remove(); });    
-    $.ajax({
-        method: "POST",
-        url: url_delete_scenario,
-        dataType: "json",
-        data: {scenario_id: id},
-    }).done(function( msg ) {
-        var deleted = msg['deleted'];
-        deleted = (deleted === "true");
-        if (!deleted) {
-            alert( "Error - failed to delete scenario" );
-        }
-    }).fail(function() {
-        alert( "Error - failed to delete scenario" );
-  });  
-}
-
-function Scenario(id, name, graph_dot, mode) {
-    this.id = id;
-    this.name = name;
-    this.graph_dot = graph_dot;
-    this.mode = mode;
-    this.object_type = OBJECT_TYPE_SCENARIO;
-}
-
-function edit_scenario(id) {
-
-    mode = EDIT_MODE; // edit
-    
-    // get existing data and populate dialog
-    $.ajax({
-        method: "GET",
-        url: url_edit_scenario,
-        dataType: "json",
-        data: {scenario_id: id},
-    }).done(function(data) {
-
-        // reset all fields
-        $('#scenario_name').val('');
-        $('#scenario_available_steps').find('option').remove();
-        $("#scenario_modal_add_step").prop('disabled', true);
-        
-        var scenario_name = data['name'];
-
-        // set input values
-        $('#scenario_id').val(id); //hidden
-        $('#scenario_name').val(scenario_name);
-
-        $('#scenario_modal').modal('show');
-        
-        var steps = data['steps'];
-        
-        // set input values
-        var value = ''
-        for (var i = 0; i < steps.length; i++) {
-            value = steps[i];
-            var option = '<option value=' + value.name.split(' ').join('_') + '>' + value.name + '</option>';
-            $("#scenario_available_steps").append(option);
-        }
-             
-        if (steps.length) {
-            $("#scenario_modal_add_step").prop('disabled', false);
-        } else {
-            $("#scenario_modal_add_step").prop('disabled', true);
-        }
-        
-                
-    }).fail(function() {
-        alert( "Error - Edit scenario failed." );
-  });    
-  
-}
-
 $('#graph_edit_mode').click(function(){
-    if ($(this).is(':checked'))
-    {
+    //if ($(this).is(':checked'))
+    //{
       scenario_graph_mode = GRAPH_EDIT_MODE; // set to edit mode
       network.addEdgeMode();
-    }
+    //}
 });
 
 $('#graph_select_mode').click(function(){
@@ -304,11 +321,12 @@ function init_graph() {
         },
         shadow: true,
         smooth: true,
-        } , 
+        physics: true,
+        }, 
         manipulation: {
             enabled: false,
-        }
-    };
+        },
+}
     
     // initialize your network!
     network = new vis.Network(container, data, options);
@@ -318,4 +336,32 @@ function init_graph() {
             network.addEdgeMode();
         }
     });
+}
+
+function delete_scenario(id) {
+    
+    // fade out then remove
+    $('#scenario-' + id).fadeOut('slow', function(){ $(this).remove(); });    
+    $.ajax({
+        method: "POST",
+        url: url_delete_scenario,
+        dataType: "json",
+        data: {scenario_id: id},
+    }).done(function( msg ) {
+        var deleted = msg['deleted'];
+        deleted = (deleted === "true");
+        if (!deleted) {
+            alert( "Error - failed to delete scenario" );
+        }
+    }).fail(function() {
+        alert( "Error - failed to delete scenario" );
+  });  
+}
+
+function Scenario(id, name, graph_dot, mode) {
+    this.id = id;
+    this.name = name;
+    this.graph_dot = graph_dot;
+    this.mode = mode;
+    this.object_type = OBJECT_TYPE_SCENARIO;
 }

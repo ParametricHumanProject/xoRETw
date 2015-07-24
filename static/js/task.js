@@ -1,69 +1,66 @@
  // Handler for .ready() called.
 $(function() {
     
-    
-    // set modal title for obstacle dialog
-    $('#task_modal').on('show.bs.modal', function(e) {
-        
-        if (mode == 1) {
-            $('#task_modal_title').text("Create New Task"); 
-        } else {
-            $('#task_modal_title').text("Edit Task");   
-        }
-    })
-    
-    $( '#save_task_btn' ).click(function() {
-        // validate all fields
-        
-        // used for edit        
-        var id = $('#task_id').val();
-        var name = $('#task_name').val().split(' ').join('_');
-
-        if (!name) {
-            alert('Error: task name cannot be empty.');
-            $('#task_name').focus();
-            $('#task_name').flash();
-            return;
-        }
-        
-        var scenarios = [];
-        $('#task_scenarios option').each(function() {
-            scenarios.push($(this).val().split(' ').join('_'));
-        });    
-
-        // create data
-        var task_data = new Task(id, name, scenarios, mode);
-        
-        // post data
-        $.ajax({
-            method: "POST",
-            url: url_dashboard,
-            dataType: "json",
-            data: task_data
-        }).done(function( msg ) {
-            
-            var task_name = msg['task_name'];
-            var created = msg['created'];
-            created = (created === "true");
-            
-            if (created) {
-                $('#task_modal').modal('toggle');
-            } else {    // created is false
-                
-                // create new mode
-                if (mode == 1) {
-                    alert('Error - failed to create task: '+ task_name);
-                } else {
-                    $('#task_modal').modal('toggle');
-                }
-            }
-            location.reload();            
-        });    
-    });    
-
 });
 
-// constraint
+// set modal title for obstacle dialog
+$('#task_modal').on('show.bs.modal', function(e) {
+    
+    if (mode == 1) {
+        $('#task_modal_title').text("Create New Task"); 
+    } else {
+        $('#task_modal_title').text("Edit Task");   
+    }
+})
+
+$( '#save_task_btn' ).click(function() {
+    
+    // validate all fields
+    var id = $('#task_id').val();   // used for edit        
+    var name = $('#task_name').val().split(' ').join('_');
+
+    if (!name) {
+        alert('Error: task name cannot be empty.');
+        $('#task_name').focus();
+        $('#task_name').flash();
+        return;
+    }
+    
+    var scenarios = [];
+    $('#task_scenarios option').each(function() {
+        scenarios.push($(this).val().split(' ').join('_'));
+    });    
+
+    // create data
+    var task_data = new Task(id, name, scenarios, mode);
+    
+    // post data
+    $.ajax({
+        method: "POST",
+        url: url_dashboard,
+        dataType: "json",
+        data: task_data
+    }).done(function( msg ) {
+        
+        var task_name = msg['task_name'];
+        var created = msg['created'];
+        created = (created === "true");
+        
+        if (created) {
+            $('#task_modal').modal('toggle');
+        } else {    
+            // create new mode
+            if (mode == 1) {
+                alert('Error - failed to create task: '+ task_name);
+            } else {
+                $('#task_modal').modal('toggle');
+            }
+        }
+        location.reload();            
+    });    
+});    
+
+// create new task
 $( '#create_task_btn' ).click(function() {
 
     // set to new mode
@@ -176,6 +173,7 @@ function delete_task(id) {
   });  
 }
 
+// edit existing task
 function edit_task(id) {
 
     mode = MODE_UPDATE; // edit
@@ -186,39 +184,40 @@ function edit_task(id) {
         url: url_edit_task,
         dataType: "json",
         data: {task_id: id},
-    }).done(function( msg ) {
+    }).done(function(data) {
         // reset all fields
-        $('#constraint_id').val('');
-        $('#constraint_name').val('');
-        $('#constraint_available_conditions').find('option').remove();
-        $('#constraint_conditions').find('option').remove();
+        $('#task_id').val('');
+        $('#task_name').val('');
+        $('#task_available_scenarios').find('option').remove();
+        $('#task_scenarios').find('option').remove();
         
-        var constraint_name = msg['name'];
-        var conditions = msg['conditions'];
+        var task_name = data['name'];
+        var scenarios = data['scenarios'];
         
-        alert(conditions);
+        alert('task_name: ' + task_name);
+        alert('scenarios: ' + scenarios);
 
         // set input values
-        $('#constraint_id').val(id); //hidden
-        $('#constraint_name').val(constraint_name);
+        $('#task_id').val(id); //hidden
+        $('#task_name').val(task_name);
 
         var value = ''
-        for (var i = 0; i < conditions.length; i++) {
-            value = conditions[i];
+        for (var i = 0; i < scenarios.length; i++) {
+            value = scenarios[i];
             var option = '<option value=' + value + '>' + value + '</option>';
-            $("#constraint_conditions").append(option);
+            $("#task_scenarios").append(option);
         }        
 
-        if (conditions.length) {
-            $("#remove_constraint_condition").prop('disabled', false);
+        if (scenarios.length) {
+            $("#remove_task_scenario").prop('disabled', false);
         } else {
-            $("#remove_constraint_condition").prop('disabled', true);
+            $("#remove_task_scenario").prop('disabled', true);
         }
         
-        $('#constraint_modal').modal('show');
+        $('#task_modal').modal('show');
                 
     }).fail(function() {
-        alert( "Error - Edit constraint failed." );
+        alert( "Error - Edit task failed." );
   });    
     
 }

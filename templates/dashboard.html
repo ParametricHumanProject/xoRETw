@@ -39,6 +39,7 @@
 		<div class="col-md-12">
 			<div class="btn-toolbar" role="toolbar" aria-label="...">
 				<div class="btn-group" role="group" aria-label="...">
+                    &nbsp;&nbsp;&nbsp;
                     <button id="create_objective_btn" type="button" class="btn btn-default" title='Create Objective' data-toggle="modal" data-target="#objective_modal"><img src="{% static 'img/goal.gif' %}" align="absmiddle"></button>
                     <button id="create_obstacle_btn" type="button" class="btn btn-default" title='Create Obstacle' data-toggle="modal" data-target="#obstacle_modal"><img src="{% static 'img/dynamite.gif' %}" align="absmiddle"></button>
                     <button id="create_condition_btn" type="button" class="btn btn-default" title='Create Condition' data-toggle="modal" data-target="#condition_modal"><img src="{% static 'img/condition.gif' %}" align="absmiddle"></button>
@@ -278,7 +279,7 @@
 
                 <!-- OBJECT_TYPE_CONTEXT_PERMISSION -->
                 {% if object_type == 7 %}  
-                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <table id = 'perm_table' data-toggle="table" id="testtable" class="table table-condensed table-hover">
                     <thead>
                     <tr>
                     <th class="col-md-1">#</th>
@@ -291,7 +292,8 @@
                     {% for permission in permissions %}
                         <tr id='permission-{{permission.id}}'>
                         <th scope="row">{{forloop.counter}}</th>
-                        <td data-toggle="context" data-target="#context-menu-permission">{{permission.name}}</td>
+                        <td data-toggle="context" data-target="#context-menu-permission-{{permission.id}}">{{permission.name}}</td>
+                        <!-- <td>{{permission.name}}</td>-->
                         <td>
                             <div class="btn-group" role="group" aria-label="First group">
                                 <!-- <a class="btn" onclick="" href="#" role="button" title='Edit constraint'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a> -->
@@ -303,6 +305,22 @@
                     
                     </tbody>
                     </table>
+                    {% for permission in permissions %}
+                        <div id="context-menu-permission-{{permission.id}}">
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a tabindex="-1" href="#">Create Permission</a></li>
+                            <li><hr style="margin:5px;"></li>
+                            <li><a id="perm_cardinality_constraint" href="#" onclick="permission_cardinality_constraints({{permission.id}})">Cardinality Constraints</a></li>
+                            <li><a tabindex="-1" href="#" onclick="permission_ssd_constraints({{permission.id}})">SSD Constraints</a></li>
+                            <li><a tabindex="-1" href="#" onclick="permission_CC({{permission.id}})">Context Constraints</a></li>
+                            <li><hr style="margin:5px;"></li>
+                            <li><a tabindex="-1" href="#">Delete Permission</a></li>
+                          </ul>
+                        </div>                    
+                    {% endfor %}
+                    
+                    
+                    
                 {% endif %}
 
                 {% if object_type == 6 %}  
@@ -807,23 +825,131 @@
 
 
 <!-- 9. Create Role Modal -->
-<div class="modal fade" id="create_role_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="role_modal" tabindex="-1" role="dialog" aria-labelledby="role_modal_title" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content">
+    <div class="modal-content modal-content-width-450">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Create Role</h4>
+        <h4 class="modal-title" id="role_modal_title"></h4>
       </div>
       <div class="modal-body">
-            Add layout and widgets here ...
-      </div>
+        <form>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="constraint_name">Role Name</label>
+                    <input type="text" class="form-control" id="role_name" placeholder="Enter role name" required>
+                    <input type="hidden" id="role_id" value="">
+                  </div>              
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="role_available_roles">Currently Available Roles</label>
+                    <select id="role_available_roles" multiple class="form-control">
+                    </select>     
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="btn-group">
+                                <input id="role_add_junior_role" class="btn btn-default" type="button" value="Add Junior-Role">                              
+                             </div>
+                            <div class="btn-group">
+                              <input id="role_add_senior_role" class="btn btn-default" type="button" value="Add Senior-Role">
+                            </div>                            
+                        </div>
+                    </div>
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="role_junior_roles">Junior Roles</label>
+                    <select id="role_junior_roles" multiple class="form-control">
+                    </select>     
+                    <input id="role_remove_junior_role" class="btn btn-default" type="button" disabled="false" value="Remove Junior-Role">     
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="role_senior_roles">Senior Roles</label>
+                    <select id="role_senior_roles" multiple class="form-control">
+                    </select>     
+                    <input id="role_remove_senior_role" class="btn btn-default" type="button" disabled="false" value="Remove Senior-Role">     
+                  </div>
+                </div>  
+            </div>        
+        </form>
+        </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button id="save_role_btn" type="button" class="btn btn-primary">Save</button>
       </div>
     </div>
   </div>
 </div>
+
+
+
+<!-- 9a. Permission to Role Assignment Modal -->
+<div class="modal fade" id="permission_to_role_assignment_modal" tabindex="-1" role="dialog" aria-labelledby="permission_to_role_assignment_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content modal-content-width-450">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="permission_to_role_assignment_modal_title"></h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="role_available_roles">Available Permissions</label>
+                    <select id="role_available_roles" multiple class="form-control">
+                    </select>     
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="btn-group">
+                                <input id="perm_role_assign_permission" class="btn btn-default" type="button" value="Assign Permission">                              
+                             </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="role_junior_roles">Junior Roles</label>
+                    <select id="role_junior_roles" multiple class="form-control">
+                    </select>     
+                    <input id="remove_junior_role" class="btn btn-default" type="button" disabled="false" value="Remove Junior-Role">     
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="role_senior_roles">Senior Roles</label>
+                    <select id="role_senior_roles" multiple class="form-control">
+                    </select>     
+                    <input id="remove_senior_role" class="btn btn-default" type="button" disabled="false" value="Remove Senior-Role">     
+                  </div>
+                </div>  
+            </div>        
+        </form>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="save_constraint_btn" type="button" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- 10. Define Trace-Links Modal -->
 <div class="modal fade" id="define_trace_links_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -1090,6 +1216,7 @@
   </ul>
 </div>
 
+
 {% endblock content %}
 
 {% block scripts %}
@@ -1145,6 +1272,7 @@ var url_delete_permission = "{% url 'delete_permission' %}"
 var url_get_conditions = "{% url 'get_conditions' %}"
 var url_get_steps = "{% url 'get_steps' %}"
 var url_get_scenarios = "{% url 'get_scenarios' %}"
+var url_get_roles = "{% url 'get_roles' %}"
 
 var url_delete_step = "{% url 'delete_step' %}"
 var url_delete_scenario = "{% url 'delete_scenario' %}"
@@ -1152,6 +1280,7 @@ var url_delete_scenario = "{% url 'delete_scenario' %}"
 var url_delete_task = "{% url 'delete_task' %}"
 
 var url_edit_scenario = "{% url 'edit_scenario' %}"
+var url_edit_task = "{% url 'edit_task' %}"
 
 var mode = 0; // edit mode, common var to all
 
@@ -1167,6 +1296,20 @@ jQuery.fn.extend({
     });
   }
 });
+  /*
+$('#perm_table').on('contextmenu', 'tr', function(e) {
+    e.preventDefault();
+    alert(this.id);
+    
+var htmlstring = '<div id="context-menu-permission-2"><ul class="dropdown-menu" role="menu"><li><a tabindex="-1" onclick="test(' + String(this.id) + ')">Create Permission</a></li><li><hr style="margin:5px;"></li> </ul></div>'
+$( "body" )
+  .html( htmlstring);
+
+});
+*/
+function permission_cardinality_constraints(perm_id) {
+    alert('perm_id is ' + perm_id);
+}
 
 </script>
 <script>
