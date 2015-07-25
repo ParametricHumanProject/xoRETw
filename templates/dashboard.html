@@ -39,7 +39,8 @@
 		<div class="col-md-12">
 			<div class="btn-toolbar" role="toolbar" aria-label="...">
 				<div class="btn-group" role="group" aria-label="...">
-                    &nbsp;&nbsp;&nbsp;
+                <fieldset>
+                <legend>Designer</legend>
                     <button id="create_objective_btn" type="button" class="btn btn-default" title='Create Objective' data-toggle="modal" data-target="#objective_modal"><img src="{% static 'img/goal.gif' %}" align="absmiddle"></button>
                     <button id="create_obstacle_btn" type="button" class="btn btn-default" title='Create Obstacle' data-toggle="modal" data-target="#obstacle_modal"><img src="{% static 'img/dynamite.gif' %}" align="absmiddle"></button>
                     <button id="create_condition_btn" type="button" class="btn btn-default" title='Create Condition' data-toggle="modal" data-target="#condition_modal"><img src="{% static 'img/condition.gif' %}" align="absmiddle"></button>
@@ -49,14 +50,20 @@
                     <button id="create_task_btn" type="button" class="btn btn-default" title='Create Task' data-toggle="modal" data-target="#task_modal"><img src="{% static 'img/task.gif' %}" align="absmiddle"></button>
                     <button id="create_work_profile_btn" type="button" class="btn btn-default" title='Create Work Profile' data-toggle="modal" data-target="#work_profile_modal"><img src="{% static 'img/profile.gif' %}" align="absmiddle"></button>
                     <button id="create_role_btn" type="button" class="btn btn-default" title='Create Role' data-toggle="modal" data-target="#role_modal"><img src="{% static 'img/facemask.gif' %}" align="absmiddle"></button>
+                </fieldset>
 				</div>
+                <div class="btn-group" role="group" aria-label="...">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
 				<div class="btn-group" role="group" aria-label="...">
+                <fieldset>
+                <legend>Analyzer</legend>
                     <button type="button" class="btn btn-default" title='Define Trace-Links' data-toggle="modal" data-target="#define_trace_links_modal"><img src="{% static 'img/trace.gif' %}" align="absmiddle"></button>
                     <button type="button" class="btn btn-default" title='View Trace-Model' data-toggle="modal" data-target="#view_trace_model_modal"><img src="{% static 'img/hierarchy.gif' %}" align="absmiddle"></button>
                     <button type="button" class="btn btn-default" title='Derive Permissions' data-toggle="modal" data-target="#derive_permissions_modal"><img src="{% static 'img/deriveperm.gif' %}" align="absmiddle"></button>
                     <button type="button" class="btn btn-default" title='Derive Context Constraints' data-toggle="modal" data-target="#derive_constraints_modal"><img src="{% static 'img/derivecc.gif' %}" align="absmiddle"></button>
                     <button type="button" class="btn btn-default" title='Derive Roles' data-toggle="modal" data-target="#derive_roles_modal"><img src="{% static 'img/deriverole.gif' %}" align="absmiddle"></button>
+                </fieldset>
 				</div>
+                
 			</div>				
 		</div>
 	</div>
