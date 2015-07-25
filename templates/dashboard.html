@@ -384,13 +384,35 @@
                 {% endif %}
 
                 {% if object_type == 9 %} 
-                    <br>
-                    <p>Placeholder for Profiles</p>                
+
                 {% endif %}
 
                 {% if object_type == 10 %} 
-                    <br>
-                    <p>Placeholder for Roles</p>
+                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <thead>
+                    <tr>
+                    <th class="col-md-1">#</th>
+                    <th class="col-md-3">Roles</th>
+                    <th class="col-md-8">&nbsp;</th> <!-- toolbar: edit/remove -->
+                    </tr>
+                    </thead>
+                    <tbody>
+                    
+                    {% for role in roles %}
+                        <tr id='role-{{role.id}}'>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td data-toggle="context" data-target="#context-menu">{{role.name}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a class="btn" onclick="edit_role({{role.id}});" href="#" role="button" title='Edit role'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                                <a class="btn" onclick="delete_role({{role.id}});" href="#" role="button" title='Delete role'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                            </div>                
+                        </td>
+                        </tr>
+                    {% endfor %}
+                    
+                    </tbody>
+                    </table>
                 {% endif %}
         </div>
     </div>
@@ -626,6 +648,14 @@
         <div class="row">
         <div class="col-md-3">
         <form>
+            <div class="input-group spinner">
+    <input type="text" class="form-control" value="42">
+    <div class="input-group-btn-vertical">
+      <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
+      <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
+    </div>
+  </div>      
+
             <input type="hidden" id="scenario_id" value="">
             <div class="row">
                 <div class="col-md-12">
@@ -1186,6 +1216,7 @@
             </div>
         </form>      
       </div>
+      
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button id="save_task_btn" type="button" class="btn btn-primary">Save</button>
@@ -1255,32 +1286,31 @@ var OBJECT_TYPE_ROLE = 10
 // common to all
 var url_dashboard = "{% url 'dashboard' %}"
 
-var url_delete_objective = "{% url 'delete_objective' %}"
 var url_edit_objective = "{% url 'edit_objective' %}"
-
-var url_delete_obstacle = "{% url 'delete_obstacle' %}"
 var url_edit_obstacle = "{% url 'edit_obstacle' %}"
-
-var url_delete_condition = "{% url 'delete_condition' %}"
 var url_edit_condition = "{% url 'edit_condition' %}"
-
-var url_delete_constraint = "{% url 'delete_constraint' %}"
 var url_edit_constraint = "{% url 'edit_constraint' %}"
+var url_edit_scenario = "{% url 'edit_scenario' %}"
+var url_edit_task = "{% url 'edit_task' %}"
 
-var url_delete_permission = "{% url 'delete_permission' %}"
 
 var url_get_conditions = "{% url 'get_conditions' %}"
 var url_get_steps = "{% url 'get_steps' %}"
 var url_get_scenarios = "{% url 'get_scenarios' %}"
 var url_get_roles = "{% url 'get_roles' %}"
 
+
+
+var url_delete_objective = "{% url 'delete_objective' %}"
+var url_delete_obstacle = "{% url 'delete_obstacle' %}"
+var url_delete_condition = "{% url 'delete_condition' %}"
+var url_delete_constraint = "{% url 'delete_constraint' %}"
 var url_delete_step = "{% url 'delete_step' %}"
 var url_delete_scenario = "{% url 'delete_scenario' %}"
-
+var url_delete_permission = "{% url 'delete_permission' %}"
 var url_delete_task = "{% url 'delete_task' %}"
+var url_delete_role = "{% url 'delete_role' %}"
 
-var url_edit_scenario = "{% url 'edit_scenario' %}"
-var url_edit_task = "{% url 'edit_task' %}"
 
 var mode = 0; // edit mode, common var to all
 

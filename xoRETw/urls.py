@@ -36,6 +36,7 @@ urlpatterns = patterns('',
     url(r'^views/delete_step$', views.delete_step, name='delete_step'),
     url(r'^views/delete_scenario$', views.delete_scenario, name='delete_scenario'),
     url(r'^views/delete_task$', views.delete_task, name='delete_task'),
+    url(r'^views/delete_role$', views.delete_role, name='delete_role'),
     
     url(r'^views/edit_scenario$', views.edit_scenario, name='edit_scenario'),
     url(r'^views/edit_task$', views.edit_task, name='edit_task'),

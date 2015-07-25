@@ -270,4 +270,22 @@ function edit_constraint(id) {
     
 }
 
-
+function delete_role(id) {
+    
+    // fade out then remove
+    $('#role-' + id).fadeOut('slow', function(){ $(this).remove(); });    
+    $.ajax({
+        method: "POST",
+        url: url_delete_role,
+        dataType: "json",
+        data: {role_id: id},
+    }).done(function( msg ) {
+        var deleted = msg['deleted'];
+        deleted = (deleted === "true");
+        if (!deleted) {
+            alert( "Error - failed to delete role" );
+        }
+    }).fail(function() {
+        alert( "Error - failed to delete role" );
+  });  
+}

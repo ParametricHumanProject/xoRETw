@@ -616,6 +616,9 @@ def dashboard(request):
         elif object_type == OBJECT_TYPE_SCENARIO:
             scenarios = Scenario.objects.all().filter(user=user)
             return render_to_response('dashboard.html', {'object_type':object_type, 'scenarios':scenarios}, context_instance=RequestContext(request))
+        elif object_type == OBJECT_TYPE_ROLE:
+            roles = Role.objects.all().filter(user=user)
+            return render_to_response('dashboard.html', {'object_type':object_type, 'roles':roles}, context_instance=RequestContext(request))
 
     return render_to_response('dashboard.html', {'object_type':object_type}, context_instance=RequestContext(request))
 
