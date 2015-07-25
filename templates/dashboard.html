@@ -277,7 +277,7 @@
                     </table>
                 {% endif %}
 
-                <!-- OBJECT_TYPE_CONTEXT_PERMISSION -->
+                <!-- permission -->
                 {% if object_type == 7 %}  
                     <table id = 'perm_table' data-toggle="table" id="testtable" class="table table-condensed table-hover">
                     <thead>
@@ -293,11 +293,9 @@
                         <tr id='permission-{{permission.id}}'>
                         <th scope="row">{{forloop.counter}}</th>
                         <td data-toggle="context" data-target="#context-menu-permission-{{permission.id}}">{{permission.name}}</td>
-                        <!-- <td>{{permission.name}}</td>-->
                         <td>
                             <div class="btn-group" role="group" aria-label="First group">
-                                <!-- <a class="btn" onclick="" href="#" role="button" title='Edit constraint'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a> -->
-                                <a class="btn" onclick="delete_permission({{permission.id}});" href="#" role="button" title='Delete permission'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                <a class="btn" onclick="delete_permission({{permission.id}})" href="#" role="button" title='Delete permission'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                             </div>                
                         </td>
                         </tr>
@@ -305,22 +303,21 @@
                     
                     </tbody>
                     </table>
+                    
+                    <!-- permission context menu -->
                     {% for permission in permissions %}
                         <div id="context-menu-permission-{{permission.id}}">
                           <ul class="dropdown-menu" role="menu">
                             <li><a tabindex="-1" href="#">Create Permission</a></li>
                             <li><hr style="margin:5px;"></li>
-                            <li><a id="perm_cardinality_constraint" href="#" onclick="permission_cardinality_constraints({{permission.id}})">Cardinality Constraints</a></li>
-                            <li><a tabindex="-1" href="#" onclick="permission_ssd_constraints({{permission.id}})">SSD Constraints</a></li>
-                            <li><a tabindex="-1" href="#" onclick="permission_CC({{permission.id}})">Context Constraints</a></li>
+                            <li><a id="perm_cardinality_constraint" href="#" onclick="perm_cardinality_constraints({{permission.id}})">Cardinality Constraints</a></li>
+                            <li><a tabindex="-1" href="#" onclick="perm_ssd_constraints({{permission.id}})">SSD Constraints</a></li>
+                            <li><a tabindex="-1" href="#" onclick="perm_context_constraints({{permission.id}})">Context Constraints</a></li>
                             <li><hr style="margin:5px;"></li>
-                            <li><a tabindex="-1" href="#">Delete Permission</a></li>
+                            <li><a tabindex="-1" href="#" onclick="delete_permission({{permission.id}})">Delete Permission</a></li>
                           </ul>
                         </div>                    
                     {% endfor %}
-                    
-                    
-                    
                 {% endif %}
 
                 {% if object_type == 6 %}  
@@ -648,14 +645,6 @@
         <div class="row">
         <div class="col-md-3">
         <form>
-            <div class="input-group spinner">
-    <input type="text" class="form-control" value="42">
-    <div class="input-group-btn-vertical">
-      <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
-      <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
-    </div>
-  </div>      
-
             <input type="hidden" id="scenario_id" value="">
             <div class="row">
                 <div class="col-md-12">
@@ -1124,8 +1113,8 @@
 
 
 
-<!-- Permissions modals -->
-<!-- Permission - Cardinality Constraints modal-->
+<!-- context menu modals -->
+
 <div class="modal fade" id="perm_cardinality_constraint_modal" tabindex="-1" role="dialog" aria-labelledby="perm_cardinality_constraint_title" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -1225,27 +1214,56 @@
   </div>
 </div>
 
-<!------- context menus ------>
 
-<div id="context-menu">
-  <ul class="dropdown-menu" role="menu">
-    <li><a tabindex="-1" href="#">Edit</a></li>
-    <li><a tabindex="-1" href="#">Delete</a></li>
-  </ul>
+<!-- context menu modals -->
+
+<div class="modal fade" id="perm_cardinality_constraints_modal" tabindex="-1" role="dialog" aria-labelledby="perm_cardinality_constraints_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="perm_cardinality_constraints_modal_title">Permission Cardinality Constraints</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <input type="hidden" id="cardinality_constraint_perm_id" value="">
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="step_actor">Minimum Owner Cardinality</label>
+                    <div id="min_spinner" class="input-group spinner">
+                      <input id="perm_cardinality_constraints_mincardinality" type="text" class="form-control" value="0">
+                        <div class="input-group-btn-vertical">
+                          <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
+                          <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
+                        </div>
+                    </div>      
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="step_actor">Maximum Owner Cardinality</label>
+                    <div id="spinner2" class="input-group spinner2">
+                      <input id="perm_cardinality_constraints_maxcardinality" type="text" class="form-control" value="0">
+                        <div class="input-group-btn-vertical">
+                          <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
+                          <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
+                        </div>
+                    </div>      
+                  </div>
+                </div>  
+            </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="save_perm_cardinality_constraints" type="button" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- permission -->
-<div id="context-menu-permission">
-  <ul class="dropdown-menu" role="menu">
-    <li><a tabindex="-1" href="#">Create Permission</a></li>
-    <li><hr style="margin:5px;"></li>
-    <li><a id="perm_cardinality_constraint" href="#" onclick="permission_cardinality_constraints()">Cardinality Constraints</a></li>
-    <li><a tabindex="-1" href="#" onclick="permission_ssd_constraints()">SSD Constraints</a></li>
-    <li><a tabindex="-1" href="#" onclick="permission_CC()">Context Constraints</a></li>
-    <li><hr style="margin:5px;"></li>
-    <li><a tabindex="-1" href="#">Delete Permission</a></li>
-  </ul>
-</div>
+
 
 
 {% endblock content %}
@@ -1281,6 +1299,7 @@ var OBJECT_TYPE_PERMISSION = 7
 var OBJECT_TYPE_TASK = 8
 var OBJECT_TYPE_WORK_PROFILE = 9
 var OBJECT_TYPE_ROLE = 10
+var PERM_CARDINALITY_CONSTRAINT = 100
 
 
 // common to all
@@ -1298,7 +1317,7 @@ var url_get_conditions = "{% url 'get_conditions' %}"
 var url_get_steps = "{% url 'get_steps' %}"
 var url_get_scenarios = "{% url 'get_scenarios' %}"
 var url_get_roles = "{% url 'get_roles' %}"
-
+var url_get_perm_cardinality_constraints = "{% url 'get_perm_cardinality_constraints' %}"
 
 
 var url_delete_objective = "{% url 'delete_objective' %}"
@@ -1337,9 +1356,6 @@ $( "body" )
 
 });
 */
-function permission_cardinality_constraints(perm_id) {
-    alert('perm_id is ' + perm_id);
-}
 
 </script>
 <script>

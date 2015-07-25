@@ -81,7 +81,7 @@ $( '#create_permission_btn' ).click(function() {
 });
 
 function permission_cardinality_constraints() {
-    //alert('helloworld');
+    alert('helloworld');
     $('#perm_cardinality_constraint_modal').modal('toggle');
     
 }
@@ -144,11 +144,71 @@ function edit_condition(id) {
     }).fail(function() {
         alert( "Error - Edit condition failed." );
   });    
-    
 }
 
-function cardinality_constraints() {
-    $('#perm_cardinality_constraint_modal').modal('show');
+// context menu functions
+function perm_cardinality_constraints(id) {
+    
+    // get values from database
+    mincardinality = 0
+    maxcardinality = 0
+    
+    $.ajax({
+        method: "GET",
+        url: url_get_perm_cardinality_constraints,
+        dataType: "json",
+        data: {perm_id: id}
+    }).done(function(data) {
+        //$('#perm_cardinality_constraints_modal').modal('toggle');  
+        mincardinality = data['mincardinality'];
+        maxcardinality = data['maxcardinality'];
+        
+        // set the min and max cardinality    
+        $('#perm_cardinality_constraints_mincardinality').val(mincardinality);
+        $('#perm_cardinality_constraints_maxcardinality').val(maxcardinality);
+              
+    }).fail(function() {
+        alert( "Error - failed to get cardinality constraints." );
+    });
+    
+    // set the permission id for this cardinality constraint modal
+    $('#cardinality_constraint_perm_id').val(id);   
+    
+    $('#perm_cardinality_constraints_modal').modal('show');
+}
+
+$('#save_perm_cardinality_constraints').click(function() {
+    
+    // validate all fields
+    var perm_id = $('#cardinality_constraint_perm_id').val();
+    var mincardinality = $('#perm_cardinality_constraints_mincardinality').val();
+    var maxcardinality = $('#perm_cardinality_constraints_maxcardinality').val();
+        
+    //alert(perm_id + ' '  + mincardinality + ' ' + maxcardinality)
+
+    // create data
+    var perm_data = new perm_cardinality_constraints_data(perm_id, mincardinality, maxcardinality);
+    
+    // post data
+    $.ajax({
+        method: "POST",
+        url: url_dashboard,
+        dataType: "json",
+        data: perm_data
+    }).done(function( msg ) {
+        
+        $('#perm_cardinality_constraints_modal').modal('toggle');        
+    }).fail(function() {
+        alert( "Error - failed to save cardinality constraints." );
+  });
+});    
+
+function perm_ssd_constraints(id) {
+    $('#perm_ssd_constraints_modal').modal('show');
+}
+
+function perm_context_constraints(id) {
+    $('#perm_context_constraints_modal').modal('show');
 }
 
 function Permission(id, operation_name, object_name, mode) {
@@ -158,3 +218,12 @@ function Permission(id, operation_name, object_name, mode) {
     this.mode = mode;
     this.object_type = OBJECT_TYPE_PERMISSION;
 }
+
+function perm_cardinality_constraints_data(perm_id, mincardinality, maxcardinality) {
+    this.id = perm_id;
+    this.mincardinality = mincardinality;
+    this.maxcardinality = maxcardinality;
+    this.object_type = PERM_CARDINALITY_CONSTRAINT;
+}
+
+

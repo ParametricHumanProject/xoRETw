@@ -28,11 +28,36 @@ OBJECT_TYPE_PERMISSION = 7
 OBJECT_TYPE_TASK = 8
 OBJECT_TYPE_WORK_PROFILE = 9
 OBJECT_TYPE_ROLE = 10
+PERM_CARDINALITY_CONSTRAINT = 100
 
 
 def home(request):
 	return render_to_response('index.html', {}, context_instance=RequestContext(request))
 
+def get_perm_cardinality_constraints(request):
+
+    user = request.user
+    print 'A1'
+    if request.method == 'GET':        
+        print 'A2'
+        perm_id = request.GET.get('perm_id', None)
+        print 'A3'
+        if perm_id:
+            print 'A4'
+            perm = Permission.objects.get(id=perm_id, user=user)
+
+    print 'A5'
+    data = {}
+    
+    data['mincardinality'] = perm.mincardinality
+    data['maxcardinality'] = perm.maxcardinality
+    print 'A6'
+    print 'mincardinality ', perm.mincardinality
+    print 'maxcardinality ', perm.maxcardinality
+    
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+                
 # get all available conditions 
 def get_conditions(request):
     user = request.user
@@ -123,8 +148,12 @@ def get_roles(request):
 def dashboard(request):
     user = request.user
     object_type = request.GET.get('object_type', 1) # default to Objective tab
+    print 'object_type is ', object_type
+    
     object_type = int(object_type)
     
+    print 'dashboard'
+    print 'request.method ', request.method
     # if this is a POST request we need to process the data
     if request.method == 'POST':
         
@@ -587,6 +616,28 @@ def dashboard(request):
             data = {}
             data['created'] = str(role_created).lower()
             data['role_created'] = role_created
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
+            
+        elif object_type == PERM_CARDINALITY_CONSTRAINT:
+            print '1'
+            perm_id = request.POST.get('id', None)
+            mincardinality = request.POST.get('mincardinality', None)
+            maxcardinality = request.POST.get('maxcardinality', None)
+            print '2'
+            perm_id = int(perm_id)
+            print '3'
+            perm, perm_created = Permission.objects.get_or_create(id__exact=perm_id, user__exact=user)
+            print '4'
+            # should already exist since we're doing an update
+            if not perm_created:
+                print '5'
+                perm.mincardinality = mincardinality
+                perm.maxcardinality = maxcardinality
+                perm.save()
+            print '6'
+            data = {}
+            data['success'] = True
             json_data = json.dumps(data)
             return HttpResponse(json_data, content_type='application/json')
                                 

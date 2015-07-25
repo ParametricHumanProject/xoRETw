@@ -67,6 +67,7 @@ class Permission(models.Model):
 #    roles = models.ManyToManyField(Role)
     context_constraints = models.ManyToManyField(ContextConstraint)
     ssd_constraints = models.TextField(blank=True)
+    
     mincardinality = models.IntegerField(default=0)  # same as blank=True, null=True
     maxcardinality = models.IntegerField(default=0)  # same as blank=True, null=True    
         
@@ -78,6 +79,11 @@ class Role(models.Model):
     senior_roles = models.ManyToManyField('self', null=True, blank=True)
     permissions = models.ManyToManyField(Permission, null=True, blank=True)
     work_profile = models.OneToOneField(WorkProfile, null=True, blank=True)
+    
+    
+    mincardinality = models.IntegerField(default=0)  # same as blank=True, null=True
+    maxcardinality = models.IntegerField(default=0)  # same as blank=True, null=True    
+
 
 
 

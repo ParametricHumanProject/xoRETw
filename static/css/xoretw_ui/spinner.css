@@ -33,3 +33,10 @@
   top: 0;
   left: 4px;
 }
+
+.spinner2 {
+  width: 100px;
+}
+.spinner2 input {
+  text-align: right;
+}
