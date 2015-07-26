@@ -80,22 +80,6 @@ $( '#create_permission_btn' ).click(function() {
     
 });
 
-function permission_cardinality_constraints() {
-    alert('helloworld');
-    $('#perm_cardinality_constraint_modal').modal('toggle');
-    
-}
-
-function permission_SSD_constraints() {
-    //alert('helloworld');
-    $('#perm_ssd_constraint_modal').modal('toggle');
-    
-}
-
-function permission_CC() {
-    $('#permission_CC_modal').modal('toggle');
-}
-
 function delete_permission(id) {
     
     // fade out then remove
@@ -159,7 +143,7 @@ function perm_cardinality_constraints(id) {
         dataType: "json",
         data: {perm_id: id}
     }).done(function(data) {
-        //$('#perm_cardinality_constraints_modal').modal('toggle');  
+        
         mincardinality = data['mincardinality'];
         maxcardinality = data['maxcardinality'];
         
@@ -184,8 +168,6 @@ $('#save_perm_cardinality_constraints').click(function() {
     var mincardinality = $('#perm_cardinality_constraints_mincardinality').val();
     var maxcardinality = $('#perm_cardinality_constraints_maxcardinality').val();
         
-    //alert(perm_id + ' '  + mincardinality + ' ' + maxcardinality)
-
     // create data
     var perm_data = new perm_cardinality_constraints_data(perm_id, mincardinality, maxcardinality);
     

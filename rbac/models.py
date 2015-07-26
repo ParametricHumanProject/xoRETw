@@ -75,11 +75,13 @@ class Permission(models.Model):
 class Role(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
+    
     junior_roles = models.ManyToManyField('self', null=True, blank=True)
     senior_roles = models.ManyToManyField('self', null=True, blank=True)
-    permissions = models.ManyToManyField(Permission, null=True, blank=True)
-    work_profile = models.OneToOneField(WorkProfile, null=True, blank=True)
     
+    permissions = models.ManyToManyField(Permission, null=True, blank=True)
+    
+    work_profile = models.OneToOneField(WorkProfile, null=True, blank=True)
     
     mincardinality = models.IntegerField(default=0)  # same as blank=True, null=True
     maxcardinality = models.IntegerField(default=0)  # same as blank=True, null=True    

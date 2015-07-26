@@ -29,6 +29,7 @@ OBJECT_TYPE_TASK = 8
 OBJECT_TYPE_WORK_PROFILE = 9
 OBJECT_TYPE_ROLE = 10
 PERM_CARDINALITY_CONSTRAINT = 100
+ROLE_CARDINALITY_CONSTRAINT = 101
 
 
 def home(request):
@@ -54,6 +55,30 @@ def get_perm_cardinality_constraints(request):
     print 'A6'
     print 'mincardinality ', perm.mincardinality
     print 'maxcardinality ', perm.maxcardinality
+    
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
+def get_role_cardinality_constraints(request):
+
+    user = request.user
+    print 'A1'
+    if request.method == 'GET':        
+        print 'A2'
+        role_id = request.GET.get('role_id', None)
+        print 'A3'
+        if role_id:
+            print 'A4'
+            role = Role.objects.get(id=role_id, user=user)
+
+    print 'A5'
+    data = {}
+    
+    data['mincardinality'] = role.mincardinality
+    data['maxcardinality'] = role.maxcardinality
+    print 'A6'
+    print 'mincardinality ', role.mincardinality
+    print 'maxcardinality ', role.maxcardinality
     
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
@@ -635,6 +660,28 @@ def dashboard(request):
                 perm.mincardinality = mincardinality
                 perm.maxcardinality = maxcardinality
                 perm.save()
+            print '6'
+            data = {}
+            data['success'] = True
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
+
+        elif object_type == ROLE_CARDINALITY_CONSTRAINT:
+            print '1'
+            role_id = request.POST.get('id', None)
+            mincardinality = request.POST.get('mincardinality', None)
+            maxcardinality = request.POST.get('maxcardinality', None)
+            print '2'
+            role_id = int(role_id)
+            print '3'
+            role, role_created = Role.objects.get_or_create(id__exact=role_id, user__exact=user)
+            print '4'
+            # should already exist since we're doing an update
+            if not role_created:
+                print '5'
+                role.mincardinality = mincardinality
+                role.maxcardinality = maxcardinality
+                role.save()
             print '6'
             data = {}
             data['success'] = True

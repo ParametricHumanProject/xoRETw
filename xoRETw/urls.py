@@ -30,6 +30,7 @@ urlpatterns = patterns('',
     url(r'^views/get_scenarios$', views.get_scenarios, name='get_scenarios'),
     url(r'^views/get_roles$', views.get_roles, name='get_roles'),
     url(r'^views/get_perm_cardinality_constraints$', views.get_perm_cardinality_constraints, name='get_perm_cardinality_constraints'),
+    url(r'^views/get_role_cardinality_constraints$', views.get_role_cardinality_constraints, name='get_role_cardinality_constraints'),
 
     url(r'^views/delete_permission$', views.delete_permission, name='delete_permission'),
     #url(r'^views/edit_permission$', views.edit_permission, name='edit_permission'),
