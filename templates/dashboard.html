@@ -389,9 +389,9 @@
                 {% endif %}
 
                 {% if object_type == 9 %} 
-
                 {% endif %}
 
+                <!-- role -->
                 {% if object_type == 10 %} 
                     <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
                     <thead>
@@ -417,11 +417,11 @@
                     {% endfor %}
                     </tbody>
                     </table>
-                    <!-- permission context menu -->
+                    <!-- role context menu -->
                     {% for role in roles %}
                         <div id="context-menu-role-{{role.id}}">
                           <ul class="dropdown-menu" role="menu">
-                            <li><a tabindex="-1" href="#" onclick="role_perm_role_assignment({{role.id}})">Create Role</a></li>
+                            <li><a tabindex="-1" href="#" onclick="create_role()">Create Role</a></li>
                             <li><a id="perm_cardinality_constraint" href="#" onclick="role_perm_role_assignment({{role.id}})">Permission/Role Assignment</a></li>
                             <li><a tabindex="-1" href="#" onclick="role_role_assignment({{role.id}})">Role/Role Assignment</a></li>
                             <li><a tabindex="-1" href="#" onclick="role_ssd_role_constraints({{role.id}})">SSD Role Constraints</a></li>

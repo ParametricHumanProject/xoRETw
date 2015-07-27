@@ -8,7 +8,6 @@ $(function() {
 
 });
 
-
 // set modal title for obstacle dialog
 $('#role_modal').on('show.bs.modal', function(e) {
     
@@ -30,7 +29,6 @@ $( '#create_role_btn' ).click(function() {
     $('#role_available_roles').find('option').remove();
     $('#role_junior_roles').find('option').remove();
     $('#role_senior_roles').find('option').remove();
-    
     
     // get all available conditions
     $.ajax({
@@ -133,14 +131,26 @@ function delete_role(id) {
   });  
 }
 
-
-$('#role_add_junior_role').click(function(e){
+$('#role_add_junior_role').click(function(e) {
     
     var value = $('#role_available_roles').val();
         
     if (!value) {
         alert('Error: no option selected');
         return;
+    }
+    // check if role exists in senior roles, if so, error
+    var senior_roles = [];
+    $('#role_senior_roles option').each(function() {
+        senior_roles.push($(this).val());
+    });    
+        
+    for (i = 0; i < senior_roles.length; i++) { 
+        if (senior_roles[i] == value) {
+            alert('Error: acyclic constraint violated. Role/class hierarchies are directed acyclic graphs. Cannot have a role as both junior and senior.');
+            $("#role_available_roles").focus();
+            return;
+        }
     }
     
     var option_values = [];
@@ -165,6 +175,91 @@ $('#role_add_junior_role').click(function(e){
     return;
 });
 
+$('#role_add_senior_role').click(function(e) {
+    
+    var value = $('#role_available_roles').val();
+        
+    if (!value) {
+        alert('Error: no option selected');
+        return;
+    }
+    
+    // check if role exists in junior roles, if so, error
+    var junior_roles = [];
+    $('#role_junior_roles option').each(function() {
+        junior_roles.push($(this).val());
+    });    
+        
+    for (i = 0; i < junior_roles.length; i++) { 
+        if (junior_roles[i] == value) {
+            alert('Error: acyclic constraint violated. Role/class hierarchies are directed acyclic graphs. Cannot have a role as both junior and senior.');
+            $("#role_available_roles").focus();
+            return;
+        }
+    }
+    
+    var option_values = [];
+    $('#role_senior_roles option').each(function() {
+        option_values.push($(this).val());
+    });    
+        
+    for (i = 0; i < option_values.length; i++) { 
+        if (option_values[i] == value) {
+            alert('Error: ' + value + ' already exists');
+            $("#role_available_roles").focus();
+            return;
+        }
+    }
+
+    // all good - add condition
+    var option = '<option value=' + value + '>' + value + '</option>';
+    $("#role_senior_roles").append(option);
+    
+    $("#role_remove_senior_role").prop('disabled', false);
+
+    return;
+});
+
+$("#role_remove_junior_role").click(function(e){
+ 
+    var value = $('#role_junior_roles').val();
+        
+    if (!value) {
+        alert('Error: no option selected');
+        return;
+    }
+    
+    var selector = "#role_junior_roles option[value='" + value + "']";
+    $(selector).remove();
+    
+    var size = $('#role_junior_roles option').size()
+    if (!size) {
+        $("#role_remove_junior_role").prop('disabled', true);
+    }
+
+    return;
+});
+
+$("#role_remove_senior_role").click(function(e){
+ 
+    var value = $('#role_senior_roles').val();
+        
+    if (!value) {
+        alert('Error: no option selected');
+        return;
+    }
+    
+    var selector = "#role_senior_roles option[value='" + value + "']";
+    $(selector).remove();
+    
+    var size = $('#role_senior_roles option').size()
+    if (!size) {
+        $("#role_remove_senior_role").prop('disabled', true);
+    }
+
+    return;
+});
+
 // context menu functions
 function role_cardinality_constraints(id) {
     
@@ -181,6 +276,7 @@ function role_cardinality_constraints(id) {
         
         mincardinality = data['mincardinality'];
         maxcardinality = data['maxcardinality'];
+        
         // set the min and max cardinality    
         $('#role_cardinality_constraints_mincardinality').val(mincardinality);
         $('#role_cardinality_constraints_maxcardinality').val(maxcardinality);
@@ -191,9 +287,7 @@ function role_cardinality_constraints(id) {
     });
     
     // set the role id for this cardinality constraint modal
-    $('#cardinality_constraint_role_id').val(id);   
-    
-    //$('#role_cardinality_constraints_modal').modal('show');
+    $('#cardinality_constraint_role_id').val(id);       
 }
 
 $('#save_role_cardinality_constraints').click(function() {
@@ -219,6 +313,11 @@ $('#save_role_cardinality_constraints').click(function() {
         alert( "Error - failed to save cardinality constraints." );
   });
 });    
+
+function create_role() {
+    $('#create_role_btn').click();
+    $('#role_modal').modal('show');
+}
 
 function Role(id, name, junior_roles, senior_roles, mode) {
     

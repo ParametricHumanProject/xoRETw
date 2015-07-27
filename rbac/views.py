@@ -18,6 +18,7 @@ from .models import Permission
 
 # constants
 CREATE_NEW = 1
+
 OBJECT_TYPE_OBJECTIVE = 1
 OBJECT_TYPE_OBSTACLE = 2
 OBJECT_TYPE_CONDITION = 3
@@ -28,6 +29,7 @@ OBJECT_TYPE_PERMISSION = 7
 OBJECT_TYPE_TASK = 8
 OBJECT_TYPE_WORK_PROFILE = 9
 OBJECT_TYPE_ROLE = 10
+
 PERM_CARDINALITY_CONSTRAINT = 100
 ROLE_CARDINALITY_CONSTRAINT = 101
 
@@ -83,7 +85,7 @@ def get_role_cardinality_constraints(request):
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
                 
-# get all available conditions 
+# context constraint get all available conditions 
 def get_conditions(request):
     user = request.user
     print 'user - get conditions ', user
@@ -333,9 +335,12 @@ def dashboard(request):
 
             mode = request.POST.get('mode', None)
             mode = int(mode)
+            
             if constraint_id:
                 constraint_id = int(constraint_id)
+            
             constraint_created = False
+            
             if mode == CREATE_NEW:
                 # use constraint name as an exact lookup
                 constraint, constraint_created = ContextConstraint.objects.get_or_create(name__exact=constraint_name, user__exact=user, defaults={'name':constraint_name, 'user':user})
@@ -590,26 +595,24 @@ def dashboard(request):
 
         elif object_type == OBJECT_TYPE_ROLE:
             print '1'
+            
             role_id = request.POST.get('id', None)
             role_name = request.POST.get('name', None)
-            print '2'
+            junior_role_names = request.POST.getlist('junior_roles[]', None)
+            senior_role_names = request.POST.getlist('senior_roles[]', None)
+                        
             mode = request.POST.get('mode', None)
             mode = int(mode)
-            print '3'
             
             if role_id:
-                print '3a'
-                print 'role_id is', role_id
                 role_id = int(role_id)
             
             print '4'
             role_created = False
                         
             if mode == CREATE_NEW:
-                print '5'
                 # use role name as an exact lookup
-                
-                
+                            
                 try:
                     print '6'
                     role, role_created = Role.objects.get_or_create(name__exact=role_name, user__exact=user, defaults={'name':role_name, 'user':user})
@@ -626,9 +629,34 @@ def dashboard(request):
                     print '9'
                     role.save()
                     print '10'
+                
+                print 'a'
+                for junior_role_name in junior_role_names:
+                    print 'b'
+                    junior_role, junior_role_created = Role.objects.get_or_create(name=junior_role_name, user=user)
+                    print 'c'
+                    
+                    if junior_role_created:
+                        print 'd'
+                        junior_role.save()
+                    print 'e'
+                    role.junior_roles.add(junior_role)
+                    print 'f'
+
+                for senior_role_name in senior_role_names:
+                    print 'b'
+                    senior_role, senior_role_created = Role.objects.get_or_create(name=senior_role_name, user=user)
+                    print 'c'
+                    
+                    if senior_role_created:
+                        print 'd'
+                        senior_role.save()
+                    print 'e'
+                    role.senior_roles.add(senior_role)
+                    print 'f'
                                     
             # edit mode
-            else:
+            else: # TODO:
                 print '7'
                 scenario, scenario_created = Scenario.objects.get_or_create(id__exact=scenario_id, user__exact=user, defaults={'name':scenario_name, 'graph':scenario_graph_dot, 'user':user})
 
@@ -637,13 +665,15 @@ def dashboard(request):
                     scenario.name = scenario_name
                     scenario.graph = scenario_graph_dot
                     scenario.save()
-                    
+
+            print 'g'
             data = {}
             data['created'] = str(role_created).lower()
             data['role_created'] = role_created
+            print 'h'
             json_data = json.dumps(data)
             return HttpResponse(json_data, content_type='application/json')
-            
+ 
         elif object_type == PERM_CARDINALITY_CONSTRAINT:
             print '1'
             perm_id = request.POST.get('id', None)
@@ -719,7 +749,6 @@ def dashboard(request):
             return render_to_response('dashboard.html', {'object_type':object_type, 'roles':roles}, context_instance=RequestContext(request))
 
     return render_to_response('dashboard.html', {'object_type':object_type}, context_instance=RequestContext(request))
-
 
 def delete_objective(request):
     user = request.user
@@ -810,7 +839,6 @@ def delete_condition(request):
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
 
-
 def edit_condition(request):
     user = request.user
     # if this is a POST request we need to process the data
@@ -844,7 +872,6 @@ def delete_constraint(request):
             
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
-
 
 def edit_constraint(request):
     user = request.user

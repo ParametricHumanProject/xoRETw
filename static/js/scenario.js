@@ -29,7 +29,7 @@ $('#scenario_modal_add_step').click(function() {
 
         return;
     }
-    //alert(selected_options[0]);
+    
     // check if selected step already added
     var node = null;
     node = nodes.get(selected_options[0]);
@@ -42,6 +42,8 @@ $('#scenario_modal_add_step').click(function() {
     // add step to graph
     nodes.add({id: selected_options[0], label:selected_options[0], physics: false, x:100, y:(nodeIds.length*50) + 50});
     nodeIds.push(selected_options[0]);
+    
+    network.fit({nodes:nodeIds});
     
     // default to edit mode
     $('#graph_edit_mode').click();    
@@ -88,6 +90,7 @@ $( '#create_scenario_btn' ).click(function() {
   });
       
 });
+
 
 function edit_scenario(id) {
 
@@ -137,6 +140,8 @@ function edit_scenario(id) {
         
         for (var i = 0; i < parsedData.nodes.length; i++) {
             nodes.add(parsedData.nodes[i]);
+            //alert(parsedData.nodes[i].id);
+            nodeIds.push(parsedData.nodes[i].id);
         }
         
         for (var i = 0; i < parsedData.edges.length; i++) {
@@ -170,8 +175,13 @@ function edit_scenario(id) {
         };
         
         // create a network
-        network = new vis.Network(container, data, options);    
-
+        network = new vis.Network(container, data, options); 
+        //alert(nodeIds)
+        var temp = {}
+        temp['nodes'] = nodeIds;
+        //network.fit({nodes:nodeIds});
+        network.fit({});
+        
         // default to select mode
         $('#graph_select_mode').click();    
 
@@ -271,6 +281,7 @@ $('#graph_select_mode').click(function(){
       scenario_graph_mode = GRAPH_SELECT_MODE; // set to select mode
       network.disableEditMode();
     }
+    //fit();
 });
 
 function clear_graph() {
