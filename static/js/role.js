@@ -18,7 +18,13 @@ $('#role_modal').on('show.bs.modal', function(e) {
     }
 })
     
-// constraint
+/*
+$( '#role_ssd_role_constraint_modal' ).click(function() {
+    $('#role_ssd_role_constraint_modal').modal('show');
+
+}
+*/
+
 $( '#create_role_btn' ).click(function() {
 
     // set to new mode
@@ -313,6 +319,16 @@ $('#save_role_cardinality_constraints').click(function() {
         alert( "Error - failed to save cardinality constraints." );
   });
 });    
+
+function role_perm_to_role_assignment(id) {
+    alert(id);
+    $('#role_perm_to_role_assignment_modal').modal('show');
+}
+
+function role_ssd_role_constraints(id) {
+    //alert(id);
+    $('#role_ssd_role_constraint_modal').modal('show');
+}
 
 function create_role() {
     $('#create_role_btn').click();

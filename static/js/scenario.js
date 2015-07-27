@@ -47,7 +47,7 @@ $('#scenario_modal_add_step').click(function() {
     //network.fit({nodes:nodeIds});
     
     // default to edit mode
-    $('#graph_edit_mode').click();    
+    $('#graph_edit_mode').click();    eit
 });
 
 // create new scenario
