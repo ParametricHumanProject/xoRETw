@@ -40,10 +40,11 @@ $('#scenario_modal_add_step').click(function() {
     }
     
     // add step to graph
-    nodes.add({id: selected_options[0], label:selected_options[0], physics: false, x:100, y:(nodeIds.length*50) + 50});
+    var x_pos = $('#scenario_modal').width()/3;
+    nodes.add({id: selected_options[0], label:selected_options[0], physics: false, x:x_pos, y:(nodeIds.length*50) + 50});
     nodeIds.push(selected_options[0]);
     
-    network.fit({nodes:nodeIds});
+    //network.fit({nodes:nodeIds});
     
     // default to edit mode
     $('#graph_edit_mode').click();    
@@ -111,7 +112,8 @@ function edit_scenario(id) {
 
         clear_graph();
         init_graph();
-        
+        var num = network.getViewPosition();
+        alert('view pos is ' + num)
         var scenario_name = data['name'];
         var scenario_graph_dot = data['graph_dot'];
         var steps = data['steps'];
@@ -138,50 +140,34 @@ function edit_scenario(id) {
         
         var parsedData = vis.network.convertDot(scenario_graph_dot);//scenario_graph_dot);
         
+        var x_pos = $('#scenario_modal').width()/3;
+        //alert('graph_width ' + graph_width);
         for (var i = 0; i < parsedData.nodes.length; i++) {
-            nodes.add(parsedData.nodes[i]);
+            //nodes.add(parsedData.nodes[i]);
             //alert(parsedData.nodes[i].id);
+            //nodeIds.push(parsedData.nodes[i].id);
+            //network.fit({nodes:nodeIds});
+            
+            nodes.add({id: parsedData.nodes[i].id, label:parsedData.nodes[i].label, physics: false, x:x_pos, y:(nodeIds.length*50) + 50});
             nodeIds.push(parsedData.nodes[i].id);
+            
+            //network.fit({nodes:nodeIds});
+            
         }
         
         for (var i = 0; i < parsedData.edges.length; i++) {
             edges.add(parsedData.edges[i]);
         }
 
-        // provide the data in the vis format
-        data = {
-          nodes: nodes,
-          edges: edges
-        }
 
-        // create a network
-        container = document.getElementById('digraph');
-            
-        options = {
-            nodes:{shape: 'box'},
-            edges:{
-            arrows: 'to',
-            color: 'red',
-            font: '12px arial #ff0000',
-            scaling:{
-              label: true,
-            },
-            shadow: true,
-            smooth: true,
-            } , 
-            manipulation: {
-                enabled: false,
-            }
-        };
         
-        // create a network
-        network = new vis.Network(container, data, options); 
-        //alert(nodeIds)
-        var temp = {}
-        temp['nodes'] = nodeIds;
+        //var temp = {}
+        //temp['nodes'] = nodeIds;
         //network.fit({nodes:nodeIds});
-        network.fit({});
-        
+        //network.focus(parsedData.nodes[0].id);
+
+
+
         // default to select mode
         $('#graph_select_mode').click();    
 
@@ -234,6 +220,7 @@ $('#save_scenario_btn').click(function() {
     }
     graph_dot = graph_dot + '}';
     
+    alert('theseed is ' + network.getSeed());
     //alert(graph_dot);
     //alert(typeof(graph_dot));
     
@@ -331,12 +318,16 @@ function init_graph() {
           label: true,
         },
         shadow: true,
-        smooth: true,
-        physics: true,
+        smooth: false,
+        length: 50,
+        physics: false,
         }, 
         manipulation: {
             enabled: false,
         },
+        physics:{
+            stabilization: true
+          },        
 }
     
     // initialize your network!
