@@ -185,13 +185,141 @@ $('#save_perm_cardinality_constraints').click(function() {
   });
 });    
 
+// context menu function
+function perm_context_constraints(id) {
+    $('#perm_context_constraints_modal').modal('show');
+    
+    // create and update
+    $.ajax({
+        method: "GET",
+        url: url_get_perm_context_constraints,
+        dataType: "json",
+        data: {perm_id: id}
+    }).done(function(data) {
+                
+        // reset all
+        $('#perm_available_context_constraints').find('option').remove();
+        $('#perm_context_constraints').find('option').remove();
+        
+        var available_context_constraints = data['available_context_constraints'];
+        var perm_context_constraints = data['perm_context_constraints'];
+        
+        
+        // set input values
+        $('#perm_context_constraint_perm_id').val(id); //hidden
+        
+        var value = ''
+        for (var i = 0; i < available_context_constraints.length; i++) {
+            value = available_context_constraints[i];
+            var option = '<option value=' + value.name + '>' + value.name + '</option>';
+            $("#perm_available_context_constraints").append(option);
+        }        
+
+        value = ''
+        for (var i = 0; i < perm_context_constraints.length; i++) {
+            value = perm_context_constraints[i];
+            var option = '<option value=' + value + '>' + value + '</option>';
+            $("#perm_context_constraints").append(option);
+        }        
+
+        if (perm_context_constraints.length) {
+            $("#perm_unlink_context_constraint").prop('disabled', false);
+        } else {
+            $("#perm_unlink_context_constraint").prop('disabled', true);
+        }
+        // set the permission id for this cardinality constraint modal
+        $('#perm_context_constraints_perm_id').val(id);   
+
+        $('#perm_context_constraints_modal').modal('show');
+              
+    }).fail(function() {
+        alert( "Error - failed to get context constraints." );
+    });
+    
+    // set the permission id for this context constraint modal
+    $('#perm_context_constraint_perm_id').val(id);   
+}
+
+$('#perm_link_context_constraint').click(function(e){
+    
+    var value = $('#perm_available_context_constraints').val();
+        
+    if (!value) {
+        alert('Error: no option selected');
+        return;
+    }
+    
+    var option_values = [];
+    $('#perm_context_constraints option').each(function() {
+        option_values.push($(this).val());
+    });    
+        
+    for (i = 0; i < option_values.length; i++) { 
+        if (option_values[i] == value) {
+            alert('Error: ' + value + ' already exists');
+            $("#perm_available_context_constraints").focus();
+            return;
+        }
+    }
+
+    // all good - add condition
+    var option = '<option value=' + value + '>' + value + '</option>';
+    $("#perm_context_constraints").append(option);
+    
+    $("#perm_unlink_context_constraint").prop('disabled', false);
+
+    return;
+});
+
+$('#perm_unlink_context_constraint').click(function(e){
+ 
+    var value = $('#perm_context_constraints').val();
+        
+    if (!value) {
+        alert('Error: no option selected');
+        return;
+    }
+    
+    var selector = "#perm_context_constraints option[value='" + value + "']";
+    $(selector).remove();
+    
+    var size = $('#perm_context_constraints option').size()
+    if (!size) {
+        $("#perm_unlink_context_constraint").prop('disabled', true);
+    }
+
+    return;
+});
+
+$('#save_perm_context_constraints').click(function() {
+    
+    // validate all fields
+    var perm_id = $('#perm_context_constraints_perm_id').val();
+    
+    var context_constraints = [];
+    $('#perm_context_constraints option').each(function() {
+        context_constraints.push($(this).val());
+    });    
+
+    // create data
+    var data = new perm_context_constraints_data(perm_id, context_constraints);
+  
+    // post data
+    $.ajax({
+        method: "POST",
+        url: url_dashboard,
+        dataType: "json",
+        data: data
+    }).done(function( msg ) {
+        $('#perm_context_constraints_modal').modal('toggle');       
+    });    
+        
+});    
+
 function perm_ssd_constraints(id) {
     $('#perm_ssd_constraints_modal').modal('show');
 }
 
-function perm_context_constraints(id) {
-    $('#perm_context_constraints_modal').modal('show');
-}
 
 function Permission(id, operation_name, object_name, mode) {
     this.id = id;
@@ -205,7 +333,12 @@ function perm_cardinality_constraints_data(perm_id, mincardinality, maxcardinali
     this.id = perm_id;
     this.mincardinality = mincardinality;
     this.maxcardinality = maxcardinality;
-    this.object_type = PERM_CARDINALITY_CONSTRAINT;
+    this.object_type = PERM_CARDINALITY_CONSTRAINTS;
 }
 
+function perm_context_constraints_data(perm_id, context_constraints) {
+    this.id = perm_id;
+    this.context_constraints = context_constraints;
+    this.object_type = PERM_CONTEXT_CONSTRAINTS;
+}
 

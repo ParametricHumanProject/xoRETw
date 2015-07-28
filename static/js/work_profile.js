@@ -1,66 +1,66 @@
  // Handler for .ready() called.
 $(function() {
+});
 
-    // set modal title for work profile dialog
-    $('#work_profile_modal').on('show.bs.modal', function(e) {
-        
-        if (mode == 1) {
-            $('#work_profile_modal_title').text("Create New Work Profile"); 
-        } else {
-            $('#work_profile_modal_title').text("Edit Work Profile");   
-        }
-    })
+// set modal title for work profile dialog
+$('#work_profile_modal').on('show.bs.modal', function(e) {
     
-    $( '#save_work_profile_btn' ).click(function() {
-        // validate all fields
-        
-        // used for edit        
-        var work_profile_id = $('#work_profile_id').val();
-        var work_profile_name = $('#work_profile_name').val().split(' ').join('_');
+    if (mode == 1) {
+        $('#work_profile_modal_title').text("Create New Work Profile"); 
+    } else {
+        $('#work_profile_modal_title').text("Edit Work Profile");   
+    }
+})
 
-        if (!work_profile_name) {
-            alert('Error: work profile name cannot be empty.');
-            $('#work_profile_name').focus();
-            $('#work_profile_name').flash();
-            return;
-        }
-        
-        var attached_tasks = [];
-        $('#work_profile_attached_tasks option').each(function() {
-            attached_tasks.push($(this).val().split(' ').join('_'));
-        });    
+$( '#save_work_profile_btn' ).click(function() {
+    // validate all fields
+    
+    // used for edit        
+    var work_profile_id = $('#work_profile_id').val();
+    var work_profile_name = $('#work_profile_name').val().split(' ').join('_');
 
-        // create data
-        var work_profile_data = new WorkProfile(work_profile_id, work_profile_name, attached_tasks, mode);
-        
-        // post data
-        $.ajax({
-            method: "POST",
-            url: url_dashboard,
-            dataType: "json",
-            data: task_data
-        }).done(function( msg ) {
-            
-            var work_profile_name = msg['work_profile_name'];
-            var created = msg['created'];
-            created = (created === "true");
-            
-            if (created) {
-                $('#work_profile_modal').modal('toggle');
-            } else {    
-                // if created is false then if create new mode
-                if (mode == 1) {
-                    alert('Error - failed to create work profile: '+ work_profile_name);
-                } else {
-                    // toggle hide/close modal
-                    $('#work_profile_modal').modal('toggle');
-                }
-            }
-            location.reload();            
-        });    
+    if (!work_profile_name) {
+        alert('Error: work profile name cannot be empty.');
+        $('#work_profile_name').focus();
+        $('#work_profile_name').flash();
+        return;
+    }
+    
+    var attached_tasks = [];
+    $('#work_profile_attached_tasks option').each(function() {
+        attached_tasks.push($(this).val().split(' ').join('_'));
     });    
 
-});
+    // create data
+    var work_profile_data = new WorkProfile(work_profile_id, work_profile_name, attached_tasks, mode);
+    
+    // post data
+    $.ajax({
+        method: "POST",
+        url: url_dashboard,
+        dataType: "json",
+        data: task_data
+    }).done(function( msg ) {
+        
+        var work_profile_name = msg['work_profile_name'];
+        var created = msg['created'];
+        created = (created === "true");
+        
+        if (created) {
+            $('#work_profile_modal').modal('toggle');
+        } else {    
+            // if created is false then if create new mode
+            if (mode == 1) {
+                alert('Error - failed to create work profile: '+ work_profile_name);
+            } else {
+                // toggle hide/close modal
+                $('#work_profile_modal').modal('toggle');
+            }
+        }
+        location.reload();            
+    });    
+});    
+
 
 // work profile
 $( '#create_work_profile_btn' ).click(function() {
@@ -148,52 +148,7 @@ function delete_work_profile(id) {
   });  
 }
 
-function edit_constraint(id) {
 
-    mode = MODE_UPDATE; // edit
-    
-    // get existing data and populate dialog
-    $.ajax({
-        method: "GET",
-        url: url_edit_constraint,
-        dataType: "json",
-        data: {constraint_id: id},
-    }).done(function( msg ) {
-        // reset all fields
-        $('#work_profile_id').val('');
-        $('#work_profile_name').val('');
-        $('#work_profile_available_tasks').find('option').remove();
-        $('#work_profile_attached_tasks').find('option').remove();
-        
-        var work_profile_name = msg['name'];
-        var attached_tasks = msg['conditions'];
-        
-        alert(conditions);
-
-        // set input values
-        $('#constraint_id').val(id); //hidden
-        $('#constraint_name').val(constraint_name);
-
-        var value = ''
-        for (var i = 0; i < conditions.length; i++) {
-            value = conditions[i];
-            var option = '<option value=' + value + '>' + value + '</option>';
-            $("#constraint_conditions").append(option);
-        }        
-
-        if (conditions.length) {
-            $("#remove_constraint_condition").prop('disabled', false);
-        } else {
-            $("#remove_constraint_condition").prop('disabled', true);
-        }
-        
-        $('#constraint_modal').modal('show');
-                
-    }).fail(function() {
-        alert( "Error - Edit constraint failed." );
-  });    
-    
-}
 
 function Task(id, name, scenarios, mode) {
     

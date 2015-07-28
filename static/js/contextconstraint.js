@@ -183,6 +183,7 @@ function delete_constraint(id) {
 
 function edit_constraint(id) {
 
+    alert('edit_constraint');
     mode = MODE_UPDATE; // edit
     
     // get existing data and populate dialog
@@ -192,7 +193,7 @@ function edit_constraint(id) {
         dataType: "json",
         data: {constraint_id: id},
     }).done(function( msg ) {
-        alert('done');
+        //alert('done');
         // reset all fields
         $('#constraint_id').val('');
         $('#constraint_name').val('');

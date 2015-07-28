@@ -30,12 +30,40 @@ OBJECT_TYPE_TASK = 8
 OBJECT_TYPE_WORK_PROFILE = 9
 OBJECT_TYPE_ROLE = 10
 
-PERM_CARDINALITY_CONSTRAINT = 100
-ROLE_CARDINALITY_CONSTRAINT = 101
-
+PERM_CARDINALITY_CONSTRAINTS = 100
+ROLE_CARDINALITY_CONSTRAINTS = 101
+PERM_CONTEXT_CONSTRAINTS = 102
 
 def home(request):
 	return render_to_response('index.html', {}, context_instance=RequestContext(request))
+
+def get_perm_context_constraints(request):
+
+    user = request.user
+    if request.method == 'GET':        
+        perm_id = request.GET.get('perm_id', None)
+        
+        if perm_id:
+            perm = Permission.objects.get(id=perm_id, user=user)
+
+    data = {}
+    data['available_context_constraints'] = []
+    data['perm_context_constraints'] = []
+
+    # get all available context constraints
+    context_constraints = ContextConstraint.objects.filter(user=user)
+    
+    for i in context_constraints:
+        context_constraint = {}
+        context_constraint['name'] = i.name
+        context_constraint['id'] = i.id
+        data['available_context_constraints'].append(context_constraint)
+
+    for context_constraint in perm.context_constraints.all():
+        data['perm_context_constraints'].append(context_constraint.name)
+        
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
 
 def get_perm_cardinality_constraints(request):
 
@@ -674,49 +702,87 @@ def dashboard(request):
             json_data = json.dumps(data)
             return HttpResponse(json_data, content_type='application/json')
  
-        elif object_type == PERM_CARDINALITY_CONSTRAINT:
-            print '1'
+        elif object_type == PERM_CARDINALITY_CONSTRAINTS:
             perm_id = request.POST.get('id', None)
             mincardinality = request.POST.get('mincardinality', None)
             maxcardinality = request.POST.get('maxcardinality', None)
-            print '2'
+            
             perm_id = int(perm_id)
-            print '3'
             perm, perm_created = Permission.objects.get_or_create(id__exact=perm_id, user__exact=user)
-            print '4'
-            # should already exist since we're doing an update
+
+            # permission should already exist since we're doing an update
             if not perm_created:
-                print '5'
                 perm.mincardinality = mincardinality
                 perm.maxcardinality = maxcardinality
                 perm.save()
+                
+            data = {}
+            data['success'] = True
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
+
+        elif object_type == ROLE_CARDINALITY_CONSTRAINTS:
+            role_id = request.POST.get('id', None)
+            mincardinality = request.POST.get('mincardinality', None)
+            maxcardinality = request.POST.get('maxcardinality', None)
+            role_id = int(role_id)
+            role, role_created = Role.objects.get_or_create(id__exact=role_id, user__exact=user)
+
+            # role should already exist since we're doing an update
+            if not role_created:
+                role.mincardinality = mincardinality
+                role.maxcardinality = maxcardinality
+                role.save()
+
+            data = {}
+            data['success'] = True
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
+            
+        elif object_type == PERM_CONTEXT_CONSTRAINTS:
+            perm_id = request.POST.get('id', None)
+            context_constraint_names = request.POST.getlist('context_constraints[]', None)
+            print 'perm_id is ', perm_id
+            perm_id = int(perm_id)
+            perm, perm_created = Permission.objects.get_or_create(id__exact=perm_id, user__exact=user)
+
+            # permission should already exist since we're doing an update
+            #if not perm_created:
+            #    perm.save()
+
+            
+            print 'context_constraint_names ', context_constraint_names
+            #perm_id = int(perm_id)
+            print 'A3'
+            #perm_id = int(perm_id)
+            #perm, perm_created = Permission.objects.get_or_create(id__exact=perm_id, user__exact=user)
+
+            print 'A4'
+            # permission should already exist since we're doing an update
+            if not perm_created:
+                print 'A5'
+                # get all context constraints linked to this permission
+                context_constraints = perm.context_constraints.all()
+                print 'A6'
+                # remove all context_constraints linked to this permission
+                for context_constraint in context_constraints:
+                    perm.context_constraints.remove(context_constraint)
+                print 'A7'    
+                for context_constraint_name in context_constraint_names:
+                    context_constraint, context_constraint_created = ContextConstraint.objects.get_or_create(name=context_constraint_name, user=user)
+                    print 'A8'                        
+                    perm.context_constraints.add(context_constraint)
+
+                print '5'
+
             print '6'
             data = {}
             data['success'] = True
             json_data = json.dumps(data)
             return HttpResponse(json_data, content_type='application/json')
 
-        elif object_type == ROLE_CARDINALITY_CONSTRAINT:
-            print '1'
-            role_id = request.POST.get('id', None)
-            mincardinality = request.POST.get('mincardinality', None)
-            maxcardinality = request.POST.get('maxcardinality', None)
-            print '2'
-            role_id = int(role_id)
-            print '3'
-            role, role_created = Role.objects.get_or_create(id__exact=role_id, user__exact=user)
-            print '4'
-            # should already exist since we're doing an update
-            if not role_created:
-                print '5'
-                role.mincardinality = mincardinality
-                role.maxcardinality = maxcardinality
-                role.save()
-            print '6'
-            data = {}
-            data['success'] = True
-            json_data = json.dumps(data)
-            return HttpResponse(json_data, content_type='application/json')
+
+
                                 
     # if a GET (or any other method)
     else:    

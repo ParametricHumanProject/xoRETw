@@ -50,9 +50,6 @@
                     <button id="create_task_btn" type="button" class="btn btn-default" title='Create Task' data-toggle="modal" data-target="#task_modal"><img src="{% static 'img/task.gif' %}" align="absmiddle"></button>
                     <button id="create_work_profile_btn" type="button" class="btn btn-default" title='Create Work Profile' data-toggle="modal" data-target="#work_profile_modal"><img src="{% static 'img/profile.gif' %}" align="absmiddle"></button>
                     <button id="create_role_btn" type="button" class="btn btn-default" title='Create Role' data-toggle="modal" data-target="#role_modal"><img src="{% static 'img/facemask.gif' %}" align="absmiddle"></button>
-                    <button id="create_role_btnf" type="button" class="btn btn-default" title='Create Role' data-toggle="modal" data-target="#role_ssd_role_constraint_modal"><img src="{% static 'img/facemask.gif' %}" align="absmiddle"></button>
-                    
-                    
                 </fieldset>
 				</div>
                 <div class="btn-group" role="group" aria-label="...">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
@@ -1452,6 +1449,7 @@
                 </div>  
             </div>
         </form>
+        </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button id="save_perm_cardinality_constraints" type="button" class="btn btn-primary">Save</button>
@@ -1460,6 +1458,46 @@
   </div>
 </div>
 
+<!-- perm context constraint modal -->
+<div class="modal fade" id="perm_context_constraints_modal" tabindex="-1" role="dialog" aria-labelledby="perm_context_constraints_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content modal-content-width-450">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="perm_context_constraint_modal_title">Context Constraint Management for Permission</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <input type="hidden" id="perm_context_constraints_perm_id" value="">
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="perm_available_context_constraints">Available Context Constraints</label>
+                    <select id="perm_available_context_constraints" multiple class="form-control">
+                    </select>     
+                    <input id="perm_link_context_constraint" class="btn btn-default" type="button" value="Link Context Constraint">
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="perm_context_constraints">Linked Context Constraints</label>
+                    <select id="perm_context_constraints" multiple class="form-control">
+                    </select>     
+                    <input id="perm_unlink_context_constraint" class="btn btn-default" type="button" disabled="false" value="Unlink Context Constraint">     
+                  </div>
+                </div>  
+            </div>
+        </form>      
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="save_perm_context_constraints" type="button" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 {% endblock content %}
@@ -1496,8 +1534,9 @@ var OBJECT_TYPE_PERMISSION = 7
 var OBJECT_TYPE_TASK = 8
 var OBJECT_TYPE_WORK_PROFILE = 9
 var OBJECT_TYPE_ROLE = 10
-var PERM_CARDINALITY_CONSTRAINT = 100
-var ROLE_CARDINALITY_CONSTRAINT = 101
+var PERM_CARDINALITY_CONSTRAINTS = 100
+var ROLE_CARDINALITY_CONSTRAINTS = 101
+var PERM_CONTEXT_CONSTRAINTS = 102
 
 
 // common to all
@@ -1517,7 +1556,9 @@ var url_get_scenarios = "{% url 'get_scenarios' %}"
 var url_get_roles = "{% url 'get_roles' %}"
 var url_get_perm_cardinality_constraints = "{% url 'get_perm_cardinality_constraints' %}"
 var url_get_role_cardinality_constraints = "{% url 'get_role_cardinality_constraints' %}"
-url_get_role_cardinality_constraints
+var url_get_perm_context_constraints = "{% url 'get_perm_context_constraints' %}"
+//url_get_role_cardinality_constraints
+//url_get_perm_context_constraints
 
 
 var url_delete_objective = "{% url 'delete_objective' %}"
