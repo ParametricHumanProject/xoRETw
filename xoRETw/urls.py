@@ -46,6 +46,10 @@ urlpatterns = patterns('',
     url(r'^views/edit_task$', views.edit_task, name='edit_task'),
     
     
+    # role 
+    url(r'^views/exists_role$', views.exists_role, name='exists_role'),
+    
+    
 
     (r'^accounts/', include('registration.backends.simple.urls')),
 )

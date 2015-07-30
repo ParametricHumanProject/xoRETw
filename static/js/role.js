@@ -17,15 +17,8 @@ $('#role_modal').on('show.bs.modal', function(e) {
         $('#role_modal_title').text("Edit Role");   
     }
 })
-    
-/*
-$( '#role_ssd_role_constraint_modal' ).click(function() {
-    $('#role_ssd_role_constraint_modal').modal('show');
 
-}
-*/
-
-$( '#create_role_btn' ).click(function() {
+$('#create_role').click(function() {
 
     // set to new mode
     mode = MODE_CREATE;
@@ -66,11 +59,38 @@ $( '#create_role_btn' ).click(function() {
          
 });
 
-$( '#save_role_btn' ).click(function() {
+$('#save_role').click(function() {
 
-    var id = $('#role_id').val();    
     var role_name = $('#role_name').val().split(' ').join('_');
-
+    
+    var exists_role = false;
+    
+    // check if role exists
+    $.ajax({
+        method: "GET",
+        url: url_exists_role,
+        async: false,
+        dataType: "json",
+        data: {role_name: role_name},
+    }).done(function(data) {
+                
+        exists_role = (String(data['exists']) === "true");
+                
+    }).fail(function() {
+        alert( "Error - exists role failed." );
+        return;
+    });  
+        
+    if (exists_role) {
+        
+        // error role already exists
+        alert('Error: the role ' + '"' + role_name + '"' + ' already exists.');
+        $('#role_name').focus();
+        $('#role_name').flash();
+        return;        
+    }
+    
+    var id = $('#role_id').val();    
     if (!role_name) {
         alert('Error: role name cannot be empty.');
         $('#role_name').focus();
@@ -354,148 +374,3 @@ function role_cardinality_constraints_data(role_id, mincardinality, maxcardinali
     this.maxcardinality = maxcardinality;
     this.object_type = ROLE_CARDINALITY_CONSTRAINT;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-$("#add_constraint_condition").click(function(e){
-    
-    var value = $('#constraint_available_conditions').val();
-        
-    if (!value) {
-        alert('Error: no option selected');
-        return;
-    }
-    
-    var option_values = [];
-    $('#constraint_conditions option').each(function() {
-        option_values.push($(this).val());
-    });    
-        
-    for (i = 0; i < option_values.length; i++) { 
-        if (option_values[i] == value) {
-            alert('Error: ' + value + ' already exists');
-            $("#constraint_available_conditions").focus();
-            return;
-        }
-    }
-
-    // all good - add condition
-    var option = '<option value=' + value + '>' + value + '</option>';
-    $("#constraint_conditions").append(option);
-    
-    $("#remove_constraint_condition").prop('disabled', false);
-
-    return;
-});
-
-$("#remove_constraint_condition").click(function(e){
- 
-    var value = $('#constraint_conditions').val();
-        
-    if (!value) {
-        alert('Error: no option selected');
-        return;
-    }
-    
-    var selector = "#constraint_conditions option[value='" + value + "']";
-    $(selector).remove();
-    
-    var size = $('#constraint_conditions option').size()
-    if (!size) {
-        $("#remove_constraint_condition").prop('disabled', true);
-    }
-
-    return;
-});
-    
-
-function delete_constraint(id) {
-    
-    // fade out then remove
-    $('#constraint-' + id).fadeOut('slow', function(){ $(this).remove(); });    
-
-    $.ajax({
-        method: "POST",
-        url: url_delete_constraint,
-        dataType: "json",
-        data: {constraint_id: id},
-    }).done(function( msg ) {
-        var deleted = msg['deleted'];
-        deleted = (deleted === "true");
-        if (!deleted) {
-            alert( "Error - failed to delete obstacle" );
-        }
-    }).fail(function() {
-        alert( "Error - failed to delete obstacle" );
-  });  
-}
-
-function edit_constraint(id) {
-
-    mode = MODE_UPDATE; // edit
-    
-    // get existing data and populate dialog
-    $.ajax({
-        method: "GET",
-        url: url_edit_constraint,
-        dataType: "json",
-        data: {constraint_id: id},
-    }).done(function( msg ) {
-        alert('done');
-        // reset all fields
-        $('#constraint_id').val('');
-        $('#constraint_name').val('');
-        $('#constraint_available_conditions').find('option').remove();
-        $('#constraint_conditions').find('option').remove();
-        
-        var constraint_name = msg['name'];
-        var conditions = msg['conditions'];
-        
-        // set input values
-        $('#constraint_id').val(id); //hidden
-        $('#constraint_name').val(constraint_name);
-
-        var value = ''
-        for (var i = 0; i < conditions.length; i++) {
-            value = conditions[i];
-            var option = '<option value=' + value + '>' + value + '</option>';
-            $("#constraint_conditions").append(option);
-        }        
-
-        if (conditions.length) {
-            $("#remove_constraint_condition").prop('disabled', false);
-        } else {
-            $("#remove_constraint_condition").prop('disabled', true);
-        }
-        
-        $('#constraint_modal').modal('show');
-                
-    }).fail(function() {
-        alert( "Error - Edit constraint failed." );
-  });    
-    
-}
-*/

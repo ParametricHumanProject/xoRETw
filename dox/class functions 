@@ -1,0 +1,328 @@
+Role - functions
+
+Role instproc updateSuperclass {} {
+Role instproc assignPerm {permission} {
+Role instproc revokePerm {permission} {
+Role instproc directlyOwnsPerm {perm} {
+Role instproc transitivelyOwnsPerm {perm} {
+Role instproc ownsPerm {perm} {
+Role instproc ownsAllPerms {permlist} {
+Role instproc getAllDirectlyAssignedPerms {} {
+Role instproc getAllTransitivelyAssignedPerms {} {
+Role instproc getAllPerms {} {
+Role instproc setMinCardinality {cardinality} {
+Role instproc getMinCardinality {} {
+Role instproc unsetMinCardinality {} {
+Role instproc setMaxCardinality {cardinality} {
+Role instproc getMaxCardinality {} {
+Role instproc unsetMaxCardinality {} {
+Role instproc checkSubjectCardinalityConsistency {} {
+Role instproc setSSDConstraint {role} {
+Role instproc unsetSSDConstraint {role} {
+Role instproc getDirectJuniorRoles {} {
+Role instproc getTransitiveJuniorRoles {} {
+Role instproc getAllJuniorRoles {} {
+Role instproc getTransitiveSeniorRoles {} {
+Role instproc getDirectSeniorRoles {} {
+Role instproc getAllSeniorRoles {} {
+Role instproc hasSeniorRole {role} {
+Role instproc hasJuniorRole {role} {
+Role instproc hasSSDPermConstraintTo {role} {
+Role instproc hasSSDRoleConstraintTo {role} {
+Role instproc isStaticallyMutualExclusive {role} {
+Role instproc getDirectSSDRoleConstraints {} {
+Role instproc getTransitiveSSDRoleConstraints {} {
+Role instproc getInheritedSSDRoleConstraints {} {
+Role instproc getSSDRoleConstraints {} {
+
+
+Class xoRET_GUI::Create::Role -superclass xoRET_GUI::Create
+
+xoRET_GUI::Create::Role instproc init args {
+  foreach r [lsort -dictionary [$pm getRoleList]] {
+    $leftlistbox insert end [$r name] \
+	-text "[$r name]" \
+	-image [Bitmap::get facemask] 
+  }
+  $sw setwidget $leftlistbox
+  pack $sw -fill both -expand yes
+
+  # right frame
+  set rtopf [frame $top.rtopf]
+  set upperrighttitleframe [TitleFrame $rtopf.tf2 -text "Junior-Roles of new Role" -ipad 5]
+  set f [$upperrighttitleframe getframe]
+  set sw [ScrolledWindow $f.sw]
+  set upperrightlistbox [ListBox::create $sw.lb -height 10 -width 20 \
+			     -highlightthickness 0 \
+			     -background white \
+			     -selectmode single \
+			     -multicolumn false]
+  $sw setwidget $upperrightlistbox
+  pack $sw -fill both -expand yes
+
+  set lowerrighttitleframe [TitleFrame $rtopf.tf3 -text "Senior-Roles of new Role" -ipad 5]
+  set f [$lowerrighttitleframe getframe]
+  set sw [ScrolledWindow $f.sw]
+  set lowerrightlistbox [ListBox::create $sw.lb -height 10 -width 20 \
+			     -highlightthickness 0 \
+			     -background white \
+			     -selectmode single \
+			     -multicolumn false]
+  $sw setwidget $lowerrightlistbox
+  pack $sw -fill both -expand yes
+
+  pack $lowerrighttitleframe $upperrighttitleframe -side bottom -fill both -expand yes
+
+  # middle frame
+  set mf  [TitleFrame $top.mf -text "Options"]
+  set f [$mf getframe]
+  set eframe [frame $f.eframe]
+  set entry [Entry $eframe.entry -width 15 -text "" -helptext "Enter new role name here"]
+  set label [Label $eframe.label -text "New Role Name:"]
+  pack $label $entry -side left -fill x -padx 2 -pady 3 -expand yes
+
+  set jbframe [frame $f.jbframe]
+  set addjunbutton  [Button $jbframe.addjunbutton -text ">> Add Junior-Role >>" -width 20 \
+			 -height 1 -command "[self] addJunior"]
+  set remjunbutton  [Button $jbframe.remjunbutton -text "<< Remove Junior-Role <<" -width 20 \
+			 -height 1 -command "[self] removeJunior"]
+  pack $remjunbutton $addjunbutton -side bottom -pady 5
+
+  set sbframe [frame $f.sbframe]
+  set addsenbutton [Button $sbframe.addsenbutton -text ">> Add Senior-Role >>" -width 20 \
+			 -height 1 -command "[self] addSenior"]
+  set remsenbutton  [Button $sbframe.remsenbutton -text "<< Remove Senior-Role <<" -width 20 \
+			 -height 1 -command "[self] removeSenior"]
+  pack $remsenbutton $addsenbutton -side bottom -pady 5
+  
+  set placeholder [frame $f.ph -height 40]
+  set sep1 [Separator  $f.sep1 -orient horizontal]
+  set sep2 [Separator  $f.sep2 -orient horizontal]
+  set create [Button $f.create -text "Create Role" -height 1 -width 16 -command "[self] create"]
+  set cancel [Button $f.cancel -text "Cancel" -height 1 -width 16 -command "[self] destroy"]
+
+  pack $cancel $create -side bottom -pady 5
+  pack $sep1 -side bottom -fill x -pady 5
+  pack $sbframe $placeholder $jbframe -side bottom -pady 5
+  pack $sep2 -side bottom -fill x -pady 5
+  pack $eframe -side bottom -pady 15
+
+  # pack toplevel-frame
+  pack $ltf $mf $rtopf -side left -fill both -padx 1 -pady 3 -expand yes
+
+  wm minsize $top 650 420
+  wm withdraw $top
+  wm title $top "Create New Role"
+
+  BWidget::place $top 0 0 center
+  wm geometry $top 650x420+330+320
+  wm deiconify $top
+  raise $top
+  focus -force $top
+  update idletasks
+}
+
+xoRET_GUI::Create::Role instproc addJunior {} {
+  my instvar leftlistbox upperrightlistbox
+  set junior [$leftlistbox selection get]
+  if {$junior != ""} {
+    if {![$upperrightlistbox exists $junior]} {
+      $upperrightlistbox insert end $junior \
+	  -text "$junior" \
+	  -image [Bitmap::get facemask]
+      update idletasks
+    }
+  }
+}
+
+xoRET_GUI::Create::Role instproc removeJunior {} {
+  my instvar upperrightlistbox
+  set junior [$upperrightlistbox selection get]
+  if {[$upperrightlistbox exists $junior]} {
+    $upperrightlistbox delete $junior
+    update idletasks
+  }
+}
+
+xoRET_GUI::Create::Role instproc addSenior {} {
+  my instvar leftlistbox lowerrightlistbox
+  set senior [$leftlistbox selection get]
+  if {$senior != ""} {
+    if {![$lowerrightlistbox exists $senior]} {
+      $lowerrightlistbox insert end $senior \
+	  -text "$senior" \
+	  -image [Bitmap::get facemask]
+      update idletasks
+    }
+  }
+}
+
+xoRET_GUI::Create::Role instproc removeSenior {} {
+  my instvar lowerrightlistbox
+  set senior [$lowerrightlistbox selection get]
+  if {[$lowerrightlistbox exists $senior]} {
+    $lowerrightlistbox delete $senior
+    update idletasks
+  }
+}
+
+xoRET_GUI::Create::Role instproc create {} {
+    [$pm createRole $new $junior $senior]
+}
+
+
+
+
+Role instproc exportRDF {fileName} {
+  my instvar mincardinality maxcardinality ssdconstraints
+  set file [open $fileName a+]
+  puts $file "  <ROLE rdf:ID='\#[my name]'>"
+  puts $file "    <re:roleName>[my name]</re:roleName>"
+  if {[info exists mincardinality]} {
+    puts $file "    <re:mincardinality>[my getMinCardinality]</re:mincardinality>"
+  }
+  if {[info exists maxcardinality]} {
+    puts $file "    <re:maxcardinality>[my getMaxCardinality]</re:maxcardinality>"
+  }
+  set juniorRoles [[self] info superclass]
+  	     
+  if {($juniorRoles != "") && ($juniorRoles != "::xotcl::Object")} {
+    foreach role $juniorRoles {
+      puts $file "    <re:juniorRole rdf:resource='\#[$role name]'/>"
+    }
+  }
+  set seniorRoles [[self] info subclass]
+  if {$seniorRoles != ""} {
+    foreach role $seniorRoles {
+      puts $file "    <re:seniorRole rdf:resource='\#[$role name]'/>"
+    }
+  }
+  if {[info exists ssdconstraints]} {
+    foreach role [my getDirectSSDRoleConstraints] {
+      puts $file "    <re:staticallyMutualExclusiveRole rdf:resource='\#[$role name]'/>"
+    }
+  } 
+  set permList [my getAllDirectlyAssignedPerms]
+  if {$permList != ""} {
+    foreach perm $permList {
+      puts $file "    <re:permission rdf:resource='\#[$perm name]'/>"
+    }
+  }
+  if {[info exists traces]} {
+    foreach targettype $traces {
+      my instvar $targettype
+      foreach tracetype [array names $targettype] {
+	foreach target [set [set targettype]($tracetype)] {
+	  puts $file "    <re:trace tracetype='$tracetype' targettype='$targettype'\
+                                    target='\#[$target name]'/>"
+	}
+      }
+    }
+  }
+  puts $file "    <re:modified>[my last_modified]</re:modified>"
+  puts $file "  </ROLE>\n"
+  close $file 
+}
+
+Role instproc export_xoRBAC_RDF {fileName} {
+  my instvar mincardinality maxcardinality ssdconstraints
+  set file [open $fileName a+]
+  puts $file "  <ROLE rdf:ID='\#[[self] name]'>"
+  puts $file "    <rm:roleName>[[self] name]</rm:roleName>"
+  if {[info exists minSubjectCardinality]} {
+    puts $file "    <rm:minSubjectCardinality>[my getMinCardinality]</rm:minSubjectCardinality>"
+  }
+  if {[info exists maxSubjectCardinality]} {
+    puts $file "    <rm:maxSubjectCardinality>[my getMaxCardinality]</rm:maxSubjectCardinality>"
+  }
+  set junior [my info superclass]
+  if {($junior != "") && ($junior != "::xotcl::Object")} {
+    foreach role $junior {
+      puts $file "    <rm:juniorRole rdf:resource='\#[$role name]'/>"
+    }
+  }
+  set senior [my info subclass]
+  if {$senior != ""} {
+    foreach role $senior {
+      puts $file "    <rm:seniorRole rdf:resource='\#[$role name]'/>"
+    }
+  }
+  if {[info exists ssdconstraints]} {
+    foreach role [my getDirectSSDRoleConstraints] {
+      puts $file "    <rm:staticallyMutualExclusiveRole rdf:resource='\#[$role name]'/>"
+    }
+  } 
+  foreach perm [my getAllDirectlyAssignedPerms] {
+    puts $file "    <rm:permission rdf:resource='\#[$perm operation] [$perm object]'/>"
+  }
+  puts $file "  </ROLE>\n"
+  close $file 
+}
+
+
+Role instproc appendToTailoredTraceDotFile {filename {totypes "all"} {tracetypes "all"}} {
+  next $filename $totypes $tracetypes egg
+}
+
+Role instproc getAttributes {} {
+  lappend all "[list Name: [my name]]"
+  if {[my getMinCardinality] != -1} {
+    lappend all "[list [list Minimal Subject Cardinality:] [my getMinCardinality]]"
+  }
+  if {[my getMaxCardinality] != -1} {
+    lappend all "[list [list Maximal Subject Cardinality:] [my getMaxCardinality]]"
+  }
+  if {[my getDirectSSDRoleConstraints] != ""} {
+    foreach mer [my getDirectSSDRoleConstraints] {
+      lappend all "[list [list Direct SSD Role Constraint:] [$mer name]]"
+    }
+  }
+  if {[my getInheritedSSDRoleConstraints] != ""} {
+    foreach mer [my getInheritedSSDRoleConstraints] {
+      lappend all "[list [list Inherited SSD Role Constraint:] [$mer name]]"
+    }
+  }
+  if {[my getAllDirectlyAssignedPerms] != ""} {
+    foreach perm [my getAllDirectlyAssignedPerms] {
+      lappend all "[list [list Directly Assigned Permission:] [$perm name]]"
+    }
+  }
+  if {[my getAllTransitivelyAssignedPerms] != ""} {
+    foreach perm [my getAllTransitivelyAssignedPerms] {
+      lappend all "[list [list Inherited Permission:] [$perm name]]"
+    }
+  }
+  if {[[self] getDirectJuniorRoles] !=""} {
+    foreach r [[self] getDirectJuniorRoles] {
+      lappend all "[list [list Direct Junior-Role:] [$r name]]"
+    }
+  }
+  if {[my getTransitiveJuniorRoles] != ""} {
+    foreach r [my getTransitiveJuniorRoles] {
+      lappend all "[list [list Transitive Junior-Role:] [$r name]]"
+    }
+  }
+  if {[[self] info subclass] != ""} {
+    foreach r [[self] info subclass] {
+      lappend all "[list [list Direct Senior-Role:] [$r name]]"
+    }
+  }
+  if {[my getTransitiveSeniorRoles] != ""} {
+    foreach r [my getTransitiveSeniorRoles] {
+      lappend all "[list [list Transitive Senior-Role:] [$r name]]"
+    }
+  }
+  if {[my roleswithequalpermissions] != ""} {
+    foreach r [my roleswithequalpermissions] {
+      lappend all "[list [list Role with identical Permissions:] [$r name]]"
+    }
+  }
+  return $all 
+}
+
+Role instproc destroy args {
+  next
+}
+
+
+

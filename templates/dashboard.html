@@ -49,7 +49,7 @@
                     <button id="create_permission_btn" type="button" class="btn btn-default" title='Create Permission' data-toggle="modal" data-target="#permission_modal"><img src="{% static 'img/key.gif' %}" align="absmiddle"></button>
                     <button id="create_task_btn" type="button" class="btn btn-default" title='Create Task' data-toggle="modal" data-target="#task_modal"><img src="{% static 'img/task.gif' %}" align="absmiddle"></button>
                     <button id="create_work_profile_btn" type="button" class="btn btn-default" title='Create Work Profile' data-toggle="modal" data-target="#work_profile_modal"><img src="{% static 'img/profile.gif' %}" align="absmiddle"></button>
-                    <button id="create_role_btn" type="button" class="btn btn-default" title='Create Role' data-toggle="modal" data-target="#role_modal"><img src="{% static 'img/facemask.gif' %}" align="absmiddle"></button>
+                    <button id="create_role" type="button" class="btn btn-default" title='Create Role' data-toggle="modal" data-target="#role_modal"><img src="{% static 'img/facemask.gif' %}" align="absmiddle"></button>
                 </fieldset>
 				</div>
                 <div class="btn-group" role="group" aria-label="...">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
@@ -923,7 +923,7 @@
         </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_role_btn" type="button" class="btn btn-primary">Save</button>
+        <button id="save_role" type="button" class="btn btn-primary">Save</button>
       </div>
     </div>
   </div>
@@ -1570,6 +1570,8 @@ var url_delete_scenario = "{% url 'delete_scenario' %}"
 var url_delete_permission = "{% url 'delete_permission' %}"
 var url_delete_task = "{% url 'delete_task' %}"
 var url_delete_role = "{% url 'delete_role' %}"
+
+var url_exists_role = "{% url 'exists_role' %}"
 
 
 var mode = 0; // edit mode, common var to all

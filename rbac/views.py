@@ -1090,3 +1090,23 @@ def delete_work_profile(request):
             data['work_profile_id'] = work_profile_id
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
+
+def exists_role(request):
+    user = request.user
+    role_name = request.GET.get('role_name', None)
+    
+    roles = Role.objects.filter(user=user)
+    
+    data = {}
+    print 'role_name is ', role_name
+    data['exists'] = False 
+    for role in roles:
+        print 'db role.name is ', role.name
+        
+        if role_name == role.name:
+            print 'True rolename exists'
+            data['exists'] = True
+        
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+    
