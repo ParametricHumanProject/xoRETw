@@ -45,6 +45,9 @@ urlpatterns = patterns('',
     url(r'^views/edit_scenario$', views.edit_scenario, name='edit_scenario'),
     url(r'^views/edit_task$', views.edit_task, name='edit_task'),
     
+    # manager
+    url(r'^views/edit_task$', views.edit_task, name='edit_task'),
+    
     
     # role 
     url(r'^views/exists_role$', views.exists_role, name='exists_role'),

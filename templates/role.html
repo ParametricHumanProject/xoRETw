@@ -1,0 +1,324 @@
+<!-- create role modal -->
+<div class="modal fade" id="role_modal" tabindex="-1" role="dialog" aria-labelledby="role_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content modal-content-width-450">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="role_modal_title"></h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="constraint_name">Role Name</label>
+                    <input type="text" class="form-control" id="role_name" placeholder="Enter role name" required>
+                    <input type="hidden" id="role_id" value="">
+                  </div>              
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="role_available_roles">Currently Available Roles</label>
+                    <select id="role_available_roles" multiple class="form-control">
+                    </select>     
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="btn-group">
+                                <input id="role_add_junior_role" class="btn btn-default" type="button" value="Add Junior-Role">                              
+                             </div>
+                            <div class="btn-group">
+                              <input id="role_add_senior_role" class="btn btn-default" type="button" value="Add Senior-Role">
+                            </div>                            
+                        </div>
+                    </div>
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="role_junior_roles">Junior Roles</label>
+                    <select id="role_junior_roles" multiple class="form-control">
+                    </select>     
+                    <input id="role_remove_junior_role" class="btn btn-default" type="button" disabled="true" value="Remove Junior-Role">     
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="role_senior_roles">Senior Roles</label>
+                    <select id="role_senior_roles" multiple class="form-control">
+                    </select>     
+                    <input id="role_remove_senior_role" class="btn btn-default" type="button" disabled="false" value="Remove Senior-Role">     
+                  </div>
+                </div>  
+            </div>        
+        </form>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="save_role" type="button" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- role to role assignment modal -->
+<div class="modal modal-wide fade" id="role_role_to_role_assignment_modal" tabindex="-1" role="dialog" aria-labelledby="role_role_to_role_assignment_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="role_role_to_role_assignment_modal_title">Role-to-Role Assignment</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <input type="hidden" id="role_to_role_assignment_role_id" value="">
+            <div class="row">
+                <div class="col-md-12">
+                    <fieldset>
+                    <legend style="font-size:medium;">Personalia:</legend>
+                    <div class="row">
+                        <div class="col-md-4">
+                          <div class="form-group">
+                            <label for="">Available Roles</label>
+                            <select id="" multiple class="form-control">
+                            </select>     
+                            <input id="" class="btn btn-default" type="button" value="Assign">
+                          </div>                            
+                        </div>
+                        <div class="col-md-4">
+                          <div class="form-group">
+                            <label for="">Available Roles</label>
+                            <select id="" multiple class="form-control">
+                            </select>     
+                            <input id="" class="btn btn-default" type="button" value="Assign">
+                          </div>                            
+                        </div>
+                        <div class="col-md-4">
+                          <div class="form-group">
+                            <label for="">Available Roles</label>
+                            <select id="" multiple class="form-control">
+                            </select>     
+                            <input id="" class="btn btn-default" type="button" value="Assign">
+                          </div>                            
+                        </div>
+                    </div>  
+                    </fieldset>
+                    <div class="row">
+                        <div class="col-md-4">
+                          <div class="form-group">
+                            <label for="">Available Roles</label>
+                            <select id="" multiple class="form-control" style="550px">
+                            </select>     
+                            <input id="" class="btn btn-default" type="button" value="Assign">
+                          </div>                            
+                        </div>
+                        <div class="col-md-4">
+                          <div class="form-group">
+                            <label for="">Available Roles</label>
+                            <select id="" multiple class="form-control">
+                            </select>     
+                            <input id="" class="btn btn-default" type="button" value="Assign">
+                          </div>                            
+                        </div>
+                        <div class="col-md-4">
+                          <div class="form-group">
+                            <label for="">Available Roles</label>
+                            <select id="" multiple class="form-control">
+                            </select>     
+                            <input id="" class="btn btn-default" type="button" value="Assign">
+                          </div>                            
+                        </div>
+                    </div>  
+                </div>  
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="save_role_cardinality_constraints" type="button" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- role cardinality constraints -->
+<div class="modal fade" id="role_cardinality_constraints_modal" tabindex="-1" role="dialog" aria-labelledby="role_cardinality_constraints_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="role_cardinality_constraints_modal_title">Role Cardinality Constraints</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <input type="hidden" id="cardinality_constraint_role_id" value="">
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="step_actor">Minimum Owner Cardinality</label>
+                    <div class="input-group spinner">
+                      <input id="role_cardinality_constraints_mincardinality" type="text" class="form-control" value="0">
+                        <div class="input-group-btn-vertical">
+                          <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
+                          <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
+                        </div>
+                    </div>      
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="step_actor">Maximum Owner Cardinality</label>
+                    <div class="input-group spinner2">
+                      <input id="role_cardinality_constraints_maxcardinality" type="text" class="form-control" value="0">
+                        <div class="input-group-btn-vertical">
+                          <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
+                          <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
+                        </div>
+                    </div>      
+                  </div>
+                </div>  
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="save_role_cardinality_constraints" type="button" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ssd role constraints modal -->
+<div class="modal modal-wide fade" id="role_ssd_role_constraints_modal" tabindex="-1" role="dialog" aria-labelledby="role_ssd_role_constraint_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="role_ssd_role_constraint_modal_title">SSD Role Constraint Management</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="perm_ssd_available_permissions">Available Roles</label>
+                                <select id="perm_ssd_available_permissions" multiple class="form-control" style="height:250px;">
+                                </select>
+                                <input id="add_ssd_constraint" class="btn btn-default" type="button" value="Add SSD Constraint">
+                            </div>
+                        </div> <!-- col-md-12 -->
+                    </div> <!-- row -->
+                </div> <!-- col-md-3 -->
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="perm_ssd_available_permissions">Directly Mutual Exclusive Roles</label>
+                                <select id="perm_ssd_available_permissions" multiple class="form-control" style="height:250px;">
+                                </select>
+                                <input id="add_ssd_constraint" class="btn btn-default" type="button" value="Remove SSD Constraint">
+                            </div>
+                        </div> <!-- col-md-12 -->
+                    </div> <!-- row -->
+                </div>
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="perm_ssd_available_permissions">Transitive SSD Role Constraints</label>
+                                <select id="perm_ssd_available_permissions" multiple class="form-control" style="height:250px;">
+                                </select>
+                                
+                            </div>
+                        </div> <!-- col-md-12 -->
+                    </div> <!-- row -->
+                </div>
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="perm_ssd_available_permissions">Inherited SSD Role Constraints</label>
+                                <select id="perm_ssd_available_permissions" multiple class="form-control" style="height:250px;">
+                                </select>
+                                
+                            </div>
+                        </div> <!-- col-md-12 -->
+                    </div> <!-- row -->
+                </div>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="save_scenario_btn" type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- permission to role assignment modal -->
+<div class="modal modal-wide fade" id="role_perm_to_role_assignment_modal" tabindex="-1" role="dialog" aria-labelledby="role_perm_to_role_assignment_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="role_perm_to_role_assignment_modal_title">Permission-to-Role Assignment</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="perm_ssd_available_permissions">Available Permissions</label>
+                                <select id="perm_ssd_available_permissions" multiple class="form-control" style="height:250px;">
+                                </select>
+                                <input id="add_ssd_constraint" class="btn btn-default" type="button" value="Assign Permission">
+                            </div>
+                        </div> <!-- col-md-12 -->
+                    </div> <!-- row -->
+                </div> <!-- col-md-4 -->
+                <div class="col-md-4">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="perm_ssd_available_permissions">Directly Assigned Permissions</label>
+                                <select id="perm_ssd_available_permissions" multiple class="form-control" style="height:250px;">
+                                </select>
+                                <input id="add_ssd_constraint" class="btn btn-default" type="button" value="Revoke Permission">
+                            </div>
+                        </div> <!-- col-md-12 -->
+                    </div> <!-- row -->
+                </div>
+                <div class="col-md-4">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="perm_ssd_available_permissions">Inherited Permissions</label>
+                                <select id="perm_ssd_available_permissions" multiple class="form-control" style="height:250px;">
+                                </select>
+                                
+                            </div>
+                        </div> <!-- col-md-12 -->
+                    </div> <!-- row -->
+                </div>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="save_scenario_btn" type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>

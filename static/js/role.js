@@ -65,6 +65,7 @@ $('#save_role').click(function() {
     
     var exists_role = false;
     
+    // alternative way is to check <select> with id="role_available_roles"
     // check if role exists
     $.ajax({
         method: "GET",
@@ -91,6 +92,8 @@ $('#save_role').click(function() {
     }
     
     var id = $('#role_id').val();    
+    
+    // check for empty string
     if (!role_name) {
         alert('Error: role name cannot be empty.');
         $('#role_name').focus();
@@ -98,15 +101,39 @@ $('#save_role').click(function() {
         return;
     }
     
+    // get all the junior roles
     var junior_roles = [];
     $('#role_junior_roles option').each(function() {
         junior_roles.push($(this).val().split(' ').join('_'));
     });    
 
+    // get all the senior roles
     var senior_roles = [];
     $('#role_senior_roles option').each(function() {
         senior_roles.push($(this).val().split(' ').join('_'));
     });    
+    
+    if (junior_roles.length) {
+        // now check if two or more of the intended juniorRoles are defined as 
+        // mutual exclusive or own mutual exclusive permissions
+        var i;
+        var j;
+        for (i = 0; i < junior_roles.length; i++) {
+            for (i = 0; i < junior_roles.length; i++) {
+                if (junior_roles[i] !== junior_roles[j]) {
+
+                if (isStaticallyMutualExclusive(junior_roles[i], junior_roles[j])) {
+                 alert( "[self] [self proc] FAILED, at least two of the intended junior-roles\
+                                         of <<$name>> are mutual exclusive.\
+                                         <<$r1>> and <<$r2>> are mutual exclusive or own permissions that\
+                                         are mutual exclusive.");
+                  return
+                
+                }
+            }            
+        }
+    }
+}
 
     // create data
     var role_data = new Role(id, role_name, junior_roles, senior_roles, mode);
@@ -347,7 +374,7 @@ function role_perm_to_role_assignment(id) {
 
 function role_ssd_role_constraints(id) {
     //alert(id);
-    $('#role_ssd_role_constraint_modal').modal('show');
+    $('#role_ssd_role_constraints_modal').modal('show');
 }
 
 function create_role() {

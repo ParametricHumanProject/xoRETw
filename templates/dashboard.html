@@ -4,36 +4,34 @@
 {% block content %}
 
 <nav class="navbar navbar-fixed-top">
-  <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand">xoRETw</a>
-    </div>
-
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
-        <!-- <li><a href="#">Options</a></li> -->
-      </ul>
-		<ul class="nav navbar-nav navbar-right">
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{% trans "Signed in" %}: {{ user.username }}  <span class="caret"></span></a>
-          <ul class="dropdown-menu" role="menu">
-            <li><a href="{% url 'auth_logout' %}">Sign out</a></li>
-          </ul>
-        </li>
-      </ul>    
-    </div><!-- /.navbar-collapse -->    
-  </div><!-- /.container-fluid -->
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand">xoRETw</a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+            <!-- <li><a href="#">Options</a></li> -->
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{% trans "Signed in" %}: {{ user.username }}  <span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="{% url 'auth_logout' %}">Sign out</a></li>
+                    </ul>
+                </li>
+            </ul>    
+        </div><!-- /.navbar-collapse -->    
+    </div><!-- /.container-fluid -->
 </nav>
 
-<br>
 <div class="container-fluid">
 	<div class="row">
 		<div class="col-md-12">
@@ -50,6 +48,8 @@
                     <button id="create_task_btn" type="button" class="btn btn-default" title='Create Task' data-toggle="modal" data-target="#task_modal"><img src="{% static 'img/task.gif' %}" align="absmiddle"></button>
                     <button id="create_work_profile_btn" type="button" class="btn btn-default" title='Create Work Profile' data-toggle="modal" data-target="#work_profile_modal"><img src="{% static 'img/profile.gif' %}" align="absmiddle"></button>
                     <button id="create_role" type="button" class="btn btn-default" title='Create Role' data-toggle="modal" data-target="#role_modal"><img src="{% static 'img/facemask.gif' %}" align="absmiddle"></button>
+                    <button id="create_role1" type="button" class="btn btn-default" title='Create Role' data-toggle="modal" data-target="#role_role_to_role_assignment_modal"><img src="{% static 'img/goal.gif' %}" align="absmiddle"></button>
+                    
                 </fieldset>
 				</div>
                 <div class="btn-group" role="group" aria-label="...">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
@@ -63,10 +63,9 @@
                     <button type="button" class="btn btn-default" title='Derive Roles' data-toggle="modal" data-target="#derive_roles_modal"><img src="{% static 'img/deriverole.gif' %}" align="absmiddle"></button>
                 </fieldset>
 				</div>
-                
 			</div>				
 		</div>
-	</div>
+	</div> <!-- row -->
     <br>
     <div class="row">
         <div class="col-md-12">
@@ -139,7 +138,6 @@
         <div class="col-md-12">
             <div class="border_one" style="height:67vh; overflow: auto">
 
-                <!-- OBJECT_TYPE_OBJECTIVE -->
                 {% if object_type == 1 %}
                     <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
                     <thead>
@@ -168,7 +166,6 @@
                     </table>
                 {% endif %}
 
-                <!-- OBJECT_TYPE_OBSTACLE -->
                 {% if object_type == 2 %}  
                     <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
                     <thead>
@@ -354,12 +351,6 @@
                     </table>
                 {% endif %}
                 
-<!--
-                {% if object_type == 77 %}  
-                    <br>
-                    <p>Placeholder for Permissions</p>                
-                {% endif %}
--->
                 {% if object_type == 8 %}
                     <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
                     <thead>
@@ -860,134 +851,6 @@
   </div>
 </div>
 
-
-<!-- role modal -->
-<div class="modal fade" id="role_modal" tabindex="-1" role="dialog" aria-labelledby="role_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content modal-content-width-450">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="role_modal_title"></h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="constraint_name">Role Name</label>
-                    <input type="text" class="form-control" id="role_name" placeholder="Enter role name" required>
-                    <input type="hidden" id="role_id" value="">
-                  </div>              
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="role_available_roles">Currently Available Roles</label>
-                    <select id="role_available_roles" multiple class="form-control">
-                    </select>     
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="btn-group">
-                                <input id="role_add_junior_role" class="btn btn-default" type="button" value="Add Junior-Role">                              
-                             </div>
-                            <div class="btn-group">
-                              <input id="role_add_senior_role" class="btn btn-default" type="button" value="Add Senior-Role">
-                            </div>                            
-                        </div>
-                    </div>
-                  </div>
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="role_junior_roles">Junior Roles</label>
-                    <select id="role_junior_roles" multiple class="form-control">
-                    </select>     
-                    <input id="role_remove_junior_role" class="btn btn-default" type="button" disabled="true" value="Remove Junior-Role">     
-                  </div>
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="role_senior_roles">Senior Roles</label>
-                    <select id="role_senior_roles" multiple class="form-control">
-                    </select>     
-                    <input id="role_remove_senior_role" class="btn btn-default" type="button" disabled="false" value="Remove Senior-Role">     
-                  </div>
-                </div>  
-            </div>        
-        </form>
-        </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_role" type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-<!-- 9a. Permission to Role Assignment Modal -->
-<div class="modal fade" id="permission_to_role_assignment_modal" tabindex="-1" role="dialog" aria-labelledby="permission_to_role_assignment_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content modal-content-width-450">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="permission_to_role_assignment_modal_title"></h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="role_available_roles">Available Permissions</label>
-                    <select id="role_available_roles" multiple class="form-control">
-                    </select>     
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="btn-group">
-                                <input id="perm_role_assign_permission" class="btn btn-default" type="button" value="Assign Permission">                              
-                             </div>
-                        </div>
-                    </div>
-                  </div>
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="role_junior_roles">Junior Roles</label>
-                    <select id="role_junior_roles" multiple class="form-control">
-                    </select>     
-                    <input id="remove_junior_role" class="btn btn-default" type="button" disabled="false" value="Remove Junior-Role">     
-                  </div>
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="role_senior_roles">Senior Roles</label>
-                    <select id="role_senior_roles" multiple class="form-control">
-                    </select>     
-                    <input id="remove_senior_role" class="btn btn-default" type="button" disabled="false" value="Remove Senior-Role">     
-                  </div>
-                </div>  
-            </div>        
-        </form>
-        </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_constraint_btn" type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
 <!-- 10. Define Trace-Links Modal -->
 <div class="modal fade" id="define_trace_links_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -1231,184 +1094,6 @@
   </div>
 </div>
 
-<!-- role - permission to role assignment modal -->
-<div class="modal modal-wide fade" id="role_perm_to_role_assignment_modal" tabindex="-1" role="dialog" aria-labelledby="role_perm_to_role_assignment_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="role_perm_to_role_assignment_modal_title">Permission-to-Role Assignment</h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="perm_ssd_available_permissions">Available Permissions</label>
-                                <select id="perm_ssd_available_permissions" multiple class="form-control" style="height:250px;">
-                                </select>
-                                <input id="add_ssd_constraint" class="btn btn-default" type="button" value="Assign Permission">
-                            </div>
-                        </div> <!-- col-md-12 -->
-                    </div> <!-- row -->
-                </div> <!-- col-md-4 -->
-                <div class="col-md-4">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="perm_ssd_available_permissions">Directly Assigned Permissions</label>
-                                <select id="perm_ssd_available_permissions" multiple class="form-control" style="height:250px;">
-                                </select>
-                                <input id="add_ssd_constraint" class="btn btn-default" type="button" value="Revoke Permission">
-                            </div>
-                        </div> <!-- col-md-12 -->
-                    </div> <!-- row -->
-                </div>
-                <div class="col-md-4">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="perm_ssd_available_permissions">Inherited Permissions</label>
-                                <select id="perm_ssd_available_permissions" multiple class="form-control" style="height:250px;">
-                                </select>
-                                
-                            </div>
-                        </div> <!-- col-md-12 -->
-                    </div> <!-- row -->
-                </div>
-            </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_scenario_btn" type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- role - ssd role constraints modal -->
-<div class="modal modal-wide fade" id="role_ssd_role_constraint_modal" tabindex="-1" role="dialog" aria-labelledby="role_ssd_role_constraint_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="role_ssd_role_constraint_modal_title">SSD Role Constraint Management</h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="perm_ssd_available_permissions">Available Roles</label>
-                                <select id="perm_ssd_available_permissions" multiple class="form-control" style="height:250px;">
-                                </select>
-                                <input id="add_ssd_constraint" class="btn btn-default" type="button" value="Add SSD Constraint">
-                            </div>
-                        </div> <!-- col-md-12 -->
-                    </div> <!-- row -->
-                </div> <!-- col-md-3 -->
-                <div class="col-md-3">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="perm_ssd_available_permissions">Directly Mutual Exclusive Roles</label>
-                                <select id="perm_ssd_available_permissions" multiple class="form-control" style="height:250px;">
-                                </select>
-                                <input id="add_ssd_constraint" class="btn btn-default" type="button" value="Remove SSD Constraint">
-                            </div>
-                        </div> <!-- col-md-12 -->
-                    </div> <!-- row -->
-                </div>
-                <div class="col-md-3">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="perm_ssd_available_permissions">Transitive SSD Role Constraints</label>
-                                <select id="perm_ssd_available_permissions" multiple class="form-control" style="height:250px;">
-                                </select>
-                                
-                            </div>
-                        </div> <!-- col-md-12 -->
-                    </div> <!-- row -->
-                </div>
-                <div class="col-md-3">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="perm_ssd_available_permissions">Inherited SSD Role Constraints</label>
-                                <select id="perm_ssd_available_permissions" multiple class="form-control" style="height:250px;">
-                                </select>
-                                
-                            </div>
-                        </div> <!-- col-md-12 -->
-                    </div> <!-- row -->
-                </div>
-            </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_scenario_btn" type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- context menu modals -->
-<!-- role - cardinality constraints -->
-<div class="modal fade" id="role_cardinality_constraints_modal" tabindex="-1" role="dialog" aria-labelledby="role_cardinality_constraints_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="role_cardinality_constraints_modal_title">Role Cardinality Constraints</h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <input type="hidden" id="cardinality_constraint_role_id" value="">
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="step_actor">Minimum Owner Cardinality</label>
-                    <div class="input-group spinner">
-                      <input id="role_cardinality_constraints_mincardinality" type="text" class="form-control" value="0">
-                        <div class="input-group-btn-vertical">
-                          <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
-                          <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
-                        </div>
-                    </div>      
-                  </div>
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="step_actor">Maximum Owner Cardinality</label>
-                    <div class="input-group spinner2">
-                      <input id="role_cardinality_constraints_maxcardinality" type="text" class="form-control" value="0">
-                        <div class="input-group-btn-vertical">
-                          <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
-                          <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
-                        </div>
-                    </div>      
-                  </div>
-                </div>  
-            </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_role_cardinality_constraints" type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- perm - cardinality constraints -->
 <div class="modal fade" id="perm_cardinality_constraints_modal" tabindex="-1" role="dialog" aria-labelledby="perm_cardinality_constraints_modal_title" aria-hidden="true">
   <div class="modal-dialog">
@@ -1500,7 +1185,14 @@
 </div>
 
 
+
+
 {% endblock content %}
+
+{% block role_content %}
+    {% include 'role.html' %}
+{% endblock role_content %}
+
 
 {% block scripts %}
 <script>
