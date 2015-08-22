@@ -57,7 +57,7 @@ function Edit_Scenario_init(name) {
                         
         // import DOT into graph
         var parsedData = vis.network.convertDot(graph_dot);
-        var x_pos = $('#scenario_modal').width()/3;
+        var x_pos = $('#scenario_modal').width()/5;
         var options1 = {};
         
         for (var i = 0; i < parsedData.nodes.length; i++) { 

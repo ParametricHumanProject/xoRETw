@@ -16,7 +16,7 @@ class Step(models.Model):
     actor = models.CharField(max_length=50, unique=True)
     action = models.CharField(max_length=50, unique=True)
     target = models.CharField(max_length=50, unique=True)
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=200, unique=True)
     step = models.ManyToManyField('self')
 
 class Scenario(models.Model):
