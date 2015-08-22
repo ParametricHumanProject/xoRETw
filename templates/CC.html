@@ -1,0 +1,50 @@
+<div class="modal fade" id="CC_modal" tabindex="-1" role="dialog" aria-labelledby="CC_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content modal-content-width-450">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="CC_modal_title"></h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="CC_name">Constraint Name</label>
+                    <input type="text" class="form-control" id="CC_name" placeholder="Enter constraint name" required>
+                    <input type="hidden" id="CC_id" value="">
+                  </div>              
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="CC_available_conditions">Available Conditions</label>
+                    <select id="CC_available_conditions" multiple class="form-control">
+                    </select>     
+                    <input id="CC_add_condition" class="btn btn-default" type="button" value="Link Condition">
+                    <input id="CC_linkbutton" class="btn btn-default" type="button" value="Link Condition">
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="CC_conditions">Linked Conditions</label>
+                    <select id="CC_conditions" multiple class="form-control">
+                    </select>     
+                    <input id="CC_remove_condition" class="btn btn-default" type="button" disabled="false" value="Unlink Condition">     
+                    <input id="CC_unlinkbutton" class="btn btn-default" type="button" disabled="false" value="Unlink Condition">
+                  </div>
+                </div>  
+            </div>
+        </form>      </div>
+      <div class="modal-footer">
+        <button id="cancel_CC" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button id="close_CC" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="create_CC" type="button" class="btn btn-primary" style="display:none;">Create Constraint</button>
+        <button id="save_CC" type="button" class="btn btn-primary" style="display:none;">Save</button>          
+      </div>
+    </div>
+  </div>
+</div>

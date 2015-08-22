@@ -80,52 +80,67 @@
         <!--[if lt IE 8]>
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
+        
 		{% block content %}
 		{% endblock content %}
+
+		{% block condition_content %}
+		{% endblock condition_content %}
+
+		{% block context_constraint_content %}
+		{% endblock context_constraint_content %}
+
+		{% block objective_content %}
+		{% endblock objective_content %}
+
+		{% block obstacle_content %}
+		{% endblock obstacle_content %}
         
+		{% block permission_content %}
+		{% endblock permission_content %}
+
 		{% block role_content %}
 		{% endblock role_content %}
+
+		{% block scenario_content %}
+		{% endblock scenario_content %}
+
+		{% block step_content %}
+		{% endblock step_content %}
+
+		{% block task_content %}
+		{% endblock task_content %}
+
+		{% block work_profile_content %}
+		{% endblock work_profile_content %}
+
         <nav class="navbar navbar-default navbar-fixed-bottom">
           <div class="container-fluid">
             <div class="navbar-header">
               <a target="_blank" class="navbar-brand" href="http://wi.wu-wien.ac.at/home/mark/xoRET/screenshots.html">
-                <img alt="PHP" src="{% static 'img/mini-logo.png' %}">
+                <img alt="Parametric Human Project" src="{% static 'img/mini-logo.png' %}">
               </a>
             </div>
           </div>
         </nav>
     </div> <!-- /container -->      
-        <script>
 
-        </script>
 		<script src="{% static 'js/vendor/jquery-1.11.2.min.js' %}"></script>
-        <script src="{% static 'js/vendor/vis.js' %}"></script>
-        
+        <script src="{% static 'js/vendor/vis.js' %}"></script>        
         <script src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
 		<script src="{% static 'js/vendor/jquery-ui.js' %}"></script>
         <script src="{% static 'js/vendor/bootstrap-contextmenu.js' %}"></script>
+        
         <script src="{% static 'js/base.js' %}"></script>
-        <script src="{% static 'js/main.js' %}"></script>
         <script src="{% static 'js/csrf.js' %}"></script>
-        <script src="{% static 'js/objective.js' %}"></script>
-        <script src="{% static 'js/obstacle.js' %}"></script>
-        <script src="{% static 'js/condition.js' %}"></script>
-        <script src="{% static 'js/contextconstraint.js' %}"></script>
-        <script src="{% static 'js/permission.js' %}"></script>
-        <script src="{% static 'js/task.js' %}"></script>
-        <script src="{% static 'js/work_profile.js' %}"></script>
-        <script src="{% static 'js/scenario.js' %}"></script>
-        <script src="{% static 'js/step.js' %}"></script>
-        <script src="{% static 'js/role.js' %}"></script>
+        <script src="{% static 'js/gui/create.js' %}"></script>
+        <script src="{% static 'js/gui/edit.js' %}"></script>
+        <script src="{% static 'js/gui/dialog.js' %}"></script>
+        <script src="{% static 'js/gui/gui.js' %}"></script>
+        
+        <!-- <script src="{% static 'js/objective.js' %}"></script> -->
         <script src="{% static 'js/xoretw_ui/spinner.js' %}"></script>
         
-<!--        
-        <script src="{% static 'js/permission.js' %}"></script>
-        <script src="{% static 'js/task.js' %}"></script>
-        <script src="{% static 'js/role.js' %}"></script>
-        <script src="{% static 'js/workprofile.js' %}"></script>
-        <script src="{% static 'js/step.js' %}"></script>
-        <!-- <script src="{% static 'js/permission.js' %}"></script> -->
         
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
         <script>
@@ -142,7 +157,9 @@
               $(this).find(".modal-body").css("max-height", height);
             });        
         </script>
+        
         {% block scripts %}
 		{% endblock scripts %}
+        
     </body>
 </html>

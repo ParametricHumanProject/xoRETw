@@ -1,0 +1,73 @@
+<div class="modal fade" id="objective_modal" tabindex="-1" role="dialog" aria-labelledby="objective_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content modal-content-width-450" >
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="objective_modal_title"></h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="objective_name">Objective Name</label>
+                    <input type="text" class="form-control" id="objective_name" placeholder="Enter name of objective here" required>
+                    <input type="hidden" id="objective_id" value=""> <!-- -used for edit objective -->
+                  </div>              
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="objective_type">Objective Type</label>
+                        <div class="dropdown">
+                          <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="true">
+                            <div id="objective_type" style="display: inline-block;">Select</div>
+                            <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu" role="menu" aria-labelledby="dropdown_objective_type">
+                            <li role="presentation"><a id="objective_type-1" role="menuitem" tabindex="-1" href="#">Achieve</a></li>
+                            <li role="presentation"><a id="objective_type-2" role="menuitem" tabindex="-1" href="#">Ensure</a></li>
+                            <li role="presentation"><a id="objective_type-3" role="menuitem" tabindex="-1" href="#">Improve</a></li>
+                            <li role="presentation"><a id="objective_type-4" role="menuitem" tabindex="-1" href="#">Increase</a></li>
+                            <li role="presentation"><a id="objective_type-5" role="menuitem" tabindex="-1" href="#">Keep</a></li>
+                            <li role="presentation"><a id="objective_type-6" role="menuitem" tabindex="-1" href="#">Maintain</a></li>
+                            <li role="presentation"><a id="objective_type-7" role="menuitem" tabindex="-1" href="#">Make</a></li>
+                            <li role="presentation"><a id="objective_type-8" role="menuitem" tabindex="-1" href="#">Notify</a></li>
+                            <li role="presentation"><a id="objective_type-9" role="menuitem" tabindex="-1" href="#">Provide</a></li>
+                            <li role="presentation"><a id="objective_type-10" role="menuitem" tabindex="-1" href="#">Reduce</a></li>
+                          </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="abstract_context_condition">Abstract Context Condition (Text)</label>
+                    <input id="objective_abstract_context_condition_entry" type="text" class="form-control" placeholder="Enter name of abstract context condition here">
+                    <input id="objective_add_condition" class="btn btn-default" type="button" value="Add Condition to List">
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="objective_abstract_context_condition_list">List of Abstract Context Conditions</label>
+                    <select id="objective_abstract_context_condition_list" multiple class="form-control">
+                    </select>     
+                    <input id="objective_remove_condition" class="btn btn-default" type="button" disabled="false" value="Remove Condition from List">     
+                  </div>
+                </div>  
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button id="create_objective" type="button" class="btn btn-primary" style="display:none;">Create Objective</button>
+        <button id="save_objective" type="button" class="btn btn-primary" style="display:none;">Save</button>
+      </div>
+    </div>
+  </div>
+</div>

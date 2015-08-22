@@ -3,6 +3,7 @@ var EDIT_MODE = 2
 
 var GRAPH_EDIT_MODE = 1
 var GRAPH_SELECT_MODE = 2
+
 //-----------------------
 // vis.js
 //-----------------------
@@ -19,7 +20,21 @@ var container = null;
 var data = null;
 var options = null;
 
-// edit = 1 or select = 2 mode     
-var scenario_graph_mode = 1;
+// default graph mode
+var graph_mode = GRAPH_EDIT_MODE;
 
 var nodeIds = null;
+
+
+function flash(selector) {
+    $(selector).fadeOut(250).fadeIn(250);
+}
+
+jQuery.fn.extend({
+  flash: function() {
+    return this.each(function() {
+    $(this).fadeOut();
+    $(this).fadeIn();
+    });
+  }
+});

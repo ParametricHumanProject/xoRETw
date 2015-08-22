@@ -6,7 +6,10 @@ from django.contrib.auth.models import User
 class Condition(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
-    is_abstract = models.BooleanField(default=False)
+
+class AbstractContextCondition(models.Model):
+    user = models.ForeignKey(User)
+    name = models.CharField(max_length=50, unique=True)
 
 class Step(models.Model):
     user = models.ForeignKey(User)
@@ -37,47 +40,49 @@ class Objective(models.Model):
     name = models.CharField(max_length=50, unique=True)
     type = models.CharField(max_length=50)
     conditions = models.ManyToManyField(Condition)
-
+    abstract_context_conditions = models.ManyToManyField(AbstractContextCondition)
+    
     steps = models.ManyToManyField(Step)
     objective = models.ManyToManyField('self')
     scenarios = models.ManyToManyField(Scenario)
 
-    
 class Obstacle(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
     type = models.CharField(max_length=50)
+    
     conditions = models.ManyToManyField(Condition)
+    abstract_context_conditions = models.ManyToManyField(AbstractContextCondition)
+    
     objective = models.ManyToManyField(Objective)
 
-
-# done
 class ContextConstraint(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
     conditions = models.ManyToManyField(Condition)
 
-# done
 class Permission(models.Model):
     user = models.ForeignKey(User)
+    
     name = models.CharField(max_length=50, unique=True)
-    operation = models.CharField(max_length=50, unique=True)
-    object = models.CharField(max_length=50, unique=True)
+    perm_operation = models.CharField(max_length=50, unique=True)
+    perm_object = models.CharField(max_length=50, unique=True)
+    
     step = models.OneToOneField(Step, null=True, blank=True)
 
     context_constraints = models.ManyToManyField(ContextConstraint)
-    ssd_constraints = models.TextField(blank=True)
+    ssd_constraints = models.ManyToManyField('self')
     
     mincardinality = models.IntegerField(default=0)  # same as blank=True, null=True
     maxcardinality = models.IntegerField(default=0)  # same as blank=True, null=True    
         
-# done    
 class Role(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=50, unique=True)
     
-    junior_roles = models.ManyToManyField('self', null=True, blank=True)
-    senior_roles = models.ManyToManyField('self', null=True, blank=True)
+    junior_roles = models.ForeignKey('self', related_name='junior', null=True, blank=True)
+    senior_roles = models.ForeignKey('self', related_name='senior', null=True, blank=True)
+    ssd_constraints = models.ManyToManyField('self', null=True, blank=True)
     
     permissions = models.ManyToManyField(Permission, null=True, blank=True)
     

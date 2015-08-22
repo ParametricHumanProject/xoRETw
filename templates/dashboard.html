@@ -2,7 +2,6 @@
 {% load i18n %}
 {% load staticfiles %}
 {% block content %}
-
 <nav class="navbar navbar-fixed-top">
     <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
@@ -18,11 +17,11 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
-            <!-- <li><a href="#">Options</a></li> -->
+            <!-- <li><a href="#">More Options here </a></li> -->
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{% trans "Signed in" %}: {{ user.username }}  <span class="caret"></span></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{% trans "Signed in as" %}: {{ user.username }}  <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
                         <li><a href="{% url 'auth_logout' %}">Sign out</a></li>
                     </ul>
@@ -39,17 +38,23 @@
 				<div class="btn-group" role="group" aria-label="...">
                 <fieldset>
                 <legend>Designer</legend>
-                    <button id="create_objective_btn" type="button" class="btn btn-default" title='Create Objective' data-toggle="modal" data-target="#objective_modal"><img src="{% static 'img/goal.gif' %}" align="absmiddle"></button>
-                    <button id="create_obstacle_btn" type="button" class="btn btn-default" title='Create Obstacle' data-toggle="modal" data-target="#obstacle_modal"><img src="{% static 'img/dynamite.gif' %}" align="absmiddle"></button>
-                    <button id="create_condition_btn" type="button" class="btn btn-default" title='Create Condition' data-toggle="modal" data-target="#condition_modal"><img src="{% static 'img/condition.gif' %}" align="absmiddle"></button>
-                    <button id="create_constraint_btn" type="button" class="btn btn-default" title='Create Context Constraint' data-toggle="modal" data-target="#constraint_modal"><img src="{% static 'img/constraint.gif' %}" align="absmiddle"></button>
-                    <button id="create_scenario_btn" type="button" class="btn btn-default" title='Create Scenario' data-toggle="modal" data-target="#scenario_modal"><img src="{% static 'img/film.gif' %}" align="absmiddle"></button>
-                    <button id="create_permission_btn" type="button" class="btn btn-default" title='Create Permission' data-toggle="modal" data-target="#permission_modal"><img src="{% static 'img/key.gif' %}" align="absmiddle"></button>
-                    <button id="create_task_btn" type="button" class="btn btn-default" title='Create Task' data-toggle="modal" data-target="#task_modal"><img src="{% static 'img/task.gif' %}" align="absmiddle"></button>
-                    <button id="create_work_profile_btn" type="button" class="btn btn-default" title='Create Work Profile' data-toggle="modal" data-target="#work_profile_modal"><img src="{% static 'img/profile.gif' %}" align="absmiddle"></button>
-                    <button id="create_role" type="button" class="btn btn-default" title='Create Role' data-toggle="modal" data-target="#role_modal"><img src="{% static 'img/facemask.gif' %}" align="absmiddle"></button>
-                    <button id="create_role1" type="button" class="btn btn-default" title='Create Role' data-toggle="modal" data-target="#role_role_to_role_assignment_modal"><img src="{% static 'img/goal.gif' %}" align="absmiddle"></button>
-                    
+                    <button id="create_objective_btn" type="button" class="btn btn-default" title='Create Objective' data-toggle="" data-target="#objective_modal"><img src="{% static 'img/goal.gif' %}" align="absmiddle"></button>
+                    <button id="create_obstacle_btn" type="button" class="btn btn-default" title='Create Obstacle' data-toggle="" data-target="#obstacle_modal"><img src="{% static 'img/dynamite.gif' %}" align="absmiddle"></button>
+                    <button id="create_condition_btn" type="button" class="btn btn-default" title='Create Condition' data-toggle="" data-target="#condition_modal"><img src="{% static 'img/condition.gif' %}" align="absmiddle"></button>
+                    <button id="create_CC_btn" type="button" class="btn btn-default" title='Create Context Constraint' data-toggle="" data-target="#constraint_modal"><img src="{% static 'img/constraint.gif' %}" align="absmiddle"></button>
+                    <button id="create_scenario_btn" type="button" class="btn btn-default" title='Create Scenario' data-toggle="" data-target="#scenario_modal"><img src="{% static 'img/film.gif' %}" align="absmiddle"></button>
+                    <button id="create_perm_btn" type="button" class="btn btn-default" title='Create Permission' data-toggle="" data-target="#permission_modal"><img src="{% static 'img/key.gif' %}" align="absmiddle"></button>
+                    <button id="create_task_btn" type="button" class="btn btn-default" title='Create Task' data-toggle="" data-target="#task_modal"><img src="{% static 'img/task.gif' %}" align="absmiddle"></button>
+                    <button id="create_profile_btn" type="button" class="btn btn-default" title='Create Work Profile' data-toggle="" data-target="#work_profile_modal"><img src="{% static 'img/profile.gif' %}" align="absmiddle"></button>
+                    <button id="create_role_btn" type="button" class="btn btn-default" title='Create Role' data-toggle="" data-target="#role_modal"><img src="{% static 'img/facemask.gif' %}" align="absmiddle"></button>
+<!--     
+                    <button id="create_step_btn" type="button" class="btn btn-default" title='Create Step' data-toggle="" data-target="#step_modal"><img src="{% static 'img/goal.gif' %}" align="absmiddle"></button>                    
+                    <button id="ssd_role_btn" type="button" class="btn btn-default" title='SSDRole' data-toggle="" data-target="#ssd_role_modal"><img src="{% static 'img/hammer.gif' %}" align="absmiddle"></button>                    
+                    <button id="rolecard_btn" type="button" class="btn btn-default" title='RoleCard' data-toggle="" data-target="#rolecard_modal"><img src="{% static 'img/file.gif' %}" align="absmiddle"></button>                    
+                    <button id="create_PRA_btn" type="button" class="btn btn-default" title='Create PRA' data-toggle="" data-target="#PRA_modal"><img src="{% static 'img/hourglass.gif' %}" align="absmiddle"></button>                    
+-->    
+
+
                 </fieldset>
 				</div>
                 <div class="btn-group" role="group" aria-label="...">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
@@ -70,7 +75,6 @@
     <div class="row">
         <div class="col-md-12">
             <ul class="nav nav-tabs">
-                
                 {% if object_type == 1 %}  
                     <li role="presentation" class="active"><a href="{% url 'dashboard' %}?object_type=1">Objectives</a></li>
                 {% else %}
@@ -138,8 +142,9 @@
         <div class="col-md-12">
             <div class="border_one" style="height:67vh; overflow: auto">
 
+                <!-- objective section -->
                 {% if object_type == 1 %}
-                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <table data-toggle="table" class="table table-condensed table-hover">
                     <thead>
                     <tr>
                     <th class="col-md-1">#</th>
@@ -148,26 +153,40 @@
                     </tr>
                     </thead>
                     <tbody>
-                    
-                    {% for objective in objectives %}
-                        <tr id='objective-{{objective.id}}'>
-                        <th scope="row">{{forloop.counter}}</th>
-                        <td data-toggle="context" data-target="#context-menu">{{objective.name}}</td>
-                        <td>
-                            <div class="btn-group" role="group" aria-label="First group">
-                                <a class="btn" onclick="edit_objective_btn({{objective.id}});" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
-                                <a class="btn" onclick="delete_objective({{objective.id}});" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
-                            </div>                
-                        </td>
-                        </tr>
-                    {% endfor %}
-                    
+                        {% for objective in objectives %}
+                            <tr id='objective-{{objective.name}}'>
+                            <th scope="row">{{forloop.counter}}</th>
+                            <td data-toggle="context" data-target="#context-menu-objective-{{objective.name}}">{{objective.name}}</td>
+                            <td>
+                                <div class="btn-group" role="group" aria-label="First group">
+                                    <!-- 
+                                    <a class="btn" onclick="edit_objective_btn('{{objective.name}}');" href="#" role="button" title='Edit objective'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                                    <a class="btn" onclick="delete_objective('{{objective.name}}');" href="#" role="button" title='Delete objective'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                    -->
+                                </div>                
+                            </td>
+                            </tr>
+                        {% endfor %}                    
                     </tbody>
                     </table>
+                    
+                    <!-- objective context menu -->
+                    {% for objective in objectives %}
+                        <div id="context-menu-objective-{{objective.name}}">
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a tabindex="-1" href="#" onclick="Create_Objective_init()">Create Objective</a></li>
+                            <li><a href="#" onclick="Edit_Objective_init('{{objective.name}}')">Edit Objective</a></li>
+                            <li><hr style="margin:5px;"></li>
+                            <li><a href="#" onclick="deleteObjective('{{objective.name}}')">Delete Objective</a></li>
+                          </ul>
+                        </div>                    
+                    {% endfor %}
+                    
                 {% endif %}
 
+                <!-- obstacle section -->
                 {% if object_type == 2 %}  
-                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <table data-toggle="table" class="table table-condensed table-hover">
                     <thead>
                     <tr>
                     <th class="col-md-1">#</th>
@@ -178,13 +197,15 @@
                     <tbody>
                     
                     {% for obstacle in obstacles %}
-                        <tr id='obstacle-{{obstacle.id}}'>
+                        <tr id='obstacle-{{obstacle.name}}'>
                         <th scope="row">{{forloop.counter}}</th>
-                        <td data-toggle="context" data-target="#context-menu">{{obstacle.name}}</td>
+                        <td data-toggle="context" data-target="#context-menu-obstacle-{{obstacle.name}}">{{obstacle.name}}</td>
                         <td>
                             <div class="btn-group" role="group" aria-label="First group">
+                                <!-- 
                                 <a class="btn" onclick="edit_obstacle({{obstacle.id}});" href="#" role="button" title='Edit obstacle'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
-                                <a class="btn" onclick="delete_obstacle({{obstacle.id}});" href="#" role="button" title='Delete obstacle'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                <a class="btn" onclick="delete_obstacle('{{obstacle.name}}');" href="#" role="button" title='Delete obstacle'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                -->
                             </div>                
                         </td>
                         </tr>
@@ -192,11 +213,24 @@
                     
                     </tbody>
                     </table>
+                    
+                    <!-- obstacle context menu -->
+                    {% for obstacle in obstacles %}
+                        <div id="context-menu-obstacle-{{obstacle.name}}">
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a tabindex="-1" href="#" onclick="Create_Obstacle_init()">Create Obstacle</a></li>
+                            <li><a href="#" onclick="Edit_Obstacle_init('{{obstacle.name}}')">Edit Obstacle</a></li>
+                            <li><hr style="margin:5px;"></li>
+                            <li><a href="#" onclick="deleteObstacle('{{obstacle.name}}')">Delete Obstacle</a></li>
+                          </ul>
+                        </div>                    
+                    {% endfor %}
+                    
                 {% endif %}
                 
-                <!-- OBJECT_TYPE_CONDITION -->
+                <!-- condition section -->
                 {% if object_type == 3 %}  
-                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <table data-toggle="table" class="table table-condensed table-hover">
                     <thead>
                     <tr>
                     <th class="col-md-1">#</th>
@@ -207,13 +241,15 @@
                     <tbody>
                     
                     {% for condition in conditions %}
-                        <tr id='condition-{{condition.id}}'>
+                        <tr id='condition-{{condition.name}}'>
                         <th scope="row">{{forloop.counter}}</th>
-                        <td data-toggle="context" data-target="#context-menu">{{condition.name}}</td>
+                        <td data-toggle="context" data-target="#context-menu-condition-{{condition.name}}">{{condition.name}}</td>
                         <td>
                             <div class="btn-group" role="group" aria-label="First group">
-                                <a class="btn" onclick="edit_condition({{condition.id}});" href="#" role="button" title='Edit condition'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
-                                <a class="btn" onclick="delete_condition({{condition.id}});" href="#" role="button" title='Delete condition'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                <!-- 
+                                <a class="btn" onclick="edit_condition('{{condition.name}}');" href="#" role="button" title='Edit condition'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                                <a class="btn" onclick="delete_condition('{{condition.name}}');" href="#" role="button" title='Delete condition'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                -->
                             </div>                
                         </td>
                         </tr>
@@ -221,11 +257,23 @@
                     
                     </tbody>
                     </table>
+                    
+                    <!-- condition context menu -->
+                    {% for condition in conditions %}
+                        <div id="context-menu-condition-{{condition.name}}">
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a tabindex="-1" href="#" onclick="Create_Condition_init()">Create Condition</a></li>
+                            <li><hr style="margin:5px;"></li>
+                            <li><a href="#" onclick="deleteCondition('{{condition.name}}')">Delete Condition</a></li>
+                          </ul>
+                        </div>                    
+                    {% endfor %}
+
                 {% endif %}
                 
-                <!-- OBJECT_TYPE_CONTEXT_CONSTRAINT -->
+                <!-- context constraint section -->
                 {% if object_type == 4 %}  
-                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <table data-toggle="table" class="table table-condensed table-hover">
                     <thead>
                     <tr>
                     <th class="col-md-1">#</th>
@@ -236,13 +284,15 @@
                     <tbody>
                     
                     {% for constraint in constraints %}
-                        <tr id='constraint-{{constraint.id}}'>
+                        <tr id='CC-{{constraint.name}}'>
                         <th scope="row">{{forloop.counter}}</th>
-                        <td data-toggle="context" data-target="#context-menu">{{constraint.name}}</td>
+                        <td data-toggle="context" data-target="#context-menu-CC-{{constraint.name}}">{{constraint.name}}</td>
                         <td>
                             <div class="btn-group" role="group" aria-label="First group">
+                                <!--
                                 <a class="btn" onclick="edit_constraint({{constraint.id}});" href="#" role="button" title='Edit constraint'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
                                 <a class="btn" onclick="delete_constraint({{constraint.id}});" href="#" role="button" title='Delete constraint'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                -->
                             </div>                
                         </td>
                         </tr>
@@ -250,11 +300,24 @@
                     
                     </tbody>
                     </table>
+
+                    <!-- context constraint context menu -->
+                    {% for constraint in constraints %}
+                        <div id="context-menu-CC-{{constraint.name}}">
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a tabindex="-1" href="#" onclick="Create_CC_init()">Create Context Constraint</a></li>
+                            <li><a tabindex="-1" href="#" onclick="Edit_CCCondMgmt_init('{{constraint.name}}')">Manage Conditions</a></li>
+                            <li><hr style="margin:5px;"></li>
+                            <li><a href="#" onclick="deleteContextConstraint('{{constraint.name}}')">Delete Context Constraint</a></li>
+                          </ul>
+                        </div>                    
+                    {% endfor %}
+
                 {% endif %}
                 
-                <!-- OBJECT_TYPE_STEP -->
+                <!-- step -->
                 {% if object_type == 5 %}  
-                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <table data-toggle="table" class="table table-condensed table-hover">
                     <thead>
                     <tr>
                     <th class="col-md-1">#</th>
@@ -265,13 +328,15 @@
                     <tbody>
                     
                     {% for step in steps %}
-                        <tr id='step-{{step.id}}'>
+                        <tr id='step-{{step.name}}'>
                         <th scope="row">{{forloop.counter}}</th>
-                        <td data-toggle="context" data-target="#context-menu">{{step.name}}</td>
+                        <td data-toggle="context" data-target="#context-menu-step-{{step.name}}">{{step.name}}</td>
                         <td>
                             <div class="btn-group" role="group" aria-label="First group">
-                                <a class="btn" onclick="edit_step({{step.id}});" href="#" role="button" title='Edit step'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
-                                <a class="btn" onclick="delete_step({{step.id}});" href="#" role="button" title='Delete step'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                <!--
+                                <a class="btn" onclick="edit_constraint({{constraint.id}});" href="#" role="button" title='Edit constraint'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                                <a class="btn" onclick="delete_constraint({{constraint.id}});" href="#" role="button" title='Delete constraint'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                -->
                             </div>                
                         </td>
                         </tr>
@@ -279,53 +344,24 @@
                     
                     </tbody>
                     </table>
-                {% endif %}
 
-                <!-- permission -->
-                {% if object_type == 7 %}  
-                    <table id = 'perm_table' data-toggle="table" id="testtable" class="table table-condensed table-hover">
-                    <thead>
-                    <tr>
-                    <th class="col-md-1">#</th>
-                    <th class="col-md-3">Permission</th>
-                    <th class="col-md-8">&nbsp;</th> <!-- toolbar: edit/remove -->
-                    </tr>
-                    </thead>
-                    <tbody>
-                    
-                    {% for permission in permissions %}
-                        <tr id='permission-{{permission.id}}'>
-                        <th scope="row">{{forloop.counter}}</th>
-                        <td data-toggle="context" data-target="#context-menu-permission-{{permission.id}}">{{permission.name}}</td>
-                        <td>
-                            <div class="btn-group" role="group" aria-label="First group">
-                                <a class="btn" onclick="delete_permission({{permission.id}})" href="#" role="button" title='Delete permission'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
-                            </div>                
-                        </td>
-                        </tr>
-                    {% endfor %}
-                    
-                    </tbody>
-                    </table>
-                    
-                    <!-- permission context menu -->
-                    {% for permission in permissions %}
-                        <div id="context-menu-permission-{{permission.id}}">
+                    <!-- context constraint context menu -->
+                    {% for step in steps %}
+                        <div id="context-menu-step-{{step.name}}">
                           <ul class="dropdown-menu" role="menu">
-                            <li><a tabindex="-1" href="#">Create Permission</a></li>
+                            <li><a tabindex="-1" href="#" onclick="Create_Step_init()">Create Step</a></li>
+                            <li><a tabindex="-1" href="#" onclick="Edit_Step_init('{{step.name}}')">Edit Step</a></li>
                             <li><hr style="margin:5px;"></li>
-                            <li><a id="perm_cardinality_constraint" href="#" onclick="perm_cardinality_constraints({{permission.id}})">Cardinality Constraints</a></li>
-                            <li><a tabindex="-1" href="#" onclick="perm_ssd_constraints({{permission.id}})">SSD Constraints</a></li>
-                            <li><a tabindex="-1" href="#" onclick="perm_context_constraints({{permission.id}})">Context Constraints</a></li>
-                            <li><hr style="margin:5px;"></li>
-                            <li><a tabindex="-1" href="#" onclick="delete_permission({{permission.id}})">Delete Permission</a></li>
+                            <li><a href="#" onclick="deleteStep('{{step.name}}')">Delete Step</a></li>
                           </ul>
                         </div>                    
                     {% endfor %}
+
                 {% endif %}
+                
 
                 {% if object_type == 6 %}  
-                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <table data-toggle="table" class="table table-condensed table-hover">
                     <thead>
                     <tr>
                     <th class="col-md-1">#</th>
@@ -336,23 +372,34 @@
                     <tbody>
                     
                     {% for scenario in scenarios %}
-                        <tr id='scenario-{{scenario.id}}'>
+                        <tr id='scenario-{{scenario.name}}'>
                         <th scope="row">{{forloop.counter}}</th>
-                        <td data-toggle="context" data-target="#context-menu">{{scenario.name}}</td>
+                        <td data-toggle="context" data-target="#context-menu-scenario-{{scenario.name}}">{{scenario.name}}</td>
                         <td>
                             <div class="btn-group" role="group" aria-label="First group">
-                                <a class="btn" onclick="edit_scenario({{scenario.id}});" href="#" role="button" title='Edit scenario'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
-                                <a class="btn" onclick="delete_scenario({{scenario.id}});" href="#" role="button" title='Delete scenario'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                             </div>                
                         </td>
                         </tr>
                     {% endfor %}
                     </tbody>
                     </table>
+
+                    <!-- scenario context menu -->
+                    {% for scenario in scenarios %}
+                        <div id="context-menu-scenario-{{scenario.name}}">
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a tabindex="-1" href="#" onclick="Create_Scenario_init()">Create Scenario</a></li>
+                            <li><a tabindex="-1" href="#" onclick="Edit_Scenario_init('{{scenario.name}}')">Edit Scenario</a></li>
+                            <li><hr style="margin:5px;"></li>
+                            <li><a tabindex="-1" href="#" onclick="deleteScenario('{{scenario.name}}')">Delete Scenario</a></li>
+                          </ul>
+                        </div>                    
+                    {% endfor %}
+                    
                 {% endif %}
                 
                 {% if object_type == 8 %}
-                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <table data-toggle="table" class="table table-condensed table-hover">
                     <thead>
                     <tr>
                     <th class="col-md-1">#</th>
@@ -363,28 +410,127 @@
                     <tbody>
                     
                     {% for task in tasks %}
-                        <tr id='task-{{task.id}}'>
+                        <tr id='task-{{task.name}}'>
                         <th scope="row">{{forloop.counter}}</th>
-                        <td data-toggle="context" data-target="#context-menu">{{task.name}}</td>
+                        <td data-toggle="context" data-target="#context-menu-task-{{task.name}}">{{task.name}}</td>
                         <td>
                             <div class="btn-group" role="group" aria-label="First group">
+                                <!--
                                 <a class="btn" onclick="edit_task({{task.id}});" href="#" role="button" title='Edit task'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
                                 <a class="btn" onclick="delete_task({{task.id}});" href="#" role="button" title='Delete task'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                -->
                             </div>                
                         </td>
                         </tr>
                     {% endfor %}
                     
                     </tbody>
-                    </table>                    
+                    </table>
+                    
+                    <!-- task context menu -->
+                    {% for task in tasks %}
+                        <div id="context-menu-task-{{task.name}}">
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a tabindex="-1" href="#" onclick="Create_Task_init()">Create Task</a></li>
+                            <li><hr style="margin:5px;"></li>
+                            <li><a tabindex="-1" href="#" onclick="deleteTask('{{task.name}}')">Delete Task</a></li>
+                          </ul>
+                        </div>                    
+                    {% endfor %}
+                                      
+                {% endif %}
+
+                <!-- permission -->
+                {% if object_type == 7 %}  
+                    <table id = 'perm_table' data-toggle="table" class="table table-condensed table-hover">
+                    <thead>
+                    <tr>
+                    <th class="col-md-1">#</th>
+                    <th class="col-md-3">Permission</th>
+                    <th class="col-md-8">&nbsp;</th> <!-- toolbar: edit/remove -->
+                    </tr>
+                    </thead>
+                    <tbody>
+                    
+                    {% for permission in permissions %}
+                        <tr id='perm-{{permission.name}}'>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td data-toggle="context" data-target="#context-menu-permission-{{permission.name}}">{{permission.name}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="First group">
+                            </div>                
+                        </td>
+                        </tr>
+                    {% endfor %}
+                    
+                    </tbody>
+                    </table>
+                    
+                    <!-- permission context menu -->
+                    {% for permission in permissions %}
+                        <div id="context-menu-permission-{{permission.name}}">
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a tabindex="-1" href="#" onclick="Create_Permission_init()">Create Permission</a></li>
+                            <li><hr style="margin:5px;"></li>
+                            
+                            <li><a id="perm_cardinality_constraint" href="#" onclick="Edit_PermCard_init('{{permission.name}}')">Cardinality Constraints</a></li>
+                            <li><a tabindex="-1" href="#" onclick="Edit_SSDPerm_init('{{permission.name}}')">SSD Constraints</a></li>
+                            <li><a tabindex="-1" href="#" onclick="Edit_PermCCMgmt_init('{{permission.name}}')">Context Constraints</a></li>
+                            
+                            <li><hr style="margin:5px;"></li>
+                            <li><a href="#" onclick="deletePermission('{{permission.name}}')">Delete Permission</a></li>
+                          </ul>
+                        </div>                    
+                    {% endfor %}
+                    
                 {% endif %}
 
                 {% if object_type == 9 %} 
+                    <table data-toggle="table" class="table table-condensed table-hover">
+                    <thead>
+                    <tr>
+                    <th class="col-md-1">#</th>
+                    <th class="col-md-3">Profiles</th>
+                    <th class="col-md-8">&nbsp;</th> <!-- toolbar: edit/remove -->
+                    </tr>
+                    </thead>
+                    <tbody>
+                    
+                    {% for profile in profiles %}
+                        <tr id='profile-{{profile.name}}'>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td data-toggle="context" data-target="#context-menu-profile-{{profile.name}}">{{profile.name}}</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <!--
+                                <a class="btn" onclick="edit_task({{task.id}});" href="#" role="button" title='Edit task'><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>
+                                <a class="btn" onclick="delete_task({{task.id}});" href="#" role="button" title='Delete task'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                                -->
+                            </div>                
+                        </td>
+                        </tr>
+                    {% endfor %}
+                    
+                    </tbody>
+                    </table>
+                    
+                    <!-- profile context menu -->
+                    {% for profile in profiles %}
+                        <div id="context-menu-profile-{{profile.name}}">
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a tabindex="-1" href="#" onclick="Create_Profile_init()">Create Profile</a></li>
+                            <li><a tabindex="-1" href="#" onclick="Edit_Profile_init('{{profile.name}}')">Edit Profile</a></li>
+                            <li><hr style="margin:5px;"></li>
+                            <li><a tabindex="-1" href="#" onclick="deleteProfile('{{profile.name}}')">Delete Profile</a></li>
+                          </ul>
+                        </div>                    
+                    {% endfor %}                                      
+
                 {% endif %}
 
                 <!-- role -->
                 {% if object_type == 10 %} 
-                    <table data-toggle="table" id="testtable" class="table table-condensed table-hover">
+                    <table data-toggle="table" class="table table-condensed table-hover">
                     <thead>
                     <tr>
                     <th class="col-md-1">#</th>
@@ -394,13 +540,12 @@
                     </thead>
                     <tbody>
                     {% for role in roles %}
-                        <tr id='role-{{role.id}}'>
+                        <tr id='role-{{role.name}}'>
                         <th scope="row">{{forloop.counter}}</th>
-                        <td data-toggle="context" data-target="#context-menu-role-{{role.id}}">{{role.name}}</td>
+                        <td data-toggle="context" data-target="#context-menu-role-{{role.name}}">{{role.name}}</td>
                         <!-- <td data-toggle="context" data-target="#context-menu">{{role.name}}</td> -->
                         <td>
                             <div class="btn-group" role="group" aria-label="First group">
-                                <a class="btn" onclick="delete_role({{role.id}})" href="#" role="button" title='Delete role'><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
                             </div>                
                         </td>
                         </tr>
@@ -409,17 +554,18 @@
                     </table>
                     <!-- role context menu -->
                     {% for role in roles %}
-                        <div id="context-menu-role-{{role.id}}">
+                        <div id="context-menu-role-{{role.name}}">
                           <ul class="dropdown-menu" role="menu">
-                            <li><a tabindex="-1" href="#" onclick="create_role()">Create Role</a></li>
-                            <li><a id="perm_cardinality_constraint" href="#" onclick="role_perm_to_role_assignment({{role.id}})">Permission/Role Assignment</a></li>
-                            <li><a tabindex="-1" href="#" onclick="role_role_assignment({{role.id}})">Role/Role Assignment</a></li>
-                            <li><a tabindex="-1" href="#" onclick="role_ssd_role_constraints({{role.id}})">SSD Role Constraints</a></li>
-                            <li><a tabindex="-1" href="#" onclick="role_cardinality_constraints({{role.id}})">Role Cardinalities</a></li>
+                            <li><a tabindex="-1" href="#" onclick="Create_Role_init()">Create Role</a></li>
+                            <li><a id="perm_cardinality_constraint" href="#" onclick="Edit_PRA_init('{{role.name}}')" disabled>Permission/Role Assignment</a></li>
+                            <li><a tabindex="-1" href="#" onclick="Edit_RRA_init('{{role.name}}')" disabled>Role/Role Assignment</a></li>
+                            <li><a tabindex="-1" href="#" onclick="Edit_SSDRole_init('{{role.name}}')" disabled>SSD Role Constraints</a></li>
+                            <li><a tabindex="-1" href="#" onclick="Edit_RoleCard_init('{{role.name}}')">Role Cardinalities</a></li>
                             <li><hr style="margin:5px;"></li>
-                            <li><a tabindex="-1" href="#" onclick="">Manage Traces</a></li>
+                            <!-- <li><a tabindex="-1" href="#" onclick="">Manage Traces</a></li>
                             <li><hr style="margin:5px;"></li>
-                            <li><a tabindex="-1" href="#" onclick="delete_role({{role.id}})">Delete Role</a></li>
+                            -->
+                            <li><a tabindex="-1" href="#" onclick="deleteRole('{{role.name}}')">Delete Role</a></li>
                           </ul>
                         </div>                    
                     {% endfor %}
@@ -428,771 +574,47 @@
     </div>
 </div>
 
-
-<!-------------------------------------------------->
-<!--                 Modals                       -->
-<!-------------------------------------------------->
-
-<!-- objective modal -->
-<div class="modal fade" id="objective_modal" tabindex="-1" role="dialog" aria-labelledby="objective_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content modal-content-width-450" >
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="objective_modal_title"></h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="objective_name">Objective Name</label>
-                    <input type="text" class="form-control" id="objective_name" placeholder="Enter objective name" required>
-                    <input type="hidden" id="objective_id" value="">
-                  </div>              
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="objective_type">Objective Type</label>
-                        <div class="dropdown">
-                          <button class="btn btn-default dropdown-toggle" type="button" id="objective_type" data-toggle="dropdown" aria-expanded="true">
-                            <div id="objective_type_label" style="display: inline-block;">Select</div>
-                            <span class="caret"></span>
-                          </button>
-                          <ul class="dropdown-menu" role="menu" aria-labelledby="dropdown_objective_type">
-                            <li role="presentation"><a id="action-1" role="menuitem" tabindex="-1" href="#">Achieve</a></li>
-                            <li role="presentation"><a id="action-2" role="menuitem" tabindex="-1" href="#">Ensure</a></li>
-                            <li role="presentation"><a id="action-3" role="menuitem" tabindex="-1" href="#">Improve</a></li>
-                            <li role="presentation"><a id="action-4" role="menuitem" tabindex="-1" href="#">Increase</a></li>
-                            <li role="presentation"><a id="action-5" role="menuitem" tabindex="-1" href="#">Keep</a></li>
-                            <li role="presentation"><a id="action-6" role="menuitem" tabindex="-1" href="#">Maintain</a></li>
-                            <li role="presentation"><a id="action-7" role="menuitem" tabindex="-1" href="#">Make</a></li>
-                            <li role="presentation"><a id="action-8" role="menuitem" tabindex="-1" href="#">Notify</a></li>
-                            <li role="presentation"><a id="action-9" role="menuitem" tabindex="-1" href="#">Provide</a></li>
-                            <li role="presentation"><a id="action-10" role="menuitem" tabindex="-1" href="#">Reduce</a></li>
-                          </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-9"></div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="abstract_context_condition">Abstract Context Condition (Text)</label>
-                    <input id="condition_input" type="text" class="form-control" id="abstract_context_condition" placeholder="Enter text">
-                    <input id="add_condition" class="btn btn-default" type="button" value="Add Condition to List">
-                  </div>
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="condition_list">List of Abstract Context Conditions</label>
-                    <select id="condition_list" multiple class="form-control">
-                    </select>     
-                    <input id="remove_condition" class="btn btn-default" type="button" disabled="false" value="Remove Condition from List">     
-                  </div>
-                </div>  
-            </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        <button id="save_objective_btn" type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- obstacle modal -->
-<div class="modal fade" id="obstacle_modal" tabindex="-1" role="dialog" aria-labelledby="obstacle_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content modal-content-width-450">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="obstacle_modal_title"></h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="obstacle_name">Obstacle Name</label>
-                    <input type="text" class="form-control" id="obstacle_name" placeholder="Enter obstacle name" required>
-                    <input type="hidden" id="obstacle_id" value="">
-                  </div>              
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="obstacle_type">Obstacle Type</label>
-                        <div class="dropdown">
-                          <button class="btn btn-default dropdown-toggle" type="button" id="obstacle_type" data-toggle="dropdown" aria-expanded="true" disabled="true">
-                            <div id="obstacle_type_label" style="display: inline-block;">Avoid</div>
-                            <!-- <span class="caret"></span> -->
-                          </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-9"></div>
-            </div>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="abstract_context_condition2">Abstract Context Condition (Text)</label>
-                    <input id="condition_input2" type="text" class="form-control" id="abstract_context_condition2" placeholder="Enter text">
-                    <input id="add_condition2" class="btn btn-default" type="button" value="Add Condition to List">
-                  </div>
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="condition_list2">List of Abstract Context Conditions</label>
-                    <select id="condition_list2" multiple class="form-control">
-                    </select>     
-                    <input id="remove_condition2" class="btn btn-default" type="button" disabled="false" value="Remove Condition from List">     
-                  </div>
-                </div>  
-            </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        <button id="save_obstacle_btn" type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- condition modal -->
-<div class="modal fade" id="condition_modal" tabindex="-1" role="dialog" aria-labelledby="condition_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content modal-content-width-450">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="condition_modal_title"></h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="condition_name">Condition Name</label>
-                    <input type="text" class="form-control" id="condition_name" placeholder="Enter condition name" required>
-                    <input type="hidden" id="condition_id" value="">
-                  </div>              
-                </div>  
-            </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_condition_btn" type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- context constraint modal -->
-<div class="modal fade" id="constraint_modal" tabindex="-1" role="dialog" aria-labelledby="constraint_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content modal-content-width-450">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="constraint_modal_title"></h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="constraint_name">Constraint Name</label>
-                    <input type="text" class="form-control" id="constraint_name" placeholder="Enter constraint name" required>
-                    <input type="hidden" id="constraint_id" value="">
-                  </div>              
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="constraint_available_conditions">Available Conditions</label>
-                    <select id="constraint_available_conditions" multiple class="form-control">
-                    </select>     
-                    <input id="add_constraint_condition" class="btn btn-default" type="button" value="Link Condition">
-                  </div>
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="constraint_conditions">Linked Conditions</label>
-                    <select id="constraint_conditions" multiple class="form-control">
-                    </select>     
-                    <input id="remove_constraint_condition" class="btn btn-default" type="button" disabled="false" value="Unlink Condition">     
-                  </div>
-                </div>  
-            </div>
-        </form>      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_constraint_btn" type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- scenario modal -->
-<div class="modal modal-wide fade" id="scenario_modal" tabindex="-1" role="dialog" aria-labelledby="scenario_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="scenario_modal_title"></h4>
-      </div>
-      <div class="modal-body">
-        <div class="row">
-        <div class="col-md-3">
-        <form>
-            <input type="hidden" id="scenario_id" value="">
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="scenario_name">Scenario Name</label>
-                    <input type="text" class="form-control" id="scenario_name" placeholder="Enter scenario name" required>
-                  </div>              
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="scenario_available_steps">Currently Available Steps</label>
-                    <select id="scenario_available_steps" multiple class="form-control" style="height:400px;">
-                    </select>
-                    <div class="row"><p></p></div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="btn-group">
-                              <!-- <a id="scenario_modal_add_step" href="#" class="btn btn-default">Add selected step</a> -->
-                                <input id="scenario_modal_add_step" class="btn btn-default" type="button" value="Add selected step" disabled="" >                              
-                             </div>
-                            <div class="btn-group">
-                              <a id="scenario_modal_create_new_step" href="#" class="btn btn-default">Create new step</a>
-                            </div>
-                        </div>
-                    </div>       
-                  </div>
-                </div>  
-            </div>
-        </form>
-        </div>
-        <div class="col-md-9">
-            <div class="row">
-                <div class="col-md-12">
-                    <div id="digraph"></div>
-                </div>
-            </div>
-            <div class="row"><p></p></div>
-            <div class="row">
-                <div class="col-md-10">
-                    <label class="radio-inline"><input id="graph_edit_mode" type="radio" name="graph_mode">Edit mode</label>
-                    <label class="radio-inline"><input id="graph_select_mode" type="radio" name="graph_mode">Select mode</label>
-                </div>
-                <div class="col-md-2">
-                    <button id="scenario_modal_clear_graph" type="button" class="btn btn-default pull-right" >Clear graph</button>
-                </div>
-            </div>
-        </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_scenario_btn" type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 6. Create Permission Modal -->
-<div class="modal fade" id="permission_modal" tabindex="-1" role="dialog" aria-labelledby="permission_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content modal-content-width-450">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="permission_modal_title"></h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <input type="hidden" id="permission_id" value="">
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="permission_operation_name">Operation Name</label>
-                    <input type="text" class="form-control" id="permission_operation_name" placeholder="Enter operation name" required>
-                  </div>              
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="permission_object_name">Object Name</label>
-                    <input type="text" class="form-control" id="permission_object_name" placeholder="Enter object name" required>
-                  </div>              
-                </div>  
-            </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="permission_modal_save_btn" type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 7. Create Task Modal -->
-<div class="modal fade" id="task_modal" tabindex="-1" role="dialog" aria-labelledby="task_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="task_modal_title"></h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="task_name">Task Name</label>
-                    <input type="text" class="form-control" id="task_name" placeholder="Enter task name" required>
-                    <input type="hidden" id="task_id" value="">
-                  </div>              
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="task_available_scenarios">Available Scenarios</label>
-                    <select id="task_available_scenarios" multiple class="form-control">
-                    </select>     
-                    <input id="add_task_scenario" class="btn btn-default" type="button" value="Add Scenario to Task">
-                  </div>
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="task_scenarios">Attached Scenarios</label>
-                    <select id="task_scenarios" multiple class="form-control">
-                    </select>     
-                    <input id="remove_task_scenario" class="btn btn-default" type="button" disabled="false" value="Remove Scenario from Task">     
-                  </div>
-                </div>  
-            </div>
-        </form>      
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_task_btn" type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 8. Create Work Profile Modal -->
-<div class="modal fade" id="work_profile_modal" tabindex="-1" role="dialog" aria-labelledby="work_profile_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="work_profile_modal_title"></h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="work_profile_name">Work Profile Name</label>
-                    <input type="text" class="form-control" id="work_profile_name" placeholder="Enter work profile name" required>
-                    <input type="hidden" id="work_profile_id" value="">
-                  </div>              
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="work_profile_available_tasks">Currently Available Tasks</label>
-                    <select id="work_profile_available_tasks" multiple class="form-control">
-                    </select>     
-                    <input id="work_profile_add_task" class="btn btn-default" type="button" value="Add Task to Profile">
-                  </div>
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="work_profile_attached_tasks">Attached Tasks</label>
-                    <select id="work_profile_attached_tasks" multiple class="form-control">
-                    </select>     
-                    <input id="work_profile_remove_task" class="btn btn-default" type="button" disabled="false" value="Remove Task from Profile">     
-                  </div>
-                </div>  
-            </div>
-        </form>      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_work_profile_btn" type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 10. Define Trace-Links Modal -->
-<div class="modal fade" id="define_trace_links_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Define Trace-Links</h4>
-      </div>
-      <div class="modal-body">
-            Add layout and widgets here ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 11. View Trace-Model Modal -->
-<div class="modal fade" id="view_trace_model_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">View Trace-Model</h4>
-      </div>
-      <div class="modal-body">
-            Add layout and widgets here ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 12. Derive Permissions Modal -->
-<div class="modal fade" id="derive_permissions_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Derive Permissions</h4>
-      </div>
-      <div class="modal-body">
-            Add layout and widgets here ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 13. Derive Context Constraints Modal -->
-<div class="modal fade" id="derive_constraints_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Derive Context Constraints</h4>
-      </div>
-      <div class="modal-body">
-            Add layout and widgets here ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 14. Derive Roles Modal -->
-<div class="modal fade" id="derive_roles_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Derive Roles</h4>
-      </div>
-      <div class="modal-body">
-            Add layout and widgets here ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Scenario modals -->
-<!-- Scenario Step modal -->
-<div class="modal fade" id="step_modal" tabindex="-1" role="dialog" aria-labelledby="step_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="step_modal_title"></h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <input type="hidden" id="step_id" value="">
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="step_actor">Actor</label>
-                    <input type="text" class="form-control" id="step_actor" placeholder="Enter actor name" required>
-                  </div>
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="step_action">Action</label>
-                    <input type="text" class="form-control" id="step_action" placeholder="Enter action name" required>
-                  </div>              
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="step_target">Target</label>
-                    <input type="text" class="form-control" id="step_target" placeholder="Enter target name" required>
-                  </div>              
-                </div>  
-            </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        <button id="save_step" type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-<!-- context menu modals -->
-
-<div class="modal fade" id="perm_cardinality_constraint_modal" tabindex="-1" role="dialog" aria-labelledby="perm_cardinality_constraint_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="perm_cardinality_constraint_title">Cardinality Constraints</h4>
-      </div>
-      <div class="modal-body">
-            Add layout and widgets here ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Permission - SSD Constraints modal -->
-<div class="modal fade" id="perm_ssd_constraint_modal" tabindex="-1" role="dialog" aria-labelledby="perm_ssd_constraint_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="perm_ssd_constraint_modal_title"></h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="perm_ssd_available_permissions">Available Permissions</label>
-                    <select id="perm_ssd_available_permissions" multiple class="form-control">
-                    </select>     
-                    <input id="add_ssd_constraint" class="btn btn-default" type="button" value="Add SSD Constraint">
-                  </div>
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="perm_ssd_direct_mutex">Direct Mutual Exclusions</label>
-                    <select id="perm_ssd_direct_mutex" multiple class="form-control">
-                    </select>     
-                    <input id="remove_ssd_constraint" class="btn btn-default" type="button" disabled="false" value="Remove SSD Constraint">     
-                  </div>
-                </div>  
-            </div>
-        </form>      
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_task_btn" type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Permission - Context Constraints modal -->
-<div class="modal fade" id="permission_CC_modal" tabindex="-1" role="dialog" aria-labelledby="permission_CC_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="permission_CC_modal_title"></h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="permission_CC_available_CC">Available Context Constraints</label>
-                    <select id="permission_CC_available_CC" multiple class="form-control">
-                    </select>     
-                    <input id="link_permission_CC" class="btn btn-default" type="button" value="Link Context Constraint">
-                  </div>
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-9">
-                  <div class="form-group">
-                    <label for="permission_CC_linked_CC">Linked Context Constraints</label>
-                    <select id="permission_CC_linked_CC" multiple class="form-control">
-                    </select>     
-                    <input id="unlink_permission_CC" class="btn btn-default" type="button" disabled="false" value="Unlink Context Constraint">     
-                  </div>
-                </div>  
-            </div>
-        </form>      
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_task_btn" type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- perm - cardinality constraints -->
-<div class="modal fade" id="perm_cardinality_constraints_modal" tabindex="-1" role="dialog" aria-labelledby="perm_cardinality_constraints_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="perm_cardinality_constraints_modal_title">Permission Cardinality Constraints</h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <input type="hidden" id="cardinality_constraint_perm_id" value="">
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="step_actor">Minimum Owner Cardinality</label>
-                    <div class="input-group spinner">
-                      <input id="perm_cardinality_constraints_mincardinality" type="text" class="form-control" value="0">
-                        <div class="input-group-btn-vertical">
-                          <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
-                          <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
-                        </div>
-                    </div>      
-                  </div>
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="step_actor">Maximum Owner Cardinality</label>
-                    <div class="input-group spinner2">
-                      <input id="perm_cardinality_constraints_maxcardinality" type="text" class="form-control" value="0">
-                        <div class="input-group-btn-vertical">
-                          <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
-                          <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
-                        </div>
-                    </div>      
-                  </div>
-                </div>  
-            </div>
-        </form>
-        </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_perm_cardinality_constraints" type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- perm context constraint modal -->
-<div class="modal fade" id="perm_context_constraints_modal" tabindex="-1" role="dialog" aria-labelledby="perm_context_constraints_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content modal-content-width-450">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="perm_context_constraint_modal_title">Context Constraint Management for Permission</h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <input type="hidden" id="perm_context_constraints_perm_id" value="">
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="perm_available_context_constraints">Available Context Constraints</label>
-                    <select id="perm_available_context_constraints" multiple class="form-control">
-                    </select>     
-                    <input id="perm_link_context_constraint" class="btn btn-default" type="button" value="Link Context Constraint">
-                  </div>
-                </div>  
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="perm_context_constraints">Linked Context Constraints</label>
-                    <select id="perm_context_constraints" multiple class="form-control">
-                    </select>     
-                    <input id="perm_unlink_context_constraint" class="btn btn-default" type="button" disabled="false" value="Unlink Context Constraint">     
-                  </div>
-                </div>  
-            </div>
-        </form>      
-        </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_perm_context_constraints" type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-
 {% endblock content %}
+
+{% block objective_content %}
+    {% include 'objective.html' %}
+{% endblock objective_content %}
+
+{% block obstacle_content %}
+    {% include 'obstacle.html' %}
+{% endblock obstacle_content %}
+
+{% block permission_content %}
+    {% include 'perm.html' %}
+{% endblock permission_content %}
+
+{% block condition_content %}
+    {% include 'condition.html' %}
+{% endblock condition_content %}
+
+{% block context_constraint_content %}
+    {% include 'CC.html' %}
+{% endblock context_constraint_content %}
+
+{% block scenario_content %}
+    {% include 'scenario.html' %}
+{% endblock scenario_content %}
+
+{% block step_content %}
+    {% include 'step.html' %}
+{% endblock step_content %}
+
+{% block task_content %}
+    {% include 'task.html' %}
+{% endblock task_content %}
+
+{% block work_profile_content %}
+    {% include 'profile.html' %}
+{% endblock work_profile_content %}
 
 {% block role_content %}
     {% include 'role.html' %}
 {% endblock role_content %}
-
 
 {% block scripts %}
 <script>
@@ -1204,17 +626,6 @@ $(function() {
 var MODE_CREATE = 1;
 var MODE_UPDATE = 2;
 
-// obstacle
-$( '#create_obstacle_btn' ).click(function() {
-
-    // set to new mode
-    mode = 1;
-    
-    // reset all fields
-    $('#obstacle_name').val('');
-    $('#condition_input2').val('');
-    $('#condition_list2').find('option').remove();
-});
 
 var OBJECT_TYPE_OBJECTIVE = 1
 var OBJECT_TYPE_OBSTACLE = 2
@@ -1234,51 +645,102 @@ var PERM_CONTEXT_CONSTRAINTS = 102
 // common to all
 var url_dashboard = "{% url 'dashboard' %}"
 
-var url_edit_objective = "{% url 'edit_objective' %}"
-var url_edit_obstacle = "{% url 'edit_obstacle' %}"
-var url_edit_condition = "{% url 'edit_condition' %}"
-var url_edit_constraint = "{% url 'edit_constraint' %}"
-var url_edit_scenario = "{% url 'edit_scenario' %}"
-var url_edit_task = "{% url 'edit_task' %}"
+
+//
+// new api
+//
+// exist
+
+var url_exist_role = "{% url 'exist_role' %}"
 
 
-var url_get_conditions = "{% url 'get_conditions' %}"
-var url_get_steps = "{% url 'get_steps' %}"
-var url_get_scenarios = "{% url 'get_scenarios' %}"
-var url_get_roles = "{% url 'get_roles' %}"
-var url_get_perm_cardinality_constraints = "{% url 'get_perm_cardinality_constraints' %}"
-var url_get_role_cardinality_constraints = "{% url 'get_role_cardinality_constraints' %}"
-var url_get_perm_context_constraints = "{% url 'get_perm_context_constraints' %}"
-//url_get_role_cardinality_constraints
-//url_get_perm_context_constraints
+var url_add_derived_abstract_context_condition_to_objective = "{% url 'add_derived_abstract_context_condition_to_objective' %}"
+var url_add_derived_abstract_context_condition_to_obstacle = "{% url 'add_derived_abstract_context_condition_to_obstacle' %}"
+var url_add_tasks_to_work_profile = "{% url 'add_tasks_to_work_profile' %}"
+var url_add_scenarios_to_task = "{% url 'add_scenarios_to_task' %}"
+var url_link_context_constraints_to_perm = "{% url 'link_context_constraints_to_perm' %}"
 
 
+
+var url_clear_derived_condition_list_of_objective = "{% url 'clear_derived_condition_list_of_objective' %}"
+var url_clear_derived_condition_list_of_obstacle = "{% url 'clear_derived_condition_list_of_obstacle' %}"
+var url_clear_task_list_of_work_profile = "{% url 'clear_task_list_of_work_profile' %}"
+var url_clear_scenario_list_of_task = "{% url 'clear_scenario_list_of_task' %}"
+
+var url_unlink_context_constraints_from_perm = "{% url 'unlink_context_constraints_from_perm' %}"
+
+
+var url_unset_ssd_perm_constraint = "{% url 'unset_ssd_perm_constraint' %}"
+var url_set_ssd_perm_constraint = "{% url 'set_ssd_perm_constraint' %}"
+
+var url_unset_ssd_role_constraint = "{% url 'unset_ssd_role_constraint' %}"
+var url_set_ssd_role_constraint = "{% url 'unset_ssd_role_constraint' %}"
+
+// edit init
+var url_edit_objective_init = "{% url 'edit_objective_init' %}"
+var url_edit_obstacle_init = "{% url 'edit_obstacle_init' %}"
+var url_edit_condition_init = "{% url 'edit_condition_init' %}"
+var url_edit_step_init = "{% url 'edit_step_init' %}"
+var url_edit_profile_init = "{% url 'edit_profile_init' %}"
+var url_edit_task_init = "{% url 'edit_task_init' %}"
+var url_edit_permcard_init = "{% url 'edit_permcard_init' %}"
+var url_edit_rolecard_init = "{% url 'edit_rolecard_init' %}"
+var url_edit_perm_cc_mgmt_init = "{% url 'edit_perm_cc_mgmt_init' %}"
+var url_edit_scenario_init = "{% url 'edit_scenario_init' %}"
+
+
+// edit save
+var url_edit_objective_save = "{% url 'edit_objective_save' %}"
+var url_edit_obstacle_save = "{% url 'edit_obstacle_save' %}"
+var url_edit_step_save = "{% url 'edit_step_save' %}"
+var url_edit_profile_save = "{% url 'edit_profile_save' %}"
+var url_edit_task_save = "{% url 'edit_task_save' %}"
+var url_edit_permcard_save = "{% url 'edit_permcard_save' %}"
+var url_edit_rolecard_save = "{% url 'edit_rolecard_save' %}"
+var url_edit_scenario_save = "{% url 'edit_scenario_save' %}"
+
+
+// create create
+var url_create_objective_create = "{% url 'create_objective_create' %}"
+var url_create_obstacle_create = "{% url 'create_obstacle_create' %}"
+var url_create_condition_create = "{% url 'create_condition_create' %}"
+var url_create_CC_create = "{% url 'create_CC_create' %}"
+var url_create_task_create = "{% url 'create_task_create' %}"
+var url_create_step_create = "{% url 'create_step_create' %}"
+var url_create_perm_create = "{% url 'create_perm_create' %}"
+var url_create_profile_create = "{% url 'create_profile_create' %}"
+var url_create_scenario_create = "{% url 'create_scenario_create' %}"
+var url_create_role_create = "{% url 'create_role_create' %}"
+
+
+// delete
 var url_delete_objective = "{% url 'delete_objective' %}"
 var url_delete_obstacle = "{% url 'delete_obstacle' %}"
 var url_delete_condition = "{% url 'delete_condition' %}"
-var url_delete_constraint = "{% url 'delete_constraint' %}"
-var url_delete_step = "{% url 'delete_step' %}"
-var url_delete_scenario = "{% url 'delete_scenario' %}"
-var url_delete_permission = "{% url 'delete_permission' %}"
+var url_delete_context_constraint = "{% url 'delete_context_constraint' %}"
 var url_delete_task = "{% url 'delete_task' %}"
+var url_delete_step = "{% url 'delete_step' %}"
+var url_delete_permission = "{% url 'delete_permission' %}"
+var url_delete_profile = "{% url 'delete_profile' %}"
+var url_delete_scenario = "{% url 'delete_scenario' %}"
 var url_delete_role = "{% url 'delete_role' %}"
 
-var url_exists_role = "{% url 'exists_role' %}"
+var url_link_condition_to_context_constraint = "{% url 'link_condition_to_context_constraint' %}"
+var url_unlink_condition_from_context_constraint = "{% url 'unlink_condition_from_context_constraint' %}"
 
+var url_get_condition_list = "{% url 'get_condition_list' %}"
+var url_get_scenario_list = "{% url 'get_scenario_list' %}"
+var url_get_step_list = "{% url 'get_step_list' %}"
+var url_get_task_list = "{% url 'get_task_list' %}"
+var url_get_role_list = "{% url 'get_role_list' %}"
+var url_get_context_constraint_list = "{% url 'get_context_constraint_list' %}"
+var url_get_permission_list = "{% url 'get_permission_list' %}"
+
+var url_get_all_conditions = "{% url 'get_all_conditions' %}"
+var url_get_context_constraints = "{% url 'get_context_constraints' %}"
+var url_get_ssd_perm_constraints = "{% url 'get_ssd_perm_constraints' %}"
 
 var mode = 0; // edit mode, common var to all
 
-function flash(selector) {
-    $(selector).fadeOut(250).fadeIn(250);
-}
-
-jQuery.fn.extend({
-  flash: function() {
-    return this.each(function() {
-    $(this).fadeOut();
-    $(this).fadeIn();
-    });
-  }
-});
 </script>
 {% endblock scripts %}

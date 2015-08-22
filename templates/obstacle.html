@@ -1,0 +1,60 @@
+<div class="modal fade" id="obstacle_modal" tabindex="-1" role="dialog" aria-labelledby="obstacle_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content modal-content-width-450">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="obstacle_modal_title"></h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="obstacle_name">Obstacle Name</label>
+                    <input type="text" class="form-control" id="obstacle_name" placeholder="Enter name of obstacle here" required>
+                    <input type="hidden" id="obstacle_id" value=""> <!-- -used for editing obstacle -->
+                  </div>              
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="obstacle_type">Obstacle Type</label>
+                        <div class="dropdown">
+                            <button class="btn btn-default dropdown-toggle" type="button" id="obstacle_type" data-toggle="dropdown" aria-expanded="true" disabled="true">
+                                <div id="obstacle_type_label" style="display: inline-block;">Avoid</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="obstacle_abstract_context_condition_entry">Abstract Context Condition (Text)</label>
+                    <input id="obstacle_abstract_context_condition_entry" type="text" class="form-control"  placeholder="Enter name of abstract context condition here">
+                    <input id="obstacle_add_condition" class="btn btn-default" type="button" value="Add Condition to List">
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">                      
+                    <label for="obstacle_abstract_context_condition_list">List of Abstract Context Conditions</label>
+                    <select id="obstacle_abstract_context_condition_list" multiple class="form-control">
+                    </select>     
+                    <input id="obstacle_remove_condition" class="btn btn-default" type="button" disabled="false" value="Remove Condition from List">     
+                  </div>
+                </div>  
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button id="create_obstacle" type="button" class="btn btn-primary" style="display:none;">Create Obstacle</button>
+        <button id="save_obstacle" type="button" class="btn btn-primary" style="display:none;">Save</button>          
+      </div>
+    </div>
+  </div>
+</div>

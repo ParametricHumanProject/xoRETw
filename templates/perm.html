@@ -1,0 +1,169 @@
+<div class="modal fade" id="perm_modal" tabindex="-1" role="dialog" aria-labelledby="perm_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content modal-content-width-450">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="perm_modal_title"></h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="opentry">Operation Name</label>
+                    <input type="text" class="form-control" id="opentry" placeholder="Enter operation name" required>
+                  </div>              
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="obentry">Object Name</label>
+                    <input type="text" class="form-control" id="obentry" placeholder="Enter object name" required>
+                  </div>              
+                </div>  
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button id="cancel_perm" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button id="close_perm" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="create_perm" type="button" class="btn btn-primary" style="display:none;">Create Permission</button>
+        <button id="save_perm" type="button" class="btn btn-primary" style="display:none;">Save</button>          
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- perm card modal -->
+<div class="modal fade" id="permcard_modal" tabindex="-1" role="dialog" aria-labelledby="perm_card_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="perm_card_modal_title">Permission Cardinality Constraints</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <input type="hidden" id="perm_card_for_perm_name" value="">
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="perm_card_mincardinality">Minimum Owner Cardinality</label>
+                    <div class="input-group spinner">
+                      <input id="perm_card_mincardinality" type="text" class="form-control" value="0">
+                        <div class="input-group-btn-vertical">
+                          <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
+                          <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
+                        </div>
+                    </div>      
+                  </div>
+                </div>  
+            </div> <!-- row -->
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="perm_card_maxcardinality">Maximum Owner Cardinality</label>
+                    <div class="input-group spinner2">
+                      <input id="perm_card_maxcardinality" type="text" class="form-control" value="0">
+                        <div class="input-group-btn-vertical">
+                          <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
+                          <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
+                        </div>
+                    </div>      
+                  </div>
+                </div>  
+            </div> <!-- row -->
+        </form>
+        </div>
+      <div class="modal-footer">
+        <button id="cancel_permcard" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button id="save_permcard" type="button" class="btn btn-primary" style="display:none;">Save</button>          
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SSD perm modal-->
+<div class="modal fade" id="ssd_perm_modal" tabindex="-1" role="dialog" aria-labelledby="ssd_perm_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="ssd_perm_modal_title">SSD Permission Constraint Management</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="SSD_for_perm">Permission Name</label>
+                    <input type="text" class="form-control" id="SSD_for_perm">
+                    <label for="perm_list">Available Permissions</label>
+                    <select id="perm_list" multiple class="form-control">
+                    </select>     
+                    <input id="set_constraint" class="btn btn-default" type="button" value="Set SSD Constraint">
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="dmeps">Direct Mutual Exclusions</label>
+                    <select id="dmeps" multiple class="form-control">
+                    </select>     
+                    <input id="unset_constraint" class="btn btn-default" type="button" disabled="false" value="Unset SSD Constraint">     
+                  </div>
+                </div>  
+            </div>
+        </form>      
+      </div>
+      <div class="modal-footer">
+        <button id="close_ssd_perm" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- perm CC modal -->
+<div class="modal fade" id="perm_CC_mgmt_modal" tabindex="-1" role="dialog" aria-labelledby="perm_CC_mgmt_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="perm_CC_mgmt_modal_title">Context Constraint Management</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="CC_mgmt_for_perm">Permission Name</label>
+                    <input type="text" class="form-control" id="CC_mgmt_for_perm">
+                      
+                    <label for="cclist">Available Context Constraints</label>
+                    <select id="cclist" multiple class="form-control">
+                    </select>     
+                    <input id="link_constraint" class="btn btn-default" type="button" value="Link Context Constraint">
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-9">
+                  <div class="form-group">
+                    <label for="ccs">Linked Context Constraints</label>
+                    <select id="ccs" multiple class="form-control">
+                    </select>     
+                    <input id="unlink_constraint" class="btn btn-default" type="button" disabled="false" value="Unlink Context Constraint">     
+                  </div>
+                </div>  
+            </div>
+        </form>      
+      </div>
+      <div class="modal-footer">
+        <button id="close_perm_CC_mgmt" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="save_perm_CC_mgmt" type="button" class="btn btn-primary">Save</button>          
+      </div>
+    </div>
+  </div>
+</div>

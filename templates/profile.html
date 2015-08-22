@@ -1,0 +1,47 @@
+<div class="modal fade" id="profile_modal" tabindex="-1" role="dialog" aria-labelledby="profile_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="profile_modal_title"></h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="profile_name">Work Profile Name</label>
+                    <input type="text" class="form-control" id="profile_name" placeholder="Enter work profile name" required>
+                  </div>              
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="task_list">Currently Available Tasks</label>
+                    <select id="task_list" multiple class="form-control">
+                    </select>     
+                    <input id="profile_add_task" class="btn btn-default" type="button" value="Add Task to Profile">
+                  </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="tasks">Attached Tasks</label>
+                    <select id="tasks" multiple class="form-control">
+                    </select>     
+                    <input id="profile_remove_task" class="btn btn-default" type="button" disabled="false" value="Remove Task from Profile">     
+                  </div>
+                </div>  
+            </div>
+        </form>      </div>
+      <div class="modal-footer">
+        <button id="cancel_profile" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button id="close_profile" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="create_profile" type="button" class="btn btn-primary" style="display:none;">Create Profile</button>
+        <button id="save_profile" type="button" class="btn btn-primary" style="display:none;">Save</button>          
+      </div>
+    </div>
+  </div>
+</div>
