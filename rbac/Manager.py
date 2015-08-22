@@ -224,7 +224,7 @@ def createRole(name, junior_roles, senior_roles, user):
         print 'G'
         role_obj.save()
     
-                    
+    """
     # save junior roles to this role
     if junior_roles:
         print 'H'
@@ -255,6 +255,7 @@ def createRole(name, junior_roles, senior_roles, user):
         
     # remove all redundant superclass-relations
     # my updateRoleHierarchy
+    """
     return 1
 
 def createScenario(name, graph_dot, user):
