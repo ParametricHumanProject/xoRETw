@@ -86,7 +86,6 @@ class Role(models.Model):
     junior_roles = models.TextField()
     senior_roles = models.TextField()
     ssd_constraints = models.TextField()
-    
     permissions = models.TextField()
     
     work_profile = models.OneToOneField(WorkProfile, null=True)

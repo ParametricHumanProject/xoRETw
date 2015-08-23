@@ -1334,7 +1334,7 @@ function Edit_SSDRole_init(name) {
     // reset all fields
     $('#SSD_for_role').val(name);
     $('#SSD_for_role').prop('disabled', true);
-    $('#role_list').find('option').remove();
+    $('#ssd_role_role_list').find('option').remove();
     $('#dmer').find('option').remove();
     $('#tssdrc').find('option').remove();
     $('#issdc').find('option').remove();
@@ -1362,15 +1362,22 @@ function Edit_SSDRole_init(name) {
     }).fail(function() {
         alert( "Error - Edit_SSDRole_init - url_get_role_list failed." );
     });
-      
+    // TODO:
+    //set dmer [$obj getDirectSSDRoleConstraints]
+    //set tssdrc [$obj getTransitiveSSDRoleConstraints]
+    //set issdc [$obj getInheritedSSDRoleConstraints]
+    
     $('#ssd_role_modal').modal('show');      
 }
 
-function Edit_SSDRole_setConstraint() {
-    
-    var role = $('#SSD_for_role').val();
-    var mutlexcl = $('#ssd_role_role_list').val()[0];
+function Edit_SSDRole_setConstraint1() {
 
+    var role = $('#SSD_for_role').val();
+    var mutlexcl = $('#ssd_role_role_list').val();//[0];
+
+    //alert('role ' + role);
+    //alert('mutlexcl ' + mutlexcl);
+    
     if (!mutlexcl) {
         alert('Error: no option selected');
         return;
@@ -1382,7 +1389,7 @@ function Edit_SSDRole_setConstraint() {
         $('#role_list').flash();
         return;
     }
-    
+    /*
     var option_values = [];
     $('#dmer option').each(function() {
         option_values.push($(this).val());
@@ -1402,13 +1409,13 @@ function Edit_SSDRole_setConstraint() {
         dataType: "json",
         data: {role:role, mutlexcl:mutlexcl}
     }).done(function(data) {
+        var option = '<option value=' + mutlexcl + '>' + mutlexcl + '</option>';
+        $("#dmer").append(option);
+        
+        $("#role_unset_constraint").prop('disabled', false);
         
     });
-    
-    var option = '<option value=' + mutlexcl + '>' + mutlexcl + '</option>';
-    $("#dmer").append(option);
-    
-    $("#role_unset_constraint").prop('disabled', false);
+    */
     return;
 }
 
@@ -1448,7 +1455,7 @@ $("#create_ssd_role_btn").click(function(e){
 });
 
 $("#role_set_constraint").click(function(e){
-    Edit_SSDRole_setConstraint();
+    Edit_SSDRole_setConstraint1();
 });
 
 $("#role_unset_constraint").click(function(e){
@@ -1463,7 +1470,7 @@ function Edit_PRA_init(name) {
     // reset all fields
     $('#PRA_for_role').val(name);
     $('#PRA_for_role').prop('disabled', true);
-    $('#perm_list').find('option').remove();
+    $('#PRA_perm_list').find('option').remove();
     $('#dp').find('option').remove();
     $('#tp').find('option').remove();
     
@@ -1479,7 +1486,7 @@ function Edit_PRA_init(name) {
         for (var i = 0; i < perm_list.length; i++) {
             value = perm_list[i];
             var option = '<option value=' + value + '>' + value + '</option>';
-            $("#role_list").append(option);
+            $("#PRA_perm_list").append(option);
         }        
 
         if (perm_list.length) {
@@ -1492,6 +1499,11 @@ function Edit_PRA_init(name) {
     });
       
     $('#PRA_modal').modal('show');
+    
+    
+    //set dp [$obj getAllDirectlyAssignedPerms]
+    //set tp [$obj getAllTransitivelyAssignedPerms]
+    
     
     /*
     // get ssd context constraints for this role (e.g. name: is the permission name)
@@ -1605,7 +1617,7 @@ function Edit_PRA_revokePermission() {
 $("#create_PRA_btn").click(function(e){
     Edit_PRA_init('');
 });
-
+/*
 $("#role_set_constraint").click(function(e){
     Edit_SSDRole_setConstraint();
 });
@@ -1614,7 +1626,7 @@ $("#role_unset_constraint").click(function(e){
     Edit_SSDRole_unsetConstraint();
 });
 
-
+*/
 //======================================================================
 // RRA section
 //======================================================================
@@ -1765,7 +1777,7 @@ function Edit_PRA_revokePermission() {
 $("#create_PRA_btn").click(function(e){
     Edit_PRA_init('');
 });
-
+/*
 $("#role_set_constraint").click(function(e){
     Edit_SSDRole_setConstraint();
 });
@@ -1773,3 +1785,4 @@ $("#role_set_constraint").click(function(e){
 $("#role_unset_constraint").click(function(e){
     Edit_SSDRole_unsetConstraint();
 });
+*/

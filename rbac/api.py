@@ -19,26 +19,20 @@ from .models import Permission
 import Manager
 
 def exist_role(request):
-    print 'e1'
     user = request.user
     name = request.GET.get('name', None)
-    print 'manager name is', name
-    print 'e2'
     data = {}
     error_message = ''
     try:
         data['exists'] = Manager.existRole(name, user)
-        print 'e7'
         
         json_data = json.dumps(data)
-        print 'e8 - json_data: ', json_data
         return HttpResponse(json_data, content_type='application/json')
         
     except:
         error_message = sys.exc_info()[1]
         print "Error: %s" % error_message
-    
-        
+            
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
     
@@ -120,7 +114,6 @@ def edit_objective_save(request):
     return HttpResponse(json_data, content_type='application/json')
 
 def edit_scenario_save(request):
-    print 'edit_scenario_save'
     user = request.user
     
     name = request.POST.get('name', None)
@@ -144,17 +137,12 @@ def create_role_create(request):
     junior = request.POST.getlist('junior[]', None)
     senior = request.POST.getlist('senior[]', None)
 
-    print 'name is ', name    
-    print 'junior_roles:', junior
-    print 'senior_roles:', senior    
-    
     data = {}
     error_message = ''
     try:
         success = Manager.createRole(name, junior, senior, user)
         
         if success:
-            print 'Success!'
             data['success'] = str(success).lower()
             json_data = json.dumps(data)
             return HttpResponse(json_data, content_type='application/json')
@@ -194,17 +182,17 @@ def create_objective_create(request):
 
 
 def set_ssd_role_constraint(request):
+    print 'set_ssd_role_constraint'
     user = request.user
     role = request.POST.get('role', None)
     mutlexcl = request.POST.get('mutlexcl', None)
 
-    #print request
     print '1. mutlexcl is ', mutlexcl
     
     data = {}
     error_message = ''
     try:
-        success = Manager.setSSDRoleConstraint(perm, mutlexcl, user)
+        success = Manager.setSSDRoleConstraint(role, mutlexcl, user)
         
         if success:
             data['success'] = str(success).lower()
@@ -1006,64 +994,27 @@ def get_all_conditions(request):
 
 
 def get_ssd_perm_constraints(request):
-    print 'get_ssd_perm_constraints'
     user = request.user
     name = request.GET.get('name', None)
     dmeps = Manager.getSSDPermConstraints(name, user)
     
-    print 'A4'    
     data = {}
     data['dmeps'] = []
-    print 'A5'
-    print 'dmeps is ', dmeps
     for dmep in dmeps:
-        print 'A6'
         data['dmeps'].append(dmep)
-    print 'A7'    
     json_data = json.dumps(data)
-    print 'A8'
-    print 'json_data is ', json_data
     return HttpResponse(json_data, content_type='application/json')
 
 def get_context_constraints(request):
     user = request.user
     name = request.GET.get('name', None)
     ccs = Manager.getContextConstraints(name, user)
-    
-    print 'A4'    
+
     data = {}
     data['ccs'] = []
-    print 'A5'
-    print 'ccs is ', ccs
     for cc in ccs:
-        print 'A6'
         data['ccs'].append(cc.name)
-    print 'A7'    
     json_data = json.dumps(data)
-    print 'A8'
-    return HttpResponse(json_data, content_type='application/json')
-
-
-#-----------------
-    user = request.user
-    name = request.GET.get('name', None)
-    
-    
-    perm = Permission.objects.get(name=name, user=user)
-    
-    condition_list = perm.getContextConstraints(name, user)
-    
-    print 'A4'    
-    data = {}
-    data['condition_list'] = []
-    print 'A5'
-    print 'condition_list is ', condition_list
-    for condition in condition_list:
-        print 'A6'
-        data['condition_list'].append(condition.name)
-    print 'A7'    
-    json_data = json.dumps(data)
-    print 'A8'
     return HttpResponse(json_data, content_type='application/json')
 
 def create_scenario_create(request):
@@ -1189,17 +1140,12 @@ def delete_permission(request):
     return HttpResponse(json_data, content_type='application/json')
 
 def edit_rolecard_save(request):
-    print 'edit_rolecard_save'
     user = request.user
         
     name = request.POST.get('name', None)
     min_card = request.POST.get('min', None)
     max_card = request.POST.get('max', None)
-    
-    print 'name ', name
-    print 'min_card ', min_card
-    print 'max_card ', max_card
-    
+        
     obj = Role.objects.get(name=name, user=user)
     
     obj.mincardinality = min_card
@@ -1228,3 +1174,10 @@ def edit_permcard_save(request):
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
 
+def perm_role_assign():
+    #permRoleAssign
+    pass
+
+def perm_role_revoke():
+    #permRoleRevoke
+    pass

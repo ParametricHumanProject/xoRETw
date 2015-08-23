@@ -104,6 +104,10 @@ urlpatterns = patterns('',
     # for perm
     url(r'^api/get_context_constraints$', api.get_context_constraints, name='get_context_constraints'),
     url(r'^api/get_ssd_perm_constraints$', api.get_ssd_perm_constraints, name='get_ssd_perm_constraints'),
+    url(r'^api/perm_role_assign$', api.perm_role_assign, name='perm_role_assign'),
+    url(r'^api/perm_role_revoke$', api.perm_role_revoke, name='perm_role_revoke'),
+    
+    
     
     #url(r'^api/get_task_list$', api.get_task_list, name='get_task_list'),
     

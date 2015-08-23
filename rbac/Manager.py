@@ -414,58 +414,86 @@ def unlinkConditionFromContextConstraint(condition, name, user):
             return 1
     return 0
 
+#done
+def possessCommonSeniorRole(role_name1, role_name2, user):
+    r1SeniorRoles = getAllSeniorRoles(role_name1, user)
+    r2SeniorRoles = getAllSeniorRoles(role_name2, user)
+    
+    for sr2 in r2SeniorRoles:
+        if sr2 in r1SeniorRoles:
+            return 1
+    return 0    
+
+def setSSDConstraint(role_name, mutlexcl_name, user):
+    return 1
+    
+"""
+Role instproc setSSDConstraint {role} {
+  my instvar ssdconstraints
+  set name [self]
+  if {![string equal $name $role]} {
+    if {![my hasSSDRoleConstraintTo $role]} {
+      set ssdconstraints($role) 1
+      my log NORMAL "[self] [self proc]: defined <<$role>> as (statically) mutual exclusive."
+      return 1
+    } else {
+      my log INFO "[self] [self proc] INFO, role: <<$role>> is already (statically)\
+                       mutual exclusive to <<[self]>>. Note\
+                       that SSD Constraints are inherited via a role-hierarchy."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, a role cannot be mutual exclusive to itself."
+    return 0
+  }
+}
+"""
+
+"""
+# role is fully-qualified name of a runtime-role-object (e.g. re::roles::MyRole)
+Role instproc unsetSSDConstraint {role} {
+  my instvar ssdconstraints
+  if {[info exists ssdconstraints($role)]} {
+    unset ssdconstraints($role)
+    my log NORMAL "[self] [self proc]: deleted mutual exclusion constraint to <<$role>>."
+    return 1
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role: <<$role>> is not mutual exclusive\
+                       to <<[my name]>>"
+    return 0
+  }
+}
+"""
+
 # a role cannot be defined as mutual exclusive to one of its junior-roles
 # or one of its senior-roles. Furthermore two roles that have a common
 # senior-role must not be defined as mutual exclusive.
 # role and mutlexcl are role names respectively (e.g. "Student" or "Professor")
-def setSSDRoleConstraint(role, mutlexcl, user):
-    """
-  set role [self]::roles::$role
-  set mutlexcl [self]::roles::$mutlexcl
-  if {[my existRole $role]} {
-    if {[my existRole $mutlexcl]} {
-      if {![string equal $role $mutlexcl]} {
-	if {![my possessCommonSeniorRole $role $mutlexcl]} {
-	  #[$role info parent]* specifies the pattern parameter for "info heritage" (e.g.: ::rm::roles*)
-	  set juniorRoles [$role info heritage [[self] info parent]*]
-	  set seniorRoles [$role getAllSeniorRoles]
-	  if {[lsearch -exact $seniorRoles $mutlexcl] == -1} {
-	    if {[lsearch -exact $juniorRoles $mutlexcl] == -1} {
-	      #set the ssdRoleConstraint for both roles
-	      set success [$role setSSDConstraint $mutlexcl]
-	      if {$success} {
-		set success [$mutlexcl setSSDConstraint $role]
-	      }
-	      return $success
-	    } else {
-	      my log FAILED "[self] [self proc] FAILED, role <<$role>> cannot be mutual\
-                                   exclusive to its junior-role <<$mutlexcl>>."
-	      return 0
-	    }		
-	    } else {
-	      my log FAILED "[self] [self proc] FAILED, role <<$role>> cannot be mutual\
-                                 exclusive to its senior-role <<$mutlexcl>>."
-	      return 0
-	    }
-	} else {
-	  my log FAILED "[self] [self proc] FAILED, <<$role>> and <<$mutlexcl>> possess a\
-                               common senior-role."
-	  return 0
-	}
-      } else {
-	my log FAILED "[self] [self proc] FAILED, a role cannot be mutual exclusive to itself."
-	return 0
-      }
-    } else {
-      my log FAILED "[self] [self proc] FAILED, role <<$mutlexcl>> does not exist."
-      return 0
-    }    
-  } else {
-    my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
-    return 0
-  }
-}
-    """
+def setSSDRoleConstraint(role_name, mutlexcl_name, user):
+
+    if role_name != mutlexcl_name:
+        if not possessCommonSeniorRole(role_name, mutlexcl_name, user):
+            juniorRoles = getAllJuniorRoles(role_name, user)
+            seniorRoles = getAllSeniorRoles(role_name, user)
+            if mutlexcl_name not in seniorRoles:
+                if mutlexcl_name not in juniorRoles:
+                    success = setSSDConstraint(role_name, mutlexcl_name, user)
+                    if success:
+                        setSSDConstraint(mutlexcl_name, role_name, user)
+                        
+                    return success
+                else:
+                    e = "FAILED, role <<$role>> cannot be mutual exclusive to its junior-role <<$mutlexcl>>."
+                    raise xoRETwError(e)                                            
+            else:
+                e = "FAILED, role <<$role>> cannot be mutual exclusive to its senior-role <<$mutlexcl>>"
+                raise xoRETwError(e)                        
+        else:
+            e = "FAILED, <<$role>> and <<$mutlexcl>> possess a common senior-role."
+            raise xoRETwError(e)
+    else:
+        e = "FAILED, a role cannot be mutual exclusive to itself."
+        raise xoRETwError(e)
     return 0
 
 def setSSDPermConstraint(perm_name, mutlexcl_name, user):
@@ -909,3 +937,72 @@ def getSSDPermConstraints(name, user):
 def getAllConditions(name, user):
     CC = ContextConstraint.objects.get(name=name, user=user)
     return CC.conditions.all()
+
+
+"""
+  set perm [self]::permissions::[join $perm _]
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    if {[my existPermission $perm]} {	   
+      if {[my ssdPermConstraintAllowPRA $perm $role]} {
+	if {[my permMaxCardinalityAllowAssignment $perm]} {
+	  set success [$role assignPerm $perm]
+	  if {$success} {
+	    my incrPermOwnerQuantity $perm
+	    my addTraceRelation Permission [$perm name] assigned-to Role [$role name]
+	  }
+	  return $success
+	} else {
+	  my log FAILED "[self] [self proc] FAILED, the permission maximum owner cardinality of\
+                             <<[$perm name]>> is already reached. In order to assign permission\
+                             <<[$perm name]>> to role: <<[$role name]>> you have to revoke\
+                             <<[$perm name]>> from at least one of its current owners first."
+	  return 0
+	}		    
+      } else {
+	my log FAILED "[self] [self proc] FAILED, assignment prevented by SSD constraint defined on\
+                           permission <<$perm>>. <<$role>> or one of its owners (subjects) possesses\
+                           at least one permission that is defined as mutual exclusive to <<$perm>>."
+	return 0
+      }
+    } else {
+      my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role: <<$role>> does not exist."
+    return 0
+  }
+}
+
+# perm is an "action object" pair
+Manager instproc permRoleRevoke {perm role} {
+  set perm [self]::permissions::[join $perm _]    
+  set role [self]::roles::$role
+  if {[my existRole $role]} {
+    if {[my existPermission $perm]} {
+      if {[my permMinCardinalityAllow $perm]} {
+	set success [$role revokePerm $perm]
+	if {$success} {
+	  my decrPermOwnerQuantity $perm
+	  my removeTraceRelation Permission [$perm name] assigned-to Role [$role name]
+	}
+	return $success
+      } else {
+	my log FAILED "[self] [self proc] FAILED, the permission minimal owner cardinality\
+                    of <<[$perm name]>> has already been reached\
+             \n --> In order to revoke permission <<$perm>> from role: <<$role>>\
+                    you have to assign at least one new owner first."
+	return 0
+      }
+    } else {
+      my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role: <<$role>> does not exist."
+    return 0
+  }
+}
+
+"""
