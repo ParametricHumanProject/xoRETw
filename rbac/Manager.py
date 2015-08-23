@@ -14,14 +14,33 @@ from .models import Role
 
 from Error import xoRETwError
 
+
+def getAllDirectlyAssignedPerms(role_name, user):
+    print 'getAllDirectlyAssignedPerms'
+    role_obj = Role.objects.get(name=role_name, user=user)
     
+    direct = []
+    
+    if role_obj.permissions:
+        direct = role_obj.permissions.split(',')
+        
+    return direct
 
+def getAllTransitivelyAssignedPerms(role_name, user):
+    junior_roles = getAllJuniorRoles(role_name, user)
+    transitive_perms = []
+    jr_direct_perms = []
+    
+    if junior_roles:
+        for role in junior_roles:
+            jr_direct_perms = getAllDirectlyAssignedPerms(role, user)
+            if jr_direct_perms:
+                for p in jr_direct_perms:
+                    if p not in transitive_perms:
+                        transitive_perms.append(p)
+                        
+    return transitive_perms
 
-def getAllDirectlyAssignedPerms(role, user):
-    pass
-
-def getAllTransitivelyAssignedPerms(role, user):
-    pass
     
 def getAllPerms(role, user):
     all_perms = getAllDirectlyAssignedPerms(role, user)
@@ -47,63 +66,49 @@ def existRole(role_name, user):
       
 #done
 def getAllSeniorRoles(role_name, user):
-    print 'call to getAllSeniorRoles'
-    print 'role_name i s ', role_name
+    print 'getAllSeniorRoles'
+    print 'role_name is ', role_name 
+    role_obj = Role.objects.get(name=role_name, user=user)
+    print '11'
+    senior_roles = role_obj.senior_roles
+    print 'role_obj.senior_roles ', role_obj.senior_roles
+    print 'type(senior_roles): ', type(senior_roles)
     
-    role = Role.objects.get(name=role_name, user=user)
-    print 'role is ', role
-    print 'role name is ', role.name
-    
-    print 'getting role.senior_roles.all()'
-    senior_roles = role.senior_roles
-    
-    print 'senior_roles is ', senior_roles
-    if senior_roles:
-        print 'senior_roles.name', senior_roles.name
-        
-    seniors = []
-    print 'seniors is ', seniors
-    print 'GG2'
+    senior = []
     
     if senior_roles:
-        print 'hellow', dir(senior_roles)
-        for sr in senior_roles:
-            print 'GG3'
-            print sr.name
-            seniors.append(sr.name)
-
-    print 'seniors is ', seniors
-    if seniors:
-        print 'GG5'
-        for sr in seniors:
-            print 'GG6'
+        senior = senior_roles.split(',')
+    
+    if senior:
+        for sr in senior:
             next_level = getAllSeniorRoles(sr, user)
             for r in next_level:
-                if r not in seniors:
-                    seniors.append(r)
-    return seniors
+                if r not in senior:
+                    senior.append(r)
+                    
+    return senior
 
 #done
 def getAllJuniorRoles(role_name, user):
+        
     print 'getAllJuniorRoles'
+    
     role = Role.objects.get(name=role_name, user=user)
-    print 'zz'
     junior_roles = role.junior_roles
-    print 'zz2'
-    juniors = []
+    
+    junior = []
     
     if junior_roles:
-        for jr in junior_roles:
-            print jr.name
-            juniors.append(jr.name)
+        junior = junior_roles.split(',')
     
-    if juniors:
-        for jr in juniors:
+    if junior:
+        for jr in junior:
             next_level = getAllJuniorRoles(jr, user)
             for r in next_level:
-                if r not in juniors:
-                    juniors.append(r)
-    return juniors
+                if r not in junior:
+                    junior.append(r)
+    
+    return junior
     
 #done
 def getInheritedSSDRoleConstraints(role_name, user):
@@ -121,7 +126,10 @@ def getInheritedSSDRoleConstraints(role_name, user):
     
 #done
 def getTransitiveSSDRoleConstraints(role_name, user):
+    print 'getTransitiveSSDRoleConstraints'
+    
     direct = getDirectSSDRoleConstraints(role_name, user)
+    print '1 direct ', direct
     transitive = []
 
     if direct:
@@ -132,18 +140,25 @@ def getTransitiveSSDRoleConstraints(role_name, user):
     return transitive
     
 #done    
-def getDirectSSDRoleConstraints(role, user):
-    role_obj = Role.objects.get(name=role, user=user)
-    ssd_constraints = role_obj.ssd_constraints.all()
-
-    ssd_role_constraints = []
-    for r in ssd_constraints:
-        ssd_role_constraints.append(r.name)
-        
-    return ssd_role_constraints
+def getDirectSSDRoleConstraints(role_name, user):
+    
+    print 'getDirectSSDRoleConstraints'
+    role_obj = Role.objects.get(name=role_name, user=user)
+    print 'role_obj.ssd_constraints ', role_obj.ssd_constraints
+    direct = []
+    
+    # empty string
+    if role_obj.ssd_constraints:
+        print 'not empty'
+        direct = role_obj.ssd_constraints.split(',')
+    
+    print 'type(direct)', type(direct)
+    print 'direct', direct
+    return direct
 
 #done    
 def getSSDRoleConstraints(role, user):
+    print 'getSSDRoleConstraints'
     direct = getDirectSSDRoleConstraints(role, user)
     transitive = getTransitiveSSDRoleConstraints(role, user)
     inherited = getInheritedSSDRoleConstraints(role, user)
@@ -152,6 +167,7 @@ def getSSDRoleConstraints(role, user):
     
 #done    
 def hasSSDRoleConstraintTo(role, r, user):
+    print 'hasSSDRoleConstraintTo'
     mutlExclRoles = getSSDRoleConstraints(role, user)
     if mutlExclRoles:
         for mutlExclRole in mutlExclRoles:
@@ -159,103 +175,129 @@ def hasSSDRoleConstraintTo(role, r, user):
                 return 1
     return 0
 
-#    
+#done
 def hasSSDPermConstraintTo(role, r, user):
     own = getAllPerms(role, user)
     other = getAllPerms(r, user)
     for p in own:
         for op in other:
-            if isStaticallyMutualExclusive(p, op, user):
+            if isStaticallyMutualExclusivePerm(p, op, user):
                 return 1
     return 0
 
-#        
+#done
+def isStaticallyMutualExclusivePerm(perm_name, p, user):
+
+    perm_obj = Permission.objects.get(name=perm_name, user=user)
+    
+    ssd_constraints = []
+    
+    if perm_obj.ssd_constraints:
+        ssd_constraints = perm_obj.ssd_constraints.split(',')
+        for i in ssd_constraints:
+            if i == p:
+                return 1
+    
+    return 0
+
+#done        
 def isStaticallyMutualExclusive(role, r, user):
+    print 'isStaticallyMutualExclusive'
     if hasSSDRoleConstraintTo(role, r, user):
         return 1
-    #if hasSSDPermConstraintTo(role, r, user):
-    #    return 1
+    if hasSSDPermConstraintTo(role, r, user):
+        return 1
     return 0
 
 #done    
-def ssdConstraintsAllowSeniorRole(role, senior, user):   
+def ssdConstraintsAllowSeniorRole(role, senior, user):
+    print 'ssdConstraintsAllowSeniorRole'
     allseniors = getAllSeniorRoles(senior, user)
+    print 'allseniors ', allseniors
     for r in allseniors:
         if isStaticallyMutualExclusive(role, r, user):
+            print 'return 0'
             return 0
+    print 'return 1'
     return 1
 
 #done        
 def createRole(name, junior_roles, senior_roles, user):
-    print 'B'
-    """
+    
+    print '1'
     if junior_roles:
-        print 'Ba'
+        
         # now check if two or more of the intended juniorRoles are defined as 
         # mutual exclusive or own mutual exclusive permissions
+        
         for r1 in junior_roles:
             for r2 in junior_roles:
-                print 'C'
                 if r1 != r2:
-                    print 'isStaticallyMutualExclusive'
+                    print 'r1 is ', r1
+                    print 'r2 is ', r2
                     if isStaticallyMutualExclusive(r1, r2, user):
                         e = "Error: at least two of the intended junior-roles of " + name + " are mutual exclusive." + r1 + " and " + r2 + " are mutually exclusive or own permissions that are mutual exclusive."
                         raise xoRETwError(e)
     
+    print '------2------'
+    
+    
     if junior_roles and senior_roles:
         for sr in senior_roles:
             for jr in junior_roles:
-                print 'ssdConstraintsAllowSeniorRole'
                 if not ssdConstraintsAllowSeniorRole(jr, sr, user):
                     e = "FAILED, " + jr + " and " + sr + " are statically mutual exclusive. Therefore, " + sr + " cannot be defined as (transitive) senior-role of " + jr + ". Creation of role " + name + " failed."
                     raise xoRETwError(e)
-    """
+    
+    print '------3------'
     
     # create the new role
     try:
-        print 'D'
         role_obj, created = Role.objects.get_or_create(name__exact=name, user__exact=user, defaults={'name':name, 'user':user})
-        print 'E'
     except Exception as e:
         error_message = str(e)
         raise xoRETwError(error_message)
-    print 'F'    
     if created:
-        print 'G'
         role_obj.save()
+        
+    print '------4------'
     
-    """
     # save junior roles to this role
+    junior = []
     if junior_roles:
-        print 'H'
         for jr in junior_roles:
-            print 'I'
-            print 'junior role is ', jr
             obj, created = Role.objects.get_or_create(name=jr, user=user)
-            print 'J'
             if created:
-                print 'K'
-                obj.save()
-            print '12'
-            role_obj.junior.add(obj)
-            print '12A'
-
-    # save senior_roles to this role    
-    if senior_roles:
-        print 'save senior_roles to this role'
-        for sr in senior_roles:
-            print 'sr is ', sr
-            obj, created = Role.objects.get_or_create(name=sr, user=user)
-            print 'after'
-            if created:
-                print 'created true'
                 obj.save()
                 
-            role_obj.senior.add(obj)
+            junior.append(jr)
         
+        print 'junior is ', junior
+        role_obj.junior_roles = ",".join(junior)
+        role_obj.save()
+        
+        # save senior_roles to this role
+        senior = []
+        print 'senior_roles is ', senior_roles
+        if senior_roles:
+            for sr in senior_roles:
+                print 'sr is ', sr
+                obj, created = Role.objects.get_or_create(name=sr, user=user)
+                if created:
+                    print 'created - senior'
+                    obj.save()
+
+                senior.append(sr)
+            
+        print '1 senior is ', senior
+        s = ",".join(senior)
+        print 's is ', s
+        role_obj.senior_roles = s
+        role_obj.save()
+           
     # remove all redundant superclass-relations
     # my updateRoleHierarchy
-    """
+    
     return 1
 
 def createScenario(name, graph_dot, user):
@@ -377,76 +419,135 @@ def unlinkConditionFromContextConstraint(condition, name, user):
 # senior-role must not be defined as mutual exclusive.
 # role and mutlexcl are role names respectively (e.g. "Student" or "Professor")
 def setSSDRoleConstraint(role, mutlexcl, user):
+    """
+  set role [self]::roles::$role
+  set mutlexcl [self]::roles::$mutlexcl
+  if {[my existRole $role]} {
+    if {[my existRole $mutlexcl]} {
+      if {![string equal $role $mutlexcl]} {
+	if {![my possessCommonSeniorRole $role $mutlexcl]} {
+	  #[$role info parent]* specifies the pattern parameter for "info heritage" (e.g.: ::rm::roles*)
+	  set juniorRoles [$role info heritage [[self] info parent]*]
+	  set seniorRoles [$role getAllSeniorRoles]
+	  if {[lsearch -exact $seniorRoles $mutlexcl] == -1} {
+	    if {[lsearch -exact $juniorRoles $mutlexcl] == -1} {
+	      #set the ssdRoleConstraint for both roles
+	      set success [$role setSSDConstraint $mutlexcl]
+	      if {$success} {
+		set success [$mutlexcl setSSDConstraint $role]
+	      }
+	      return $success
+	    } else {
+	      my log FAILED "[self] [self proc] FAILED, role <<$role>> cannot be mutual\
+                                   exclusive to its junior-role <<$mutlexcl>>."
+	      return 0
+	    }		
+	    } else {
+	      my log FAILED "[self] [self proc] FAILED, role <<$role>> cannot be mutual\
+                                 exclusive to its senior-role <<$mutlexcl>>."
+	      return 0
+	    }
+	} else {
+	  my log FAILED "[self] [self proc] FAILED, <<$role>> and <<$mutlexcl>> possess a\
+                               common senior-role."
+	  return 0
+	}
+      } else {
+	my log FAILED "[self] [self proc] FAILED, a role cannot be mutual exclusive to itself."
+	return 0
+      }
+    } else {
+      my log FAILED "[self] [self proc] FAILED, role <<$mutlexcl>> does not exist."
+      return 0
+    }    
+  } else {
+    my log FAILED "[self] [self proc] FAILED, role <<$role>> does not exist."
+    return 0
+  }
+}
+    """
     return 0
 
-def setSSDPermConstraint(perm, mutlexcl, user):
-    if not permAssignedToSameRole(perm, mutlexcl, user):
+def setSSDPermConstraint(perm_name, mutlexcl_name, user):
+    print 'setSSDPermConstraint'
+    
+    if not permAssignedToSameRole(perm_name, mutlexcl_name, user):
+        print 'not permAssignedToSameRole'
         try:
-            perm_obj = Permission.objects.get(name=perm, user=user)
-        except:
-            e = sys.exc_info()[0]
+            perm_obj = Permission.objects.get(name=perm_name, user=user)
+        except Exception as e:
+            error_message = str(e)
             raise xoRETwError(e)
         
-        if perm_obj:
-            try:
-                mutlexcl_obj, created = Permission.objects.get_or_create(name__exact=mutlexcl, user__exact=user)
-            except:
-                e = sys.exc_info()[0]
-                raise xoRETwError(e)
+        ssd_constraints = []
         
-            if created:
-                print 'Error - should not have been created here.'
-
-            perm_obj.ssd_constraints.add(mutlexcl_obj)
+        if perm_obj.ssd_constraints:
+            ssd_constraints = perm_obj.ssd_constraints.split(',')
             
-
+        ssd_constraints.append(mutlexcl_name)
+        perm_obj.ssd_constraints = ",".join(ssd_constraints)
+        perm_obj.save()
+            
         try:
-            mutlexcl_obj = Permission.objects.get(name=mutlexcl, user=user)
-        except:
-            e = sys.exc_info()[0]
+            mutlexcl_obj = Permission.objects.get(name=mutlexcl_name, user=user)
+        except Exception as e:
+            error_message = str(e)
             raise xoRETwError(e)
         
-        if mutlexcl_obj:
-            try:
-                perm_obj, created = Permission.objects.get_or_create(name__exact=perm, user__exact=user)
-            except:
-                e = sys.exc_info()[0]
-                raise xoRETwError(e)
+        ssd_constraints = []
         
-            if created:
-                print 'Error - should not have been created here.'
-
-            mutlexcl_obj.ssd_constraints.add(perm_obj)
+        if mutlexcl_obj.ssd_constraints:
+            ssd_constraints = mutlexcl_obj.ssd_constraints.split(',')
             
-            return 1
+        ssd_constraints.append(perm_name)
+        mutlexcl_obj.ssd_constraints = ",".join(ssd_constraints)
+        mutlexcl_obj.save()
             
+        return 1
+    else:
+        e = "FAILED, at least one role owns both permissions <<$perm>> and <<$mutlexcl>> (directly or transitively). In order to register a mutual exclusion constraint for two permissions they must not be assigned to the same role."        
+        raise xoRETwError(e)
+        
     return 0
 
-def transitivelyOwnsPerm(role, perm, user):
-    return 0
-    
-def directlyOwnsPerm(role, perm, user):
-    
-    permissions = role.permissions.all()
-    print '############ permissions: ', permissions
-    for permission in permissions:
-        print 'permission.name is ', permission.name
-        if permission.name == perm:
+#done
+def transitivelyOwnsPerm(role_name, perm, user):
+    junior_roles = getAllJuniorRoles(role_name, user)
+    for role in junior_roles:
+        if directlyOwnsPerm(role_name, perm, user):
             return 1
     return 0
 
-def ownsPerm(role, perm, user):
-    if directlyOwnsPerm(role, perm, user) or transitivelyOwnsPerm(role, perm, user):
+#done    
+def directlyOwnsPerm(role_name, perm, user):
+    
+    role_obj = Role.objects.get(name=role_name, user=user)
+    
+    permissions = []
+    
+    if role_obj.permissions:
+        permissions = role_obj.permissions.split(',')    
+    
+    for p in permissions:
+        if p == perm:
+            return 1
+    return 0
+
+def ownsPerm(role_name, perm, user):
+    print 'ownsPerm'
+    if directlyOwnsPerm(role_name, perm, user) or transitivelyOwnsPerm(role_name, perm, user):
         return 1
     return 0
     
 def permAssignedToSameRole(perm1, perm2, user):
+    print 'permAssignedToSameRole'
     print 'perm1 is ', perm1
     print 'perm2 is ', perm2
     
     role_list = getRoleList(user)  
     owners = []
-
+    print 'role_list ', role_list
+    
     for role in role_list:
         if ownsPerm(role, perm1, user) and ownsPerm(role, perm2, user):
             owners.append(role)
@@ -744,17 +845,22 @@ def createProfile(name, user):
         return 1
 
 def createPermission(perm_operation, perm_object, user):
-    
+    print '1'
     name = perm_operation + '_' + perm_object
-    
+    print 'name is ', name
+    print '2'
     # use the permission name as an exact lookup
     try:
-        obj, created = Permission.objects.get_or_create(name__exact=name, user__exact=user, defaults={'name':name, 'perm_operation':perm_operation, 'perm_object':perm_object, 'user':user})
+        print '3'
+        obj, created = Permission.objects.get_or_create(name__exact=name, user__exact=user, defaults={'name':name, 'user':user})
+        print '4'
     except:
         e = sys.exc_info()[0]
         raise xoRETwError(e)
-    
+        
+    print '5'
     if created:
+        print '6'
         obj.save()   
         return 1
 
@@ -777,15 +883,28 @@ def getTaskList(user):
     return Task.objects.filter(user=user)
 
 def getRoleList(user):
-    return Role.objects.filter(user=user)
+    role_list = Role.objects.filter(user=user)
+    roles = []
+    
+    for r in role_list:
+        roles.append(r.name)
+        
+    return roles
 
 def getContextConstraints(name, user):
     perm = Permission.objects.get(name=name, user=user)
     return perm.context_constraints.all()
 
 def getSSDPermConstraints(name, user):
-    perm = Permission.objects.get(name=name, user=user)
-    return perm.ssd_constraints.all()
+    print 'getSSDPermConstraints'
+    perm_obj = Permission.objects.get(name=name, user=user)
+    
+    ssd_perm_constraints = []
+    if perm_obj.ssd_constraints:
+        ssd_perm_constraints = perm_obj.ssd_constraints.split(',')
+        
+    print 'ssd_perm_constraints: ', ssd_perm_constraints
+    return ssd_perm_constraints
 
 def getAllConditions(name, user):
     CC = ContextConstraint.objects.get(name=name, user=user)

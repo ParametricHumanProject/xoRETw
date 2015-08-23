@@ -138,27 +138,23 @@ def edit_scenario_save(request):
     return HttpResponse(json_data, content_type='application/json')
 
 def create_role_create(request):
-    print 'create_role_create'
     user = request.user
     
     name = request.POST.get('name', None)
     junior = request.POST.getlist('junior[]', None)
     senior = request.POST.getlist('senior[]', None)
-    
+
+    print 'name is ', name    
     print 'junior_roles:', junior
-    print 'senior_roles:', senior
-    
-    print 'name is ', name
+    print 'senior_roles:', senior    
     
     data = {}
     error_message = ''
     try:
-        print 'A'
         success = Manager.createRole(name, junior, senior, user)
-        print 'B'
         
         if success:
-            print 'success'
+            print 'Success!'
             data['success'] = str(success).lower()
             json_data = json.dumps(data)
             return HttpResponse(json_data, content_type='application/json')
@@ -169,9 +165,7 @@ def create_role_create(request):
         data['success'] = str(False).lower()
         data['error_message'] = error_message
     
-    print 'data is ', data    
     json_data = json.dumps(data)
-    print 'exiting create_role_create'
     return HttpResponse(json_data, content_type='application/json')
 
 def create_objective_create(request):
@@ -227,16 +221,15 @@ def set_ssd_role_constraint(request):
     return HttpResponse(json_data, content_type='application/json')
 
 def set_ssd_perm_constraint(request):
+    print 'set_ssd_perm_constraint'
     user = request.user
     perm = request.POST.get('perm', None)
     mutlexcl = request.POST.get('mutlexcl', None)
-
-    #print request
-    print '1. mutlexcl is ', mutlexcl
     
     data = {}
     error_message = ''
     try:
+        print '1'
         success = Manager.setSSDPermConstraint(perm, mutlexcl, user)
         
         if success:
@@ -754,7 +747,7 @@ def unlink_condition_from_context_constraint(request):
         
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
-    
+    createRole
 def add_derived_abstract_context_condition_to_obstacle(request):
     user = request.user
     abstract_context_condition = request.POST.get('abstract_context_condition', None)
@@ -987,7 +980,7 @@ def get_role_list(request):
     data['role_list'] = []
 
     for role in role_list:
-        data['role_list'].append(role.name)
+        data['role_list'].append(role)
 
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
@@ -1013,6 +1006,7 @@ def get_all_conditions(request):
 
 
 def get_ssd_perm_constraints(request):
+    print 'get_ssd_perm_constraints'
     user = request.user
     name = request.GET.get('name', None)
     dmeps = Manager.getSSDPermConstraints(name, user)
@@ -1024,7 +1018,7 @@ def get_ssd_perm_constraints(request):
     print 'dmeps is ', dmeps
     for dmep in dmeps:
         print 'A6'
-        data['dmeps'].append(dmep.name)
+        data['dmeps'].append(dmep)
     print 'A7'    
     json_data = json.dumps(data)
     print 'A8'

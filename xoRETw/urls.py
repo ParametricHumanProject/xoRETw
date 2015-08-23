@@ -27,7 +27,7 @@ urlpatterns = patterns('',
     url(r'^api/add_scenarios_to_task$', api.add_scenarios_to_task, name='add_scenarios_to_task'),
     url(r'^api/link_context_constraints_to_perm$', api.link_context_constraints_to_perm, name='link_context_constraints_to_perm'),
     url(r'^api/set_ssd_perm_constraint', api.set_ssd_perm_constraint, name='set_ssd_perm_constraint'),
-    url(r'^api/set_ssd_role_constraint', api.set_ssd_role_constraint, name='set_ssd_perm_constraint'),
+    url(r'^api/set_ssd_role_constraint', api.set_ssd_role_constraint, name='set_ssd_role_constraint'),
     
     
     # clear

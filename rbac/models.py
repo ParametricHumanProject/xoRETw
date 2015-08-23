@@ -5,40 +5,42 @@ from django.contrib.auth.models import User
 
 class Condition(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50, unique=True)
+    name = models.TextField(unique=True)
 
 class AbstractContextCondition(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50, unique=True)
+    name = models.TextField(unique=True)
 
 class Step(models.Model):
-    user = models.ForeignKey(User)
-    actor = models.CharField(max_length=50, unique=True)
-    action = models.CharField(max_length=50, unique=True)
-    target = models.CharField(max_length=50, unique=True)
-    name = models.CharField(max_length=200, unique=True)
-    step = models.ManyToManyField('self')
+    user    = models.ForeignKey(User)
+    name    = name = models.TextField(unique=True)
+
+    actor   = models.TextField()
+    action  = models.TextField()
+    target  = models.TextField()
 
 class Scenario(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50, unique=True)
-    graph = models.TextField(blank=True)
-    steps = models.ManyToManyField(Step)
+    name = models.TextField(unique=True)
+    graph = models.TextField()
 
 class Task(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50, unique=True)
+    name = models.TextField(unique=True)
+    
     scenarios = models.ManyToManyField(Scenario)
 
 class WorkProfile(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50, unique=True)
+    name = models.TextField(unique=True)
+    
     tasks = models.ManyToManyField(Task)
 
 class Objective(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50, unique=True)
-    type = models.CharField(max_length=50)
+    name = models.TextField(unique=True)
+    objective_type = models.TextField(blank=True)
+    
     conditions = models.ManyToManyField(Condition)
     abstract_context_conditions = models.ManyToManyField(AbstractContextCondition)
     
@@ -48,45 +50,46 @@ class Objective(models.Model):
 
 class Obstacle(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50, unique=True)
-    type = models.CharField(max_length=50)
+    name = models.TextField(unique=True)
+    obstacle_type = models.TextField(blank=True)
     
     conditions = models.ManyToManyField(Condition)
     abstract_context_conditions = models.ManyToManyField(AbstractContextCondition)
     
-    objective = models.ManyToManyField(Objective)
+    objective = models.ManyToManyField(Objective, blank=True)
 
 class ContextConstraint(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50, unique=True)
-    conditions = models.ManyToManyField(Condition)
+    name = models.TextField(unique=True)
+    conditions = models.ManyToManyField(Condition, blank=True)
 
 class Permission(models.Model):
     user = models.ForeignKey(User)
+    name = models.TextField(unique=True)
     
-    name = models.CharField(max_length=50, unique=True)
-    perm_operation = models.CharField(max_length=50, unique=True)
-    perm_object = models.CharField(max_length=50, unique=True)
+    perm_operation = models.TextField(blank=True)
+    perm_object = models.TextField(blank=True)
     
-    step = models.OneToOneField(Step, null=True, blank=True)
+    #step = models.OneToOneField(Step, blank=True)
 
-    context_constraints = models.ManyToManyField(ContextConstraint)
-    ssd_constraints = models.ManyToManyField('self')
+    context_constraints = models.ManyToManyField(ContextConstraint, blank=True)
+    
+    ssd_constraints = models.TextField(blank=True)
     
     mincardinality = models.IntegerField(default=0)  # same as blank=True, null=True
     maxcardinality = models.IntegerField(default=0)  # same as blank=True, null=True    
         
 class Role(models.Model):
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=50, unique=True)
+    name = models.TextField(unique=True)
     
-    junior_roles = models.ForeignKey('self', related_name='junior', null=True, blank=True)
-    senior_roles = models.ForeignKey('self', related_name='senior', null=True, blank=True)
-    ssd_constraints = models.ManyToManyField('self', null=True, blank=True)
+    junior_roles = models.TextField()
+    senior_roles = models.TextField()
+    ssd_constraints = models.TextField()
     
-    permissions = models.ManyToManyField(Permission, null=True, blank=True)
+    permissions = models.TextField()
     
-    work_profile = models.OneToOneField(WorkProfile, null=True, blank=True)
+    work_profile = models.OneToOneField(WorkProfile, null=True)
     
     mincardinality = models.IntegerField(default=0)  # same as blank=True, null=True
     maxcardinality = models.IntegerField(default=0)  # same as blank=True, null=True    

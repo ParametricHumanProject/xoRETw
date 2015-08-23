@@ -1121,7 +1121,7 @@ function Edit_SSDPerm_init(name) {
     $('#perm_list').find('option').remove();
     $('#dmeps').find('option').remove();
     
-    // get_context_constraint_list
+    // get_permission_list
     $.ajax({
         method: "GET",
         url: url_get_permission_list,
@@ -1172,12 +1172,12 @@ function Edit_SSDPerm_init(name) {
         $('#ssd_perm_modal').modal('show');
                 
     }).fail(function() {
-        alert( "Error - Edit_PermCCMgmt_init - url_get_ssd_perm_constraints failed." );
+        alert( "Error - Edit_SSDPerm_init - url_get_ssd_perm_constraints failed." );
     });    
 }
 
 function Edit_SSDPerm_setConstraint() {
-    
+    alert('12')
     var perm = $('#SSD_for_perm').val();
     var mutlexcl = $('#perm_list').val()[0];
 
@@ -1253,11 +1253,12 @@ function Edit_SSDPerm_unsetConstraint() {
     return;
 }
 
-$("#set_constraint").click(function(e){
+$("#perm_set_constraint").click(function(e) {
+    alert('1')
     Edit_SSDPerm_setConstraint();
 });
 
-$("#unset_constraint").click(function(e){
+$("#perm_unset_constraint").click(function(e) {
     Edit_SSDPerm_unsetConstraint();
 });
 
