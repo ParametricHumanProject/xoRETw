@@ -107,7 +107,10 @@ urlpatterns = patterns('',
     url(r'^api/perm_role_assign$', api.perm_role_assign, name='perm_role_assign'),
     url(r'^api/perm_role_revoke$', api.perm_role_revoke, name='perm_role_revoke'),
     
-    
+    # for role
+    url(r'^api/get_direct_ssd_role_constraints$', api.get_direct_ssd_role_constraints, name='get_direct_ssd_role_constraints'),
+    url(r'^api/get_transitive_ssd_role_constraints$', api.get_transitive_ssd_role_constraints, name='get_transitive_ssd_role_constraints'),
+    url(r'^api/get_inherited_ssd_role_constraints$', api.get_inherited_ssd_role_constraints, name='get_inherited_ssd_role_constraints'),
     
     #url(r'^api/get_task_list$', api.get_task_list, name='get_task_list'),
     

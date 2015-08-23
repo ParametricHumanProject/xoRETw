@@ -1362,21 +1362,81 @@ function Edit_SSDRole_init(name) {
     }).fail(function() {
         alert( "Error - Edit_SSDRole_init - url_get_role_list failed." );
     });
-    // TODO:
-    //set dmer [$obj getDirectSSDRoleConstraints]
-    //set tssdrc [$obj getTransitiveSSDRoleConstraints]
-    //set issdc [$obj getInheritedSSDRoleConstraints]
     
+    $.ajax({
+        method: "GET",
+        url: url_get_direct_ssd_role_constraints,
+        dataType: "json",
+        data: {name:name},
+    }).done(function(data) {
+        
+        var dmer = data['dmer'];
+
+        var value = ''
+        for (var i = 0; i < dmer.length; i++) {
+            value = dmer[i];
+            var option = '<option value=' + value + '>' + value + '</option>';
+            $("#dmer").append(option);
+        }        
+
+        if (dmer.length) {
+            $("#role_unset_constraint").prop('disabled', false);
+        } else {
+            $("#role_unset_constraint").prop('disabled', true);
+        }
+    }).fail(function() {
+        alert( "Error - url_get_direct_ssd_role_constraints failed." );
+    });
+
+
+    $.ajax({
+        method: "GET",
+        url: url_get_transitive_ssd_role_constraints,
+        dataType: "json",
+        data: {name:name},
+    }).done(function(data) {
+        
+        var tssdrc = data['tssdrc'];
+
+        var value = ''
+        for (var i = 0; i < tssdrc.length; i++) {
+            value = tssdrc[i];
+            var option = '<option value=' + value + '>' + value + '</option>';
+            $("#tssdrc").append(option);
+        }        
+
+    }).fail(function() {
+        alert( "Error - url_get_transitive_ssd_role_constraints failed." );
+    });
+    
+    $.ajax({
+        method: "GET",
+        url: url_get_inherited_ssd_role_constraints,
+        dataType: "json",
+        data: {name:name},
+    }).done(function(data) {
+        
+        var issdc = data['issdc'];
+
+        var value = ''
+        for (var i = 0; i < issdc.length; i++) {
+            value = issdc[i];
+            var option = '<option value=' + value + '>' + value + '</option>';
+            $("#issdc").append(option);
+        }        
+
+    }).fail(function() {
+        alert( "Error - url_get_inherited_ssd_role_constraints failed." );
+    });    
     $('#ssd_role_modal').modal('show');      
 }
 
-function Edit_SSDRole_setConstraint1() {
+function Edit_SSDRole_setConstraint() {
 
     var role = $('#SSD_for_role').val();
-    var mutlexcl = $('#ssd_role_role_list').val();//[0];
-
-    //alert('role ' + role);
-    //alert('mutlexcl ' + mutlexcl);
+    var mutlexcl = $('#ssd_role_role_list').val()[0];
+    alert('role:' + role)
+    alert('mutlexcl:' + mutlexcl)
     
     if (!mutlexcl) {
         alert('Error: no option selected');
@@ -1389,7 +1449,8 @@ function Edit_SSDRole_setConstraint1() {
         $('#role_list').flash();
         return;
     }
-    /*
+    
+    
     var option_values = [];
     $('#dmer option').each(function() {
         option_values.push($(this).val());
@@ -1409,27 +1470,33 @@ function Edit_SSDRole_setConstraint1() {
         dataType: "json",
         data: {role:role, mutlexcl:mutlexcl}
     }).done(function(data) {
+       
         var option = '<option value=' + mutlexcl + '>' + mutlexcl + '</option>';
         $("#dmer").append(option);
         
         $("#role_unset_constraint").prop('disabled', false);
         
     });
-    */
+    
     return;
 }
 
 function Edit_SSDRole_unsetConstraint() {
     
-    var perm = $('#SSD_for_role').val();
-    var mutlexcl = $('#dmer').val()[0];
+    alert('Edit_SSDRole_unsetConstraint');
+    
+    var role = $('#SSD_for_role').val();
+    var mutlexcl = $('#dmer').val();
         
     if (!mutlexcl) {
         alert('Error: no option selected');
+        $('#dmer').focus();
+        $('#dmer').flash();
+        
         return;
     }
     
-    var selector = "#dmer option[value='" + mutlexcl + "']";
+    var selector = "#dmer option[value='" + mutlexcl[0] + "']";
     $(selector).remove();
     
     var size = $('#dmer option').size()
@@ -1437,12 +1504,12 @@ function Edit_SSDRole_unsetConstraint() {
     if (!size) {
         $("#role_unset_constraint").prop('disabled', true);
     }
-
+    
     $.ajax({
         method: "POST",
         url: url_unset_ssd_role_constraint,
         dataType: "json",
-        data: {role:role, mutlexcl:mutlexcl}
+        data: {role:role, mutlexcl:mutlexcl[0]}
     }).done(function(data) {
         
     });
@@ -1455,7 +1522,7 @@ $("#create_ssd_role_btn").click(function(e){
 });
 
 $("#role_set_constraint").click(function(e){
-    Edit_SSDRole_setConstraint1();
+    Edit_SSDRole_setConstraint();
 });
 
 $("#role_unset_constraint").click(function(e){
@@ -1549,7 +1616,7 @@ function Edit_PRA_assignPermission() {
     
     if (role == mutlexcl) {
         alert('Edit_SSDRole_setConstraint for role "' + role + '", FAILED, a role cannot be mutually exclusive to itself.');
-        $('role_list').focus();
+        $('#role_list').focus();
         $('#role_list').flash();
         return;
     }

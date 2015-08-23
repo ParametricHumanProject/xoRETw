@@ -425,29 +425,31 @@ def possessCommonSeniorRole(role_name1, role_name2, user):
     return 0    
 
 def setSSDConstraint(role_name, mutlexcl_name, user):
-    return 1
-    
-"""
-Role instproc setSSDConstraint {role} {
-  my instvar ssdconstraints
-  set name [self]
-  if {![string equal $name $role]} {
-    if {![my hasSSDRoleConstraintTo $role]} {
-      set ssdconstraints($role) 1
-      my log NORMAL "[self] [self proc]: defined <<$role>> as (statically) mutual exclusive."
-      return 1
-    } else {
-      my log INFO "[self] [self proc] INFO, role: <<$role>> is already (statically)\
-                       mutual exclusive to <<[self]>>. Note\
-                       that SSD Constraints are inherited via a role-hierarchy."
-      return 0
-    }
-  } else {
-    my log FAILED "[self] [self proc] FAILED, a role cannot be mutual exclusive to itself."
+    print 'setSSDConstraint'
+    print 'role_name is ', role_name
+    print 'mutlexcl_name is ', mutlexcl_name
+    if not hasSSDRoleConstraintTo(role_name, mutlexcl_name, user):
+        print 'not hasSSDRoleConstraintTo'
+        try:
+            role_obj = Role.objects.get(name=role_name, user=user)
+        except Exception as e:
+            error_message = str(e)
+            raise xoRETwError(e)
+        
+        ssd_constraints = []
+        
+        if role_obj.ssd_constraints:
+            ssd_constraints = role_obj.ssd_constraints.split(',')
+            
+        ssd_constraints.append(mutlexcl_name)
+        role_obj.ssd_constraints = ",".join(ssd_constraints)
+        role_obj.save()
+            
+        return 1        
+    else:
+        e = "INFO, role: <<$role>> is already (statically) mutual exclusive to <<[self]>>. Note that SSD Constraints are inherited via a role-hierarchy."
+        raise xoRETwError(e)
     return 0
-  }
-}
-"""
 
 """
 # role is fully-qualified name of a runtime-role-object (e.g. re::roles::MyRole)
@@ -465,6 +467,9 @@ Role instproc unsetSSDConstraint {role} {
 }
 """
 
+
+    
+    
 # a role cannot be defined as mutual exclusive to one of its junior-roles
 # or one of its senior-roles. Furthermore two roles that have a common
 # senior-role must not be defined as mutual exclusive.
@@ -480,7 +485,6 @@ def setSSDRoleConstraint(role_name, mutlexcl_name, user):
                     success = setSSDConstraint(role_name, mutlexcl_name, user)
                     if success:
                         setSSDConstraint(mutlexcl_name, role_name, user)
-                        
                     return success
                 else:
                     e = "FAILED, role <<$role>> cannot be mutual exclusive to its junior-role <<$mutlexcl>>."
@@ -690,12 +694,18 @@ def clearDerivedConditionListOfObjective(name, user):
 
     return 1
     
-def unsetSSDRoleConstraint(role, mutlexcl, user):
+def unsetSSDRoleConstraint(role_name, mutlexcl_name, user):
+    print 'unsetSSDRoleConstraint'
     
-    role_obj = Role.objects.get(name=role, user=user)
-    mutlexcl_obj = Role.objects.get(name=mutlexcl, user=user)
+    role_obj = Role.objects.get(name=role_name, user=user)
+    print 'role_obj is ', role_obj
     
-    role_obj.ssd_constraints.remove(mutlexcl_obj)
+    ssd_constraints = []
+    ssd_constraints = role_obj.ssd_constraints.split(",")
+    ssd_constraints.remove(mutlexcl_name)
+    role_obj.ssd_constraints = ",".join(ssd_constraints)
+    print 'role_obj.ssd_constraints: ', role_obj.ssd_constraints
+    role_obj.save()
     
     return 1
 

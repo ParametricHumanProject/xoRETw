@@ -187,7 +187,9 @@ def set_ssd_role_constraint(request):
     role = request.POST.get('role', None)
     mutlexcl = request.POST.get('mutlexcl', None)
 
-    print '1. mutlexcl is ', mutlexcl
+    print request
+    print 'role is ', role
+    print 'mutlexcl is ', mutlexcl
     
     data = {}
     error_message = ''
@@ -347,12 +349,18 @@ def delete_objective(request):
     return HttpResponse(json_data, content_type='application/json')
 
 def unset_ssd_role_constraint(request):
+    print 'unset_ssd_role_constraint'
+    
     user = request.user
     role = request.POST.get('role', None)
     mutlexcl = request.POST.get('mutlexcl', None)
+    
+    print 'role is ', role
+    print 'mutlexcl is ', mutlexcl
 
-    Manager.unsetSSDPermConstraint(role, mutlexcl, user)
-    Manager.unsetSSDPermConstraint(mutlexcl, role, user)
+    #delete the mutual exclusion constraint from both roles
+    Manager.unsetSSDRoleConstraint(role, mutlexcl, user)
+    Manager.unsetSSDRoleConstraint(mutlexcl, role, user)
 
     data = {}
     data['success'] = str(True).lower()
@@ -1173,6 +1181,53 @@ def edit_permcard_save(request):
     data = {}
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
+
+def get_direct_ssd_role_constraints(request):
+    user = request.user
+    name = request.GET.get('name', None)
+
+    dmer = Manager.getDirectSSDRoleConstraints(name, user)
+    
+    data = {}
+    data['dmer'] = []
+
+    for i in dmer:
+        data['dmer'].append(i)
+    
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+    
+
+def get_transitive_ssd_role_constraints(request):
+    user = request.user
+    name = request.GET.get('name', None)
+
+    tssdrc = Manager.getTransitiveSSDRoleConstraints(name, user)
+    
+    data = {}
+    data['tssdrc'] = []
+
+    for i in tssdrc:
+        data['tssdrc'].append(i)
+    
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
+def get_inherited_ssd_role_constraints(request):
+    user = request.user
+    name = request.GET.get('name', None)
+
+    issdc = Manager.getInheritedSSDRoleConstraints(name, user)
+    
+    data = {}
+    data['issdc'] = []
+
+    for i in issdc:
+        data['issdc'].append(i)
+    
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+    
 
 def perm_role_assign():
     #permRoleAssign
