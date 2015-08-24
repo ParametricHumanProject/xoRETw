@@ -677,6 +677,10 @@ function Edit_PermCard_save() {
     var min = $('#perm_card_mincardinality').val();
     var max = $('#perm_card_maxcardinality').val();
     
+    if ((min < -1) || (max < -1)) {
+        alert('min max cardinality cannot be less that 0.')
+    }
+    
     // get existing data and populate modal
     $.ajax({
         method: "POST",
@@ -1564,136 +1568,136 @@ function Edit_PRA_init(name) {
     }).fail(function() {
         alert( "Error - Edit_PRA_init - url_get_permission_list failed." );
     });
-      
-    $('#PRA_modal').modal('show');
-    
-    
-    //set dp [$obj getAllDirectlyAssignedPerms]
-    //set tp [$obj getAllTransitivelyAssignedPerms]
-    
-    
-    /*
-    // get ssd context constraints for this role (e.g. name: is the permission name)
+          
     $.ajax({
         method: "GET",
-        url: url_get_ssd_perm_constraints,
+        url: url_get_all_directly_assigned_perms,
         dataType: "json",
-        data: {name:name}
+        data: {name:name},
     }).done(function(data) {
         
-        var dmeps= data['dmeps'];
+        var dp = data['dp'];
 
         var value = ''
-        for (var i = 0; i < dmeps.length; i++) {
-            value = dmeps[i];
+        for (var i = 0; i < dp.length; i++) {
+            value = dp[i];
             var option = '<option value=' + value + '>' + value + '</option>';
-            $("#dmeps").append(option);
+            $("#dp").append(option);
         }        
 
-        if (dmeps.length) {
-            $("#unset_constraint").prop('disabled', false);
+        if (dp.length) {
+            $("#revoke_permission").prop('disabled', false);
         } else {
-            $("#unset_constraint").prop('disabled', true);
+            $("#revoke_permission").prop('disabled', true);
         }
-
-        $('#ssd_perm_modal').modal('show');
-                
     }).fail(function() {
-        alert( "Error - Edit_PermCCMgmt_init - url_get_ssd_perm_constraints failed." );
-    });    
-    */
+        alert( "Error - url_get_all_directly_assigned_perms failed." );
+    });
+
+    $.ajax({
+        method: "GET",
+        url: url_get_all_transitively_assigned_perms,
+        dataType: "json",
+        data: {name:name},
+    }).done(function(data) {
+        
+        var tp = data['tp'];
+
+        var value = ''
+        for (var i = 0; i < tp.length; i++) {
+            value = tp[i];
+            var option = '<option value=' + value + '>' + value + '</option>';
+            $("#tp").append(option);
+        }        
+
+    }).fail(function() {
+        alert( "Error - url_get_all_transitively_assigned_perms failed." );
+    });
+        
+    $('#PRA_modal').modal('show');
 }
 
 function Edit_PRA_assignPermission() {
-    
-    var role = $('#SSD_for_role').val();
-    var mutlexcl = $('#role_list').val()[0];
+        
+    var role = $('#PRA_for_role').val();
+    var perm = $('#PRA_perm_list').val();
 
-    if (!mutlexcl) {
+    if (!perm) {
         alert('Error: no option selected');
         return;
     }
-    
-    if (role == mutlexcl) {
-        alert('Edit_SSDRole_setConstraint for role "' + role + '", FAILED, a role cannot be mutually exclusive to itself.');
-        $('#role_list').focus();
-        $('#role_list').flash();
-        return;
-    }
-    
+        
     var option_values = [];
-    $('#dmer option').each(function() {
+    $('#dp option').each(function() {
         option_values.push($(this).val());
     });    
         
     for (i = 0; i < option_values.length; i++) { 
-        if (option_values[i] == mutlexcl) {
-            alert('Error: ' + mutlexcl + ' already exists');
-            $("#dmer").focus();
+        if (option_values[i] == perm[0]) {
+            alert('Error: ' + perm[0] + ' already exists');
+            $("#dp").focus();
             return;
         }
     }
     
     $.ajax({
         method: "POST",
-        url: url_set_ssd_role_constraint,
+        url: url_assign_permission,
         dataType: "json",
-        data: {role:role, mutlexcl:mutlexcl}
+        data: {role:role, perm:perm[0]}
     }).done(function(data) {
         
     });
     
-    var option = '<option value=' + mutlexcl + '>' + mutlexcl + '</option>';
-    $("#dmer").append(option);
+    var option = '<option value=' + perm + '>' + perm + '</option>';
+    $("#dp").append(option);
     
-    $("#role_unset_constraint").prop('disabled', false);
+    $("#revoke_permission").prop('disabled', false);
     return;
 }
 
 function Edit_PRA_revokePermission() {
-    
-    var perm = $('#SSD_for_role').val();
-    var mutlexcl = $('#dmer').val()[0];
         
-    if (!mutlexcl) {
+    var role = $('#PRA_for_role').val();
+    var perm = $('#dp').val();
+        
+    if (!perm) {
         alert('Error: no option selected');
         return;
     }
     
-    var selector = "#dmer option[value='" + mutlexcl + "']";
-    $(selector).remove();
-    
-    var size = $('#dmer option').size()
-    
-    if (!size) {
-        $("#role_unset_constraint").prop('disabled', true);
-    }
-
     $.ajax({
         method: "POST",
-        url: url_unset_ssd_role_constraint,
+        url: url_revoke_permission,
         dataType: "json",
-        data: {role:role, mutlexcl:mutlexcl}
+        data: {role:role, perm:perm[0]}
     }).done(function(data) {
+        var selector = "#dp option[value='" + perm[0] + "']";
+        $(selector).remove();
         
+        var size = $('#dp option').size()
+        
+        if (!size) {
+            $("#revoke_permission").prop('disabled', true);
+        }        
     });
 
     return;
 }
 
-$("#create_PRA_btn").click(function(e){
+$("#create_PRA_btn").click(function(e) {
     Edit_PRA_init('');
 });
-/*
-$("#role_set_constraint").click(function(e){
-    Edit_SSDRole_setConstraint();
+
+$("#assign_permission").click(function(e) {
+    Edit_PRA_assignPermission();
 });
 
-$("#role_unset_constraint").click(function(e){
-    Edit_SSDRole_unsetConstraint();
+$("#revoke_permission").click(function(e) {
+    Edit_PRA_revokePermission();
 });
 
-*/
+
 //======================================================================
 // RRA section
 //======================================================================
@@ -1763,7 +1767,7 @@ function Edit_RRA_init(name) {
     });    
     */
 }
-
+/*
 function Edit_PRA_assignPermission() {
     
     var role = $('#SSD_for_role').val();
@@ -1844,7 +1848,7 @@ function Edit_PRA_revokePermission() {
 $("#create_PRA_btn").click(function(e){
     Edit_PRA_init('');
 });
-/*
+
 $("#role_set_constraint").click(function(e){
     Edit_SSDRole_setConstraint();
 });

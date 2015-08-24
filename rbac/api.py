@@ -899,8 +899,10 @@ def edit_perm_cc_mgmt_init(request):
 #=======================================================================
 
 def get_permission_list(request):
+    print '11'
     user = request.user
     perm_list = Manager.getPermissionList(user)
+    print '22'
     data = {}
     data['perm_list'] = []
     for perm in perm_list:
@@ -1182,6 +1184,37 @@ def edit_permcard_save(request):
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
 
+
+def get_all_directly_assigned_perms(request):
+    user = request.user
+    name = request.GET.get('name', None)
+
+    dp = Manager.getAllDirectlyAssignedPerms(name, user)
+    
+    data = {}
+    data['dp'] = []
+
+    for i in dp:
+        data['dp'].append(i)
+    
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
+def get_all_transitively_assigned_perms(request):
+    user = request.user
+    name = request.GET.get('name', None)
+
+    tp = Manager.getAllTransitivelyAssignedPerms(name, user)
+    
+    data = {}
+    data['tp'] = []
+
+    for i in tp:
+        data['tp'].append(i)
+    
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
 def get_direct_ssd_role_constraints(request):
     user = request.user
     name = request.GET.get('name', None)
@@ -1229,10 +1262,59 @@ def get_inherited_ssd_role_constraints(request):
     return HttpResponse(json_data, content_type='application/json')
     
 
-def perm_role_assign():
-    #permRoleAssign
-    pass
+def assign_permission(request):
+    print 'assign_permission'
+    
+    user = request.user
+    role_name = request.POST.get('role', None)
+    perm_name = request.POST.get('perm', None)
 
-def perm_role_revoke():
-    #permRoleRevoke
-    pass
+    print 'role_name is ', role_name
+    print 'perm_name is ', perm_name
+    
+    data = {}
+    error_message = ''
+    try:
+        success = Manager.permRoleAssign(perm_name, role_name, user)
+        
+        if success:
+            data['success'] = str(success).lower()
+
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
+        
+    except:
+        error_message = sys.exc_info()[1]
+        print "Error: %s" % error_message
+            
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+    
+
+def revoke_permission(request):
+    print 'revoke_permission'
+    
+    user = request.user
+    role_name = request.POST.get('role', None)
+    perm_name = request.POST.get('perm', None)
+
+    print 'role_name is ', role_name
+    print 'perm_name is ', perm_name
+    
+    data = {}
+    error_message = ''
+    try:
+        success = Manager.permRoleRevoke(perm_name, role_name, user)
+        
+        if success:
+            data['success'] = str(success).lower()
+
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
+        
+    except:
+        error_message = sys.exc_info()[1]
+        print "Error: %s" % error_message
+            
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')

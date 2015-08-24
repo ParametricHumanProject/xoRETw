@@ -740,14 +740,20 @@ var url_get_all_conditions = "{% url 'get_all_conditions' %}"
 var url_get_context_constraints = "{% url 'get_context_constraints' %}"
 var url_get_ssd_perm_constraints = "{% url 'get_ssd_perm_constraints' %}"
 
-var url_perm_role_assign = "{% url 'perm_role_assign' %}"
-var url_perm_role_revoke = "{% url 'perm_role_revoke' %}"
 
 // ssd role constraints
 
 var url_get_direct_ssd_role_constraints = "{% url 'get_direct_ssd_role_constraints' %}"
 var url_get_transitive_ssd_role_constraints = "{% url 'get_transitive_ssd_role_constraints' %}"
 var url_get_inherited_ssd_role_constraints = "{% url 'get_inherited_ssd_role_constraints' %}"
+
+
+// ssd perm constraints
+var url_assign_permission = "{% url 'assign_permission' %}"
+var url_revoke_permission = "{% url 'revoke_permission' %}"
+var url_get_all_directly_assigned_perms = "{% url 'get_all_directly_assigned_perms' %}"
+var url_get_all_transitively_assigned_perms = "{% url 'get_all_transitively_assigned_perms' %}"
+
 
 
 

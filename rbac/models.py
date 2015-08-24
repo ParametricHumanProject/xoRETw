@@ -76,8 +76,9 @@ class Permission(models.Model):
     
     ssd_constraints = models.TextField(blank=True)
     
-    mincardinality = models.IntegerField(default=0)  # same as blank=True, null=True
-    maxcardinality = models.IntegerField(default=0)  # same as blank=True, null=True    
+    mincardinality = models.IntegerField(default=-1)  
+    maxcardinality = models.IntegerField(default=-1)  
+    perm_owner_quantity = models.IntegerField(default=0)
         
 class Role(models.Model):
     user = models.ForeignKey(User)
@@ -90,8 +91,8 @@ class Role(models.Model):
     
     work_profile = models.OneToOneField(WorkProfile, null=True)
     
-    mincardinality = models.IntegerField(default=0)  # same as blank=True, null=True
-    maxcardinality = models.IntegerField(default=0)  # same as blank=True, null=True    
+    mincardinality = models.IntegerField(default=-1)  # same as blank=True, null=True
+    maxcardinality = models.IntegerField(default=-1)  # same as blank=True, null=True    
 
 
 

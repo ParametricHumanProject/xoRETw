@@ -100,12 +100,16 @@ urlpatterns = patterns('',
     url(r'^api/get_context_constraint_list$', api.get_context_constraint_list, name='get_context_constraint_list'),
     url(r'^api/get_permission_list$', api.get_permission_list, name='get_permission_list'),
     
+    #PRA
+    url(r'^api/get_all_directly_assigned_perms$', api.get_all_directly_assigned_perms, name='get_all_directly_assigned_perms'),
+    url(r'^api/get_all_transitively_assigned_perms$', api.get_all_transitively_assigned_perms, name='get_all_transitively_assigned_perms'),
+    url(r'^api/assign_permission$', api.assign_permission, name='assign_permission'),
+    url(r'^api/revoke_permission$', api.revoke_permission, name='revoke_permission'),
+    
     
     # for perm
     url(r'^api/get_context_constraints$', api.get_context_constraints, name='get_context_constraints'),
     url(r'^api/get_ssd_perm_constraints$', api.get_ssd_perm_constraints, name='get_ssd_perm_constraints'),
-    url(r'^api/perm_role_assign$', api.perm_role_assign, name='perm_role_assign'),
-    url(r'^api/perm_role_revoke$', api.perm_role_revoke, name='perm_role_revoke'),
     
     # for role
     url(r'^api/get_direct_ssd_role_constraints$', api.get_direct_ssd_role_constraints, name='get_direct_ssd_role_constraints'),

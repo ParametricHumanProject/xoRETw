@@ -14,6 +14,207 @@ from .models import Role
 
 from Error import xoRETwError
 
+def getMinCardinalityPerm(perm_name, user):
+    print 'getMinCardinalityPerm'
+    print 'perm_name is ', perm_name
+    perm_obj = Permission.objects.get(name=perm_name, user=user)
+    print 'KK'
+    return perm_obj.mincardinality
+
+
+# perm is a fully-qualified name of a runtime-permissin-object (e.g.: m::permissions::get_document)
+def permMinCardinalityFulfilled(perm_name, user):
+    minNumber  = getMinCardinalityPerm(perm_name, user)
+    if minNumber == -1:
+        return 1
+        
+    current = getPermOwnerQuantity(perm_name, user)
+    if current >= minNumber:
+        return 1
+        
+    return 0
+
+# perm is the fully-qualified name of a runtime-permission-object (e.g.: m::permissions::get_document)
+def decrPermOwnerQuantity(perm_name, user):
+    perm_obj = Permission.objects.get(name=perm_name, user=user)
+    perm_obj.perm_owner_quantity -=  1
+    perm_obj.save()
+    
+def incrPermOwnerQuantity(perm_name, user):
+    perm_obj = Permission.objects.get(name=perm_name, user=user)
+    perm_obj.perm_owner_quantity +=  1
+    perm_obj.save()
+    
+    if not permMinCardinalityFulfilled(perm_name, user):
+        # log: Minimal owner cardinality of <<$perm>> is not yet fulfilled, you must assign <<$perm>> to at least [expr $minCardinality - $currentQuantity] more role(s)."	
+        pass
+        
+    return 1
+    
+# perm is the fully-qualified name of a runtime-permission-object (e.g.: m::permissions::get_document)
+def getPermOwnerQuantity(perm_name, user):
+    perm_obj = Permission.objects.get(name=perm_name, user=user)
+    return perm_obj.perm_owner_quantity
+
+#"permission" is a fully-qualified name of a runtime-permission-object (e.g. roleMan::permissions::move_agent)
+def revokePerm(role_name, perm_name, user):
+    if directlyOwnsPerm(role_name, perm_name, user):
+        # revoke permission from role
+        role_obj = Role.objects.get(name=role_name, user=user)
+        
+        permissions = []
+        
+        if role_obj.permissions:
+            permissions = role_obj.permissions.split(',')
+        
+        permissions.remove(perm_name)
+        role_obj.permissions = ",".join(permissions)
+        role_obj.save()
+        
+        return 1
+    else:
+        # FAILED, permission <<[$permission name]>> is not directly assigned to <<[my name]>>."
+        return 0
+
+#"permission" is a fully-qualified name of a runtime-permission-object (e.g. roleMan::permissions::move_agent)
+def assignPerm(role_name, perm_name, user):
+    print 'assignPerm'
+    print 'role_name is ', role_name
+    print 'perm_name is ', perm_name
+    
+    if not directlyOwnsPerm(role_name, perm_name, user):
+        print 'not directlyOwnsPerm - True'
+        if not transitivelyOwnsPerm(role_name, perm_name, user):
+            print 'not transitivelyOwnsPerm - True'
+            
+            print 'TRACE 1'
+            # assign permission to this role
+            role_obj = Role.objects.get(name=role_name, user=user)
+            print 'TRACE 2'
+            
+            permissions = []
+            
+            if role_obj.permissions:
+                print 'AAA'
+                permissions = role_obj.permissions.split(',')
+            
+            print 'BBB'
+            permissions.append(perm_name)
+            role_obj.permissions = ",".join(permissions)
+            role_obj.save()
+            print 'CCC'
+
+            return 1
+        else:
+            print 'XXX'
+            return 0
+            e = "FAILED, permission <<[$permission name]>> is already transitively assigned to <<[my name]>>."
+            raise xoRETwError(e)
+    else:
+        print 'XXX2'
+        return 0
+        e = "FAILED, permission <<[$permission name]>> is already directly assigned to <<[my name]>>."
+        raise xoRETwError(e)
+
+def getMaxCardinalityPerm(perm_name, user):
+    print 'getMaxCardinalityPerm'
+    print 'perm_name is ', perm_name
+    perm_obj = Permission.objects.get(name=perm_name, user=user)
+    print 'KK'
+    return perm_obj.maxcardinality
+    
+# perm is a fully-qualified name of a runtime-permission-object (e.g. m::permissions::get_document)
+def permMaxCardinalityAllowAssignment(perm_name, user):
+    print 'permMaxCardinalityAllowAssignment'
+    print 'perm_name is ', perm_name
+    maxNumber = getMaxCardinalityPerm(perm_name, user)
+    print 'maxNumber ', maxNumber
+    if maxNumber == -1:
+        return 1
+    current = getPermOwnerQuantity(perm_name, user)
+    if maxNumber - current > 0:
+        return 1
+    return 0
+
+# SSD Constraints are inherited within a role-hierarchy and are valid for
+# ALL roles and permissions of a xoRET Manager instance
+# PRA is an acronym for "PermissionRoleAssign"
+# role is the fully-qualified name of a runtime-role-object (e.g. m::roles::MyRole)
+# perm is the fully-qualified name of a runtime-permission-object (e.g. m::permissions::get_document)
+def ssdPermConstraintAllowPRA(perm_name, role_name, user):
+    print 'ssdPermConstraintAllowPRA'
+    mutualExcl = []
+
+    # first: check if one or more of the permissions that are (directly or transitively) assigned 
+    # to $role are defined as mutual exclusive to $perm 
+
+    all_perms = getAllPerms(role_name, user)
+    print 'AA'
+    for rp in all_perms:
+        print 'rp is ', rp
+        if isStaticallyMutualExclusivePerm(perm_name, rp, user):
+            print 'mutualExcl.append(rp)'
+            mutualExcl.append(rp)
+  
+    # now: check if a senior-role of $role already owns a permission that 
+    # is mutual exclusive to $perm. In this case the assignment of $perm to $role
+    # must be denied - otherwise the corresponding senior-role would acquire two
+    # mutual exclusive permissions
+    
+    print 'CCC'
+    for sr in getAllSeniorRoles(role_name, user):
+        for srp in getAllPerms(sr, user):
+            if isStaticallyMutualExclusivePerm(perm_name, srp, user):
+                mutualExcl.append(srp)
+    print 'DDD'
+    if mutualExcl:
+        # NORMAL:  <<$role>> or at least one senior-role of <<$role>>, owns the following permission(s) <<$mutualExcl>> which are defined as mutual exclusive to <<$perm>>.
+        return 0
+
+    return 1
+    
+# perm is an "action object" pair
+def permRoleAssign(perm_name, role_name, user):
+    print 'permRoleAssign'
+    print 'perm_name: ', perm_name
+    if ssdPermConstraintAllowPRA(perm_name, role_name, user):
+        print 'RRR'
+        if permMaxCardinalityAllowAssignment(perm_name, user):
+            success = assignPerm(role_name, perm_name, user)
+            if success:
+                incrPermOwnerQuantity(perm_name, user)
+            return success
+        else:
+            e = "FAILED, the permission maximum owner cardinality of <<[$perm name]>> is already reached. In order to assign permission <<[$perm name]>> to role: <<[$role name]>> you have to revoke <<[$perm name]>> from at least one of its current owners first."
+            raise xoRETwError(e)
+    else:
+        e = "FAILED, assignment prevented by SSD constraint defined on permission <<$perm>>. <<$role>> or one of its owners (subjects) possesses at least one permission that is defined as mutual exclusive to <<$perm>>."
+        raise xoRETwError(e)
+
+# perm is the fully-qualified name of a runtime-permissin-object (e.g.: m::permissions::get_document)
+def permMinCardinalityAllow(perm_name, user):
+    minNumber = getMinCardinalityPerm(perm_name, user)
+    if minNumber == -1:
+        return 1
+  
+    current = getPermOwnerQuantity(perm_name, user)
+    if current - minNumber >= 1:
+        return 1
+    
+    return 0
+                
+# perm is an "action object" pair
+def permRoleRevoke(perm_name, role_name, user):
+    print 'permRoleRevoke'
+    if permMinCardinalityAllow(perm_name, user):
+        print 'permMinCardinalityAllow - True'
+        success = revokePerm(role_name, perm_name, user)
+        if success:
+            decrPermOwnerQuantity(perm_name, user)
+        return success
+    else:
+        # FAILED, the permission minimal owner cardinality of <<[$perm name]>> has already been reached \n --> In order to revoke permission <<$perm>> from role: <<$role>> you have to assign at least one new owner first.
+        return 0
 
 def getAllDirectlyAssignedPerms(role_name, user):
     print 'getAllDirectlyAssignedPerms'
@@ -78,14 +279,17 @@ def getAllSeniorRoles(role_name, user):
     
     if senior_roles:
         senior = senior_roles.split(',')
-    
+    print 'zz'
+    print 'senior is ', senior
     if senior:
+        print 
         for sr in senior:
+            print 'sr is ', sr
             next_level = getAllSeniorRoles(sr, user)
             for r in next_level:
                 if r not in senior:
                     senior.append(r)
-                    
+    print 'exiting getAllSeniorRoles'
     return senior
 
 #done
@@ -903,6 +1107,7 @@ def createPermission(perm_operation, perm_object, user):
         return 1
 
 def getPermissionList(user):
+    print '33'
     return Permission.objects.filter(user=user)
 
 def getContextConstraintList(user):
@@ -949,70 +1154,3 @@ def getAllConditions(name, user):
     return CC.conditions.all()
 
 
-"""
-  set perm [self]::permissions::[join $perm _]
-  set role [self]::roles::$role
-  if {[my existRole $role]} {
-    if {[my existPermission $perm]} {	   
-      if {[my ssdPermConstraintAllowPRA $perm $role]} {
-	if {[my permMaxCardinalityAllowAssignment $perm]} {
-	  set success [$role assignPerm $perm]
-	  if {$success} {
-	    my incrPermOwnerQuantity $perm
-	    my addTraceRelation Permission [$perm name] assigned-to Role [$role name]
-	  }
-	  return $success
-	} else {
-	  my log FAILED "[self] [self proc] FAILED, the permission maximum owner cardinality of\
-                             <<[$perm name]>> is already reached. In order to assign permission\
-                             <<[$perm name]>> to role: <<[$role name]>> you have to revoke\
-                             <<[$perm name]>> from at least one of its current owners first."
-	  return 0
-	}		    
-      } else {
-	my log FAILED "[self] [self proc] FAILED, assignment prevented by SSD constraint defined on\
-                           permission <<$perm>>. <<$role>> or one of its owners (subjects) possesses\
-                           at least one permission that is defined as mutual exclusive to <<$perm>>."
-	return 0
-      }
-    } else {
-      my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
-      return 0
-    }
-  } else {
-    my log FAILED "[self] [self proc] FAILED, role: <<$role>> does not exist."
-    return 0
-  }
-}
-
-# perm is an "action object" pair
-Manager instproc permRoleRevoke {perm role} {
-  set perm [self]::permissions::[join $perm _]    
-  set role [self]::roles::$role
-  if {[my existRole $role]} {
-    if {[my existPermission $perm]} {
-      if {[my permMinCardinalityAllow $perm]} {
-	set success [$role revokePerm $perm]
-	if {$success} {
-	  my decrPermOwnerQuantity $perm
-	  my removeTraceRelation Permission [$perm name] assigned-to Role [$role name]
-	}
-	return $success
-      } else {
-	my log FAILED "[self] [self proc] FAILED, the permission minimal owner cardinality\
-                    of <<[$perm name]>> has already been reached\
-             \n --> In order to revoke permission <<$perm>> from role: <<$role>>\
-                    you have to assign at least one new owner first."
-	return 0
-      }
-    } else {
-      my log FAILED "[self] [self proc] FAILED, permission <<$perm>> does not exist."
-      return 0
-    }
-  } else {
-    my log FAILED "[self] [self proc] FAILED, role: <<$role>> does not exist."
-    return 0
-  }
-}
-
-"""
