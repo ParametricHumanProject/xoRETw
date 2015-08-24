@@ -1318,3 +1318,48 @@ def revoke_permission(request):
             
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
+
+def add_junior_role_relation(request):
+    #addJuniorRoleRelation
+    pass
+    
+    print 'add_junior_role_relation'
+    
+    user = request.user
+    role_name = request.POST.get('role', None)
+    junior_name = request.POST.get('junior', None)
+
+    print 'role_name is ', role_name
+    print 'junior_name is ', junior_name
+    
+    data = {}
+    error_message = ''
+    try:
+        success = Manager.addJuniorRoleRelation(role_name, junior_name, user)
+        
+        if success:
+            data['success'] = str(success).lower()
+
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
+        
+    except:
+        error_message = sys.exc_info()[1]
+        print "Error: %s" % error_message
+            
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
+
+    
+def remove_junior_role_relation(request):
+    #removeJuniorRoleRelation
+    pass
+    
+def add_senior_role_relation(request):
+    #addSeniorRoleRelation
+    pass        
+    
+def remove_senior_role_relation(request):
+    #removeSeniorRoleRelation
+    pass    

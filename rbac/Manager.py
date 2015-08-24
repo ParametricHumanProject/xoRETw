@@ -14,6 +14,112 @@ from .models import Role
 
 from Error import xoRETwError
 
+def addJuniorRoleRelation(role_name, junior_name, user):
+    pass
+    
+"""
+Manager instproc addJuniorRoleRelation {role junior {type "junior"}} {
+  my instvar importinprogress
+  set role [self]::roles::$role
+  set junior [self]::roles::$junior
+  if {$type == "junior"} {set cproc [self proc]} else {set cproc [self callingproc]}
+  if {[my existRole $role]} {
+    if {[my existRole $junior]} {
+      if {![string equal $role $junior]} {
+	if {![$role hasJuniorRole $junior]} {
+	  if {![$role hasSeniorRole $junior]} {
+	    if {[my ssdConstraintsAllowSeniorRole $junior $role]} {
+	      # add $junior to the superclass list of $role
+	      set super [$role info superclass]
+	      set new [concat $junior $super]
+	      $role superclass $new
+	      if {$type == "junior"} {
+		my log NORMAL "[self] $cproc, <<$junior>> added to junior-role list of <<$role>>."
+	      } else {
+		my log NORMAL "[self] $cproc, <<$role>> added to senior-role list of <<$junior>>."
+	      }
+	      my updateRoleHierarchy
+	      my addTraceRelation Role [$role name] senior-role Role [$junior name]
+	      return 1
+	    } else {
+	      my log FAILED "[self] $cproc FAILED, definition of $type-role relation between\
+                                 <<$role>> and <<$junior>> prohibited by SSD constraints. Either\
+                                 <<$role>> or one of its senior-roles is defined as statically\
+                                 mutual exclusive to <<$junior>>. The prohibitory constraint\
+                                 is either an SSD role constraint defined on <<$junior>>, or an SSD\
+                                 permission constraint defined on one of the permissions of <<$junior>>."
+	      return 0
+	    }
+	  } else {
+	    if {!$importinprogress} {
+	      my log FAILED "[self] $cproc FAILED: <<$role>> already is a junior-role of <<$junior>>"
+	    }
+	    return 0
+	  }
+	} else {
+	  if {!$importinprogress} {
+	    my log FAILED "[self] $cproc FAILED: <<$role>> already is a senior-role of <<$junior>>."
+	  }
+	  return 0
+	}
+      } else {
+	  my log FAILED "[self] $cproc FAILED: a role cannot be $type-role of itself."
+	return 0
+      }
+    } else {
+      my log FAILED "[self] $cproc FAILED: role <<$junior>> does not exist."
+      return 0
+    }
+  } else {
+    my log FAILED "[self] $cproc FAILED: role <<$role>> does not exist."
+    return 0
+  }
+}
+
+Manager instproc removeJuniorRoleRelation {role junior {type "junior"}} {
+  set role [self]::roles::$role
+  set junior [self]::roles::$junior
+  if {$type == "junior"} {set cproc [self proc]} else {set cproc [self callingproc]}
+  if {[my existRole $role]} {
+    if {[my existRole $junior]} {
+      set old [$role info superclass]
+      set index [lsearch -exact $old $junior]
+      if {$index != -1} {
+	#delete "$junior" from the list of superclasses
+	set new [lreplace $old $index $index]
+	#set the new junior-roles (superclasses)
+	if {$new == ""} {set new "::xotcl::Object"}
+	$role superclass $new
+	if {$type == "junior"} {
+	  my log NORMAL "[self] $cproc <<$junior>> removed from junior-role list of <<$role>>."
+	} else {
+	  my log NORMAL "[self] $cproc <<$role>> removed from senior-role list of <<$junior>>."
+	}
+	my updateRoleHierarchy
+	my removeTraceRelation Role [$role name] senior-role Role [$junior name]
+	return 1
+      } else {
+	if {$type == "junior"} {
+	  my log FAILED "[self] $cproc FAILED: <<$junior>> is not a (direct) junior-role\
+                           of <<$role>>."
+	} else {
+	  my log FAILED "[self] $cproc FAILED: <<$role>> is not a (direct) senior-role\
+                             of <<$junior>>."
+	}
+	return 0
+      }
+    } else {
+      my log FAILED "[self] $cproc FAILED: role <<$junior>> does not exist"
+      return 0
+    }
+  } else {
+    my log FAILED "[self] $cproc FAILED: role <<$role>> does not exist"
+    return 0
+  }
+}
+"""
+
+
 def getMinCardinalityPerm(perm_name, user):
     print 'getMinCardinalityPerm'
     print 'perm_name is ', perm_name

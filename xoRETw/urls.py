@@ -116,8 +116,14 @@ urlpatterns = patterns('',
     url(r'^api/get_transitive_ssd_role_constraints$', api.get_transitive_ssd_role_constraints, name='get_transitive_ssd_role_constraints'),
     url(r'^api/get_inherited_ssd_role_constraints$', api.get_inherited_ssd_role_constraints, name='get_inherited_ssd_role_constraints'),
     
-    #url(r'^api/get_task_list$', api.get_task_list, name='get_task_list'),
+    # RRA
+    url(r'^api/add_junior_role_relation$', api.add_junior_role_relation, name='add_junior_role_relation'),
+    url(r'^api/remove_junior_role_relation$', api.remove_junior_role_relation, name='remove_junior_role_relation'),
+    url(r'^api/add_senior_role_relation$', api.add_senior_role_relation, name='add_senior_role_relation'),
+    url(r'^api/remove_senior_role_relation$', api.remove_senior_role_relation, name='remove_senior_role_relation'),
     
+    
+        
     
     
     url(r'^api/get_all_conditions$', api.get_all_conditions, name='get_all_conditions'),

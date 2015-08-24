@@ -1706,30 +1706,48 @@ function Edit_RRA_init(name) {
     // reset all fields
     $('#RRA_role').val(name);
     $('#RRA_role').prop('disabled', true);
-    $('#perm_list').find('option').remove();
-    $('#dp').find('option').remove();
-    $('#tp').find('option').remove();
+    $('#RRA_role_list_jr').find('option').remove();
+    $('#RRA_role_list_sr').find('option').remove();
+    $('#djr').find('option').remove();
+    $('#tjr').find('option').remove();
+    $('#dsr').find('option').remove();
+    $('#tsr').find('option').remove();
     
+    // foreach r [lsort -dictionary [$pm getRoleList]] {
+    // set djr [$obj getDirectJuniorRoles]
+    // set tjr [$obj getTransitiveJuniorRoles]
+    // set dsr [$obj info subclass]
+    // set tsr [$obj getTransitiveSeniorRoles]
+
     $.ajax({
         method: "GET",
-        url: url_get_permission_list,
+        url: url_get_role_list,
         dataType: "json",
     }).done(function(data) {
         
-        var perm_list = data['perm_list'];
+        var role_list = data['role_list'];
 
         var value = ''
-        for (var i = 0; i < perm_list.length; i++) {
-            value = perm_list[i];
+        for (var i = 0; i < role_list.length; i++) {
+            value = role_list[i];
             var option = '<option value=' + value + '>' + value + '</option>';
-            $("#role_list").append(option);
+            $("#RRA_role_list_jr").append(option);
         }        
 
-        if (perm_list.length) {
+        value = ''
+        for (var i = 0; i < role_list.length; i++) {
+            value = role_list[i];
+            var option = '<option value=' + value + '>' + value + '</option>';
+            $("#RRA_role_list_sr").append(option);
+        }   
+        /*
+        if (role_list.length) {
             $("#revoke_permission").prop('disabled', false);
         } else {
             $("#revoke_permission").prop('disabled', true);
         }
+        */
+        
     }).fail(function() {
         alert( "Error - Edit_PRA_init - url_get_permission_list failed." );
     });
@@ -1767,82 +1785,15 @@ function Edit_RRA_init(name) {
     });    
     */
 }
+
 /*
-function Edit_PRA_assignPermission() {
-    
-    var role = $('#SSD_for_role').val();
-    var mutlexcl = $('#role_list').val()[0];
-
-    if (!mutlexcl) {
-        alert('Error: no option selected');
-        return;
-    }
-    
-    if (role == mutlexcl) {
-        alert('Edit_SSDRole_setConstraint for role "' + role + '", FAILED, a role cannot be mutually exclusive to itself.');
-        $('role_list').focus();
-        $('#role_list').flash();
-        return;
-    }
-    
-    var option_values = [];
-    $('#dmer option').each(function() {
-        option_values.push($(this).val());
-    });    
-        
-    for (i = 0; i < option_values.length; i++) { 
-        if (option_values[i] == mutlexcl) {
-            alert('Error: ' + mutlexcl + ' already exists');
-            $("#dmer").focus();
-            return;
-        }
-    }
-    
-    $.ajax({
-        method: "POST",
-        url: url_set_ssd_role_constraint,
-        dataType: "json",
-        data: {role:role, mutlexcl:mutlexcl}
-    }).done(function(data) {
-        
-    });
-    
-    var option = '<option value=' + mutlexcl + '>' + mutlexcl + '</option>';
-    $("#dmer").append(option);
-    
-    $("#role_unset_constraint").prop('disabled', false);
-    return;
+function Edit_RRA_assignJunior() {
 }
-
-function Edit_PRA_revokePermission() {
-    
-    var perm = $('#SSD_for_role').val();
-    var mutlexcl = $('#dmer').val()[0];
-        
-    if (!mutlexcl) {
-        alert('Error: no option selected');
-        return;
-    }
-    
-    var selector = "#dmer option[value='" + mutlexcl + "']";
-    $(selector).remove();
-    
-    var size = $('#dmer option').size()
-    
-    if (!size) {
-        $("#role_unset_constraint").prop('disabled', true);
-    }
-
-    $.ajax({
-        method: "POST",
-        url: url_unset_ssd_role_constraint,
-        dataType: "json",
-        data: {role:role, mutlexcl:mutlexcl}
-    }).done(function(data) {
-        
-    });
-
-    return;
+function Edit_RRA_revokeJunior() {
+}
+function Edit_RRA_assignSenior() {
+}
+function Edit_RRA_revokeSenior() {
 }
 
 $("#create_PRA_btn").click(function(e){
@@ -1856,4 +1807,11 @@ $("#role_set_constraint").click(function(e){
 $("#role_unset_constraint").click(function(e){
     Edit_SSDRole_unsetConstraint();
 });
+
 */
+
+
+
+
+
+

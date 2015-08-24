@@ -64,86 +64,6 @@
   </div>
 </div>
 
-<!-- RRA modal -->
-<div class="modal modal-wide fade" id="RRA_modal" tabindex="-1" role="dialog" aria-labelledby="RRA_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="RRA_modal_title">Role-to-Role Assignment</h4>
-      </div>
-      <div class="modal-body">
-        <form>
-            <input type="hidden" id="RRA_role" value="">
-            <div class="row">
-                <div class="col-md-12">
-                    <fieldset>
-                    <legend style="font-size:medium;">Personalia:</legend>
-                    <div class="row">
-                        <div class="col-md-4">
-                          <div class="form-group">
-                            <label for="">Available Roles</label>
-                            <select id="" multiple class="form-control">
-                            </select>     
-                            <input id="" class="btn btn-default" type="button" value="Assign">
-                          </div>                            
-                        </div>
-                        <div class="col-md-4">
-                          <div class="form-group">
-                            <label for="">Available Roles</label>
-                            <select id="" multiple class="form-control">
-                            </select>     
-                            <input id="" class="btn btn-default" type="button" value="Assign">
-                          </div>                            
-                        </div>
-                        <div class="col-md-4">
-                          <div class="form-group">
-                            <label for="">Available Roles</label>
-                            <select id="" multiple class="form-control">
-                            </select>     
-                            <input id="" class="btn btn-default" type="button" value="Assign">
-                          </div>                            
-                        </div>
-                    </div>  
-                    </fieldset>
-                    <div class="row">
-                        <div class="col-md-4">
-                          <div class="form-group">
-                            <label for="">Available Roles</label>
-                            <select id="" multiple class="form-control" style="550px">
-                            </select>     
-                            <input id="" class="btn btn-default" type="button" value="Assign">
-                          </div>                            
-                        </div>
-                        <div class="col-md-4">
-                          <div class="form-group">
-                            <label for="">Available Roles</label>
-                            <select id="" multiple class="form-control">
-                            </select>     
-                            <input id="" class="btn btn-default" type="button" value="Assign">
-                          </div>                            
-                        </div>
-                        <div class="col-md-4">
-                          <div class="form-group">
-                            <label for="">Available Roles</label>
-                            <select id="" multiple class="form-control">
-                            </select>     
-                            <input id="" class="btn btn-default" type="button" value="Assign">
-                          </div>                            
-                        </div>
-                    </div>  
-                </div>  
-            </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_role_cardinality_constraints" type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- rolecard modal -->
 <div class="modal fade" id="rolecard_modal" tabindex="-1" role="dialog" aria-labelledby="rolecard_modal_title" aria-hidden="true">
   <div class="modal-dialog">
@@ -328,6 +248,86 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RRA modal -->
+<div class="modal modal-wide fade" id="RRA_modal" tabindex="-1" role="dialog" aria-labelledby="RRA_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="RRA_modal_title">Role-to-Role Assignment</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+            <input type="hidden" id="RRA_role" value="">
+            <div class="row">
+                <div class="col-md-12">
+                    <fieldset>
+                    <legend style="font-size:medium;">Personalia:</legend>
+                    <div class="row">
+                        <div class="col-md-4">
+                          <div class="form-group">
+                            <label for="RRA_role_list_jr">Available Roles</label>
+                            <select id="RRA_role_list_jr" multiple class="form-control">
+                            </select>     
+                            <input id="" class="btn btn-default" type="button" value="Assign">
+                          </div>                            
+                        </div>
+                        <div class="col-md-4">
+                          <div class="form-group">
+                            <label for="">Available Roles</label>
+                            <select id="" multiple class="form-control">
+                            </select>     
+                            <input id="" class="btn btn-default" type="button" value="Assign">
+                          </div>                            
+                        </div>
+                        <div class="col-md-4">
+                          <div class="form-group">
+                            <label for="RRA_role_list_sr">Available Roles</label>
+                            <select id="RRA_role_list_sr" multiple class="form-control">
+                            </select>     
+                            <input id="" class="btn btn-default" type="button" value="Assign">
+                          </div>                            
+                        </div>
+                    </div>  
+                    </fieldset>
+                    <div class="row">
+                        <div class="col-md-4">
+                          <div class="form-group">
+                            <label for="">Available Roles</label>
+                            <select id="" multiple class="form-control" style="550px">
+                            </select>     
+                            <input id="" class="btn btn-default" type="button" value="Assign">
+                          </div>                            
+                        </div>
+                        <div class="col-md-4">
+                          <div class="form-group">
+                            <label for="">Available Roles</label>
+                            <select id="" multiple class="form-control">
+                            </select>     
+                            <input id="" class="btn btn-default" type="button" value="Assign">
+                          </div>                            
+                        </div>
+                        <div class="col-md-4">
+                          <div class="form-group">
+                            <label for="">Available Roles</label>
+                            <select id="" multiple class="form-control">
+                            </select>     
+                            <input id="" class="btn btn-default" type="button" value="Assign">
+                          </div>                            
+                        </div>
+                    </div>  
+                </div>  
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="save_role_cardinality_constraints" type="button" class="btn btn-primary">Save</button>
       </div>
     </div>
   </div>
