@@ -122,8 +122,10 @@ urlpatterns = patterns('',
     url(r'^api/add_senior_role_relation$', api.add_senior_role_relation, name='add_senior_role_relation'),
     url(r'^api/remove_senior_role_relation$', api.remove_senior_role_relation, name='remove_senior_role_relation'),
     
-    
-        
+    url(r'^api/get_direct_junior_roles$', api.get_direct_junior_roles, name='get_direct_junior_roles'),
+    url(r'^api/get_direct_senior_roles$', api.get_direct_senior_roles, name='get_direct_senior_roles'),
+    url(r'^api/get_transitive_junior_roles$', api.get_transitive_junior_roles, name='get_transitive_junior_roles'),
+    url(r'^api/get_transitive_senior_roles$', api.get_transitive_senior_roles, name='get_transitive_senior_roles'),
     
     
     url(r'^api/get_all_conditions$', api.get_all_conditions, name='get_all_conditions'),

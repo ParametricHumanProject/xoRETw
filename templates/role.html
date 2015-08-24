@@ -259,65 +259,60 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="RRA_modal_title">Role-to-Role Assignment</h4>
+        <h4 class="modal-title" id="RRA_modal_title"></h4>
       </div>
       <div class="modal-body">
         <form>
             <input type="hidden" id="RRA_role" value="">
             <div class="row">
-                <div class="col-md-12">
-                    <fieldset>
-                    <legend style="font-size:medium;">Personalia:</legend>
+                <div class="col-md-12">                    
                     <div class="row">
                         <div class="col-md-4">
                           <div class="form-group">
-                            <label for="RRA_role_list_jr">Available Roles</label>
-                            <select id="RRA_role_list_jr" multiple class="form-control">
+                            <label for="RRA_role_list_JR">Available Roles</label>
+                            <select id="RRA_role_list_JR" multiple class="form-control">
                             </select>     
-                            <input id="" class="btn btn-default" type="button" value="Assign">
+                            <input id="assign_junior" class="btn btn-default" type="button" value="Assign Junior">
                           </div>                            
                         </div>
                         <div class="col-md-4">
                           <div class="form-group">
-                            <label for="">Available Roles</label>
-                            <select id="" multiple class="form-control">
+                            <label for="djr">Direct Junior-Roles</label>
+                            <select id="djr" multiple class="form-control">
                             </select>     
-                            <input id="" class="btn btn-default" type="button" value="Assign">
+                            <input id="revoke_junior" class="btn btn-default" type="button" value="Revoke Junior">
                           </div>                            
                         </div>
                         <div class="col-md-4">
                           <div class="form-group">
-                            <label for="RRA_role_list_sr">Available Roles</label>
-                            <select id="RRA_role_list_sr" multiple class="form-control">
+                            <label for="tjr">Inherited Junior-Roles</label>
+                            <select id="tjr" multiple class="form-control">
                             </select>     
-                            <input id="" class="btn btn-default" type="button" value="Assign">
                           </div>                            
                         </div>
                     </div>  
-                    </fieldset>
                     <div class="row">
                         <div class="col-md-4">
                           <div class="form-group">
-                            <label for="">Available Roles</label>
-                            <select id="" multiple class="form-control" style="550px">
+                            <label for="RRA_role_list_SR">Available Roles</label>
+                            <select id="RRA_role_list_SR" multiple class="form-control" style="550px">
                             </select>     
-                            <input id="" class="btn btn-default" type="button" value="Assign">
+                            <input id="assign_senior" class="btn btn-default" type="button" value="Assign Senior">
                           </div>                            
                         </div>
                         <div class="col-md-4">
                           <div class="form-group">
-                            <label for="">Available Roles</label>
-                            <select id="" multiple class="form-control">
+                            <label for="dsr">Direct Senior-Roles</label>
+                            <select id="dsr" multiple class="form-control">
                             </select>     
-                            <input id="" class="btn btn-default" type="button" value="Assign">
+                            <input id="revoke_senior" class="btn btn-default" type="button" value="Revoke Senior">
                           </div>                            
                         </div>
                         <div class="col-md-4">
                           <div class="form-group">
-                            <label for="">Available Roles</label>
-                            <select id="" multiple class="form-control">
+                            <label for="tsr">Inherited Senior-Roles</label>
+                            <select id="tsr" multiple class="form-control">
                             </select>     
-                            <input id="" class="btn btn-default" type="button" value="Assign">
                           </div>                            
                         </div>
                     </div>  
@@ -327,7 +322,6 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="save_role_cardinality_constraints" type="button" class="btn btn-primary">Save</button>
       </div>
     </div>
   </div>

@@ -1702,12 +1702,15 @@ $("#revoke_permission").click(function(e) {
 // RRA section
 //======================================================================
 function Edit_RRA_init(name) {
-        
+    
+    var modal_title = 'Role-to-Role Assignment for Role: ' + name;
+    $('#RRA_modal_title').text(modal_title);
+    
     // reset all fields
     $('#RRA_role').val(name);
     $('#RRA_role').prop('disabled', true);
-    $('#RRA_role_list_jr').find('option').remove();
-    $('#RRA_role_list_sr').find('option').remove();
+    $('#RRA_role_list_JR').find('option').remove();
+    $('#RRA_role_list_SR').find('option').remove();
     $('#djr').find('option').remove();
     $('#tjr').find('option').remove();
     $('#dsr').find('option').remove();
@@ -1731,71 +1734,314 @@ function Edit_RRA_init(name) {
         for (var i = 0; i < role_list.length; i++) {
             value = role_list[i];
             var option = '<option value=' + value + '>' + value + '</option>';
-            $("#RRA_role_list_jr").append(option);
+            $("#RRA_role_list_JR").append(option);
         }        
 
         value = ''
         for (var i = 0; i < role_list.length; i++) {
             value = role_list[i];
             var option = '<option value=' + value + '>' + value + '</option>';
-            $("#RRA_role_list_sr").append(option);
-        }   
-        /*
-        if (role_list.length) {
-            $("#revoke_permission").prop('disabled', false);
-        } else {
-            $("#revoke_permission").prop('disabled', true);
+            $("#RRA_role_list_SR").append(option);
         }
-        */
-        
+                
     }).fail(function() {
-        alert( "Error - Edit_PRA_init - url_get_permission_list failed." );
+        alert( "Error - Edit_RRA_init - url_get_role_list failed." );
     });
       
-    $('#RRA_modal').modal('show');
-    
-    /*
-    // get ssd context constraints for this role (e.g. name: is the permission name)
+    // getDirectJuniorRoles
     $.ajax({
         method: "GET",
-        url: url_get_ssd_perm_constraints,
+        url: url_get_direct_junior_roles,
         dataType: "json",
         data: {name:name}
     }).done(function(data) {
         
-        var dmeps= data['dmeps'];
+        var djr= data['djr'];
 
         var value = ''
-        for (var i = 0; i < dmeps.length; i++) {
-            value = dmeps[i];
+        for (var i = 0; i < djr.length; i++) {
+            value = djr[i];
             var option = '<option value=' + value + '>' + value + '</option>';
-            $("#dmeps").append(option);
+            $("#djr").append(option);
         }        
 
-        if (dmeps.length) {
-            $("#unset_constraint").prop('disabled', false);
+        if (djr.length) {
+            $("#revoke_junior").prop('disabled', false);
         } else {
-            $("#unset_constraint").prop('disabled', true);
+            $("#revoke_junior").prop('disabled', true);
         }
-
-        $('#ssd_perm_modal').modal('show');
                 
     }).fail(function() {
-        alert( "Error - Edit_PermCCMgmt_init - url_get_ssd_perm_constraints failed." );
+        alert( "Error - Edit_RRA_init - url_get_direct_junior_roles failed." );
     });    
-    */
+
+    // getTransitiveJuniorRoles
+    $.ajax({
+        method: "GET",
+        url: url_get_transitive_junior_roles,
+        dataType: "json",
+        data: {name:name}
+    }).done(function(data) {
+        
+        var tjr = data['tjr'];
+
+        var value = ''
+        for (var i = 0; i < tjr.length; i++) {
+            value = tjr[i];
+            var option = '<option value=' + value + '>' + value + '</option>';
+            $("#tjr").append(option);
+        }                        
+    }).fail(function() {
+        alert( "Error - Edit_PermCCMgmt_init - url_get_transitive_junior_roles failed." );
+    });    
+   
+    // getDirectSeniorRoles
+    $.ajax({
+        method: "GET",
+        url: url_get_direct_senior_roles,
+        dataType: "json",
+        data: {name:name}
+    }).done(function(data) {
+        
+        var dsr= data['dsr'];
+
+        var value = ''
+        for (var i = 0; i < dsr.length; i++) {
+            value = dsr[i];
+            var option = '<option value=' + value + '>' + value + '</option>';
+            $("#dsr").append(option);
+        }        
+        
+        if (dsr.length) {
+            $("#revoke_senior").prop('disabled', false);
+        } else {
+            $("#revoke_senior").prop('disabled', true);
+        }
+                
+    }).fail(function() {
+        alert( "Error - Edit_RRA_init - url_get_direct_senior_roles failed." );
+    });  
+
+    // getTransitiveSeniorRoles
+    $.ajax({
+        method: "GET",
+        url: url_get_transitive_senior_roles,
+        dataType: "json",
+        data: {name:name}
+    }).done(function(data) {
+        
+        var tsr = data['tsr'];
+
+        var value = ''
+        for (var i = 0; i < tsr.length; i++) {
+            value = tsr[i];
+            var option = '<option value=' + value + '>' + value + '</option>';
+            $("#tsr").append(option);
+        }                        
+    }).fail(function() {
+        alert( "Error - Edit_PermCCMgmt_init - url_get_transitive_senior_roles failed." );
+    });    
+            
+    $('#RRA_modal').modal('show');    
 }
+
+
+function Edit_RRA_assignJunior() {
+    
+    var role = $('#RRA_role').val();
+    var junior = $('#RRA_role_list_JR').val();
+
+    if (!junior) {
+        alert('Error: no option selected');
+        $('#RRA_role_list_JR').flash();
+        $('#RRA_role_list_JR').focus();
+        return;
+    }
+    
+    if (role == junior) {
+        alert('FAILED: a role cannot be a junior of itself."')
+        $("#RRA_role_list_JR").flash();
+        $("#RRA_role_list_JR").focus();
+        return;
+    }
+        
+    var option_values = [];
+    $('#djr option').each(function() {
+        option_values.push($(this).val());
+    });    
+        
+    for (i = 0; i < option_values.length; i++) { 
+        if (option_values[i] == junior[0]) {
+            alert('Error: ' + junior[0] + ' already exists');
+            $("#RRA_role_list_JR").flash();
+            $("#RRA_role_list_JR").focus();
+            return;
+        }
+    }
+        
+    $.ajax({
+        method: "POST",
+        url: url_add_junior_role_relation,
+        dataType: "json",
+        data: {role:role, junior:junior[0]}
+    }).done(function(data) {
+        
+    });
+    
+    var option = '<option value=' + junior[0] + '>' + junior[0] + '</option>';
+    $("#djr").append(option);
+    
+    $("#revoke_permission").prop('disabled', false);
+    return;
+
+    // set tjr [$obj getTransitiveJuniorRoles]
+    // getTransitiveJuniorRoles
+    $.ajax({
+        method: "GET",
+        url: url_get_transitive_junior_roles,
+        dataType: "json",
+        data: {name:name}
+    }).done(function(data) {
+        
+        var tjr = data['tjr'];
+
+        var value = ''
+        for (var i = 0; i < tjr.length; i++) {
+            value = tjr[i];
+            var option = '<option value=' + value + '>' + value + '</option>';
+            $("#tjr").append(option);
+        }                        
+    }).fail(function() {
+        alert( "Error - Edit_RRA_assignJunior - url_get_transitive_junior_roles failed." );
+    });  
+}
+
+function Edit_RRA_revokeJunior() {
+        
+    var role = $('#RRA_role').val();
+    var junior = $('#djr').val();
+        
+    if (!junior) {
+        alert('Error: no option selected');
+        $('#djr').flash();
+        $('#djr').focus();        
+        return;
+    }
+    
+    $.ajax({
+        method: "POST",
+        url: url_remove_junior_role_relation,
+        dataType: "json",
+        data: {role:role, junior:junior[0]}
+    }).done(function(data) {
+        var selector = "#djr option[value='" + junior[0] + "']";
+        $(selector).remove();
+        
+        var size = $('#djr option').size()
+        
+        if (!size) {
+            $("#revoke_junior").prop('disabled', true);
+        }        
+    });
+
+    return;
+    
+}
+//TODO
+function Edit_RRA_assignSenior() {
+    
+    var role = $('#RRA_role').val();
+    var senior = $('#RRA_role_list_SR').val();
+
+    if (!senior) {
+        alert('Error: no option selected');
+        $('#RRA_role_list_SR').flash();
+        $('#RRA_role_list_SR').focus();
+        return;
+    }
+    
+    if (role == senior) {
+        alert('FAILED: a role cannot be a senior of itself."')
+        $("#RRA_role_list_SR").flash();
+        $("#RRA_role_list_SR").focus();
+        return;
+    }
+        
+    var option_values = [];
+    $('#dsr option').each(function() {
+        option_values.push($(this).val());
+    });    
+        
+    for (i = 0; i < option_values.length; i++) { 
+        if (option_values[i] == senior[0]) {
+            alert('Error: ' + senior[0] + ' already exists');
+            $("#RRA_role_list_SR").flash();
+            $("#RRA_role_list_SR").focus();
+            return;
+        }
+    }
+    // STOPPED HERE    
+    $.ajax({
+        method: "POST",
+        url: url_add_junior_role_relation,
+        dataType: "json",
+        data: {role:role, junior:junior[0]}
+    }).done(function(data) {
+        
+    });
+    
+    var option = '<option value=' + junior[0] + '>' + junior[0] + '</option>';
+    $("#djr").append(option);
+    
+    $("#revoke_permission").prop('disabled', false);
+    return;
+
+    // set tjr [$obj getTransitiveJuniorRoles]
+    // getTransitiveJuniorRoles
+    $.ajax({
+        method: "GET",
+        url: url_get_transitive_junior_roles,
+        dataType: "json",
+        data: {name:name}
+    }).done(function(data) {
+        
+        var tjr = data['tjr'];
+
+        var value = ''
+        for (var i = 0; i < tjr.length; i++) {
+            value = tjr[i];
+            var option = '<option value=' + value + '>' + value + '</option>';
+            $("#tjr").append(option);
+        }                        
+    }).fail(function() {
+        alert( "Error - Edit_RRA_assignJunior - url_get_transitive_junior_roles failed." );
+    });  
+}
+
+//TODO
+function Edit_RRA_revokeSenior() {
+    //alert('Edit_RRA_revokeSenior');
+}
+
+
+$("#assign_junior").click(function(e){
+    Edit_RRA_assignJunior();
+});
+
+$("#revoke_junior").click(function(e){
+    Edit_RRA_revokeJunior();
+});
+
+$("#assign_senior").click(function(e){
+    Edit_RRA_assignSenior();
+});
+
+$("#revoke_senior").click(function(e){
+    Edit_RRA_revokeSenior();
+});
+
 
 /*
-function Edit_RRA_assignJunior() {
-}
-function Edit_RRA_revokeJunior() {
-}
-function Edit_RRA_assignSenior() {
-}
-function Edit_RRA_revokeSenior() {
-}
-
 $("#create_PRA_btn").click(function(e){
     Edit_PRA_init('');
 });
@@ -1809,9 +2055,6 @@ $("#role_unset_constraint").click(function(e){
 });
 
 */
-
-
-
 
 
 

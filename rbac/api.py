@@ -18,6 +18,80 @@ from .models import Permission
 
 import Manager
 
+
+def get_transitive_senior_roles(request):
+    user = request.user
+    name = request.GET.get('name', None)
+    data = {}
+    error_message = ''
+    try:
+        data['tsr'] = Manager.getTransitiveSeniorRoles(name, user)
+        
+        json_data = json.dumps(data)
+        return HttpResponse(json_data, content_type='application/json')
+        
+    except:
+        error_message = sys.exc_info()[1]
+        print "Error: %s" % error_message
+            
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
+def get_transitive_junior_roles(request):
+    user = request.user
+    name = request.GET.get('name', None)
+    data = {}
+    error_message = ''
+    try:
+        data['tjr'] = Manager.getTransitiveJuniorRoles(name, user)
+        print "data['tjr'] --------------------------------------------------------- is ", data['tjr']
+        json_data = json.dumps(data)
+        return HttpResponse(json_data, content_type='application/json')
+        
+    except:
+        error_message = sys.exc_info()[1]
+        print "Error: %s" % error_message
+            
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
+def get_direct_senior_roles(request):
+    user = request.user
+    name = request.GET.get('name', None)
+    data = {}
+    error_message = ''
+    try:
+        data['dsr'] = Manager.getDirectSeniorRoles(name, user)
+        
+        json_data = json.dumps(data)
+        return HttpResponse(json_data, content_type='application/json')
+        
+    except:
+        error_message = sys.exc_info()[1]
+        print "Error: %s" % error_message
+            
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+
+def get_direct_junior_roles(request):
+    user = request.user
+    name = request.GET.get('name', None)
+    data = {}
+    error_message = ''
+    try:
+        data['djr'] = Manager.getDirectJuniorRoles(name, user)
+        
+        json_data = json.dumps(data)
+        return HttpResponse(json_data, content_type='application/json')
+        
+    except:
+        error_message = sys.exc_info()[1]
+        print "Error: %s" % error_message
+            
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
+    
+
 def exist_role(request):
     user = request.user
     name = request.GET.get('name', None)
@@ -1230,7 +1304,6 @@ def get_direct_ssd_role_constraints(request):
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
     
-
 def get_transitive_ssd_role_constraints(request):
     user = request.user
     name = request.GET.get('name', None)
@@ -1261,7 +1334,6 @@ def get_inherited_ssd_role_constraints(request):
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
     
-
 def assign_permission(request):
     print 'assign_permission'
     
@@ -1290,7 +1362,6 @@ def assign_permission(request):
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
     
-
 def revoke_permission(request):
     print 'revoke_permission'
     
@@ -1320,9 +1391,6 @@ def revoke_permission(request):
     return HttpResponse(json_data, content_type='application/json')
 
 def add_junior_role_relation(request):
-    #addJuniorRoleRelation
-    pass
-    
     print 'add_junior_role_relation'
     
     user = request.user
@@ -1350,11 +1418,32 @@ def add_junior_role_relation(request):
     json_data = json.dumps(data)
     return HttpResponse(json_data, content_type='application/json')
 
-
-    
 def remove_junior_role_relation(request):
-    #removeJuniorRoleRelation
-    pass
+    print 'remove_junior_role_relation'
+    user = request.user
+    role_name = request.POST.get('role', None)
+    junior_name = request.POST.get('junior', None)
+
+    print 'role_name is ', role_name
+    print 'junior_name is ', junior_name
+    
+    data = {}
+    error_message = ''
+    try:
+        success = Manager.removeJuniorRoleRelation(role_name, junior_name, user)
+        
+        if success:
+            data['success'] = str(success).lower()
+
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
+        
+    except:
+        error_message = sys.exc_info()[1]
+        print "Error: %s" % error_message
+            
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
     
 def add_senior_role_relation(request):
     #addSeniorRoleRelation
