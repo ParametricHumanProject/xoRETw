@@ -1446,9 +1446,57 @@ def remove_junior_role_relation(request):
     return HttpResponse(json_data, content_type='application/json')
     
 def add_senior_role_relation(request):
-    #addSeniorRoleRelation
-    pass        
+    print 'add_senior_role_relation'
+    
+    user = request.user
+    role_name = request.POST.get('role', None)
+    senior_name = request.POST.get('senior', None)
+
+    print 'role_name is ', role_name
+    print 'senior_name is ', senior_name
+    
+    data = {}
+    error_message = ''
+    try:
+        success = Manager.addSeniorRoleRelation(role_name, senior_name, user)
+        
+        if success:
+            data['success'] = str(success).lower()
+
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
+        
+    except:
+        error_message = sys.exc_info()[1]
+        print "Error: %s" % error_message
+            
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')
     
 def remove_senior_role_relation(request):
-    #removeSeniorRoleRelation
-    pass    
+    print 'remove_senior_role_relation'
+    #print request
+    user = request.user
+    role_name = request.POST.get('role', None)
+    senior_name = request.POST.get('senior', None)
+
+    print '1role_name is ', role_name
+    print '1senior_name is ', senior_name
+    
+    data = {}
+    error_message = ''
+    try:
+        success = Manager.removeSeniorRoleRelation(role_name, senior_name, user)
+        
+        if success:
+            data['success'] = str(success).lower()
+
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, content_type='application/json')
+        
+    except:
+        error_message = sys.exc_info()[1]
+        print "Error: %s" % error_message
+            
+    json_data = json.dumps(data)
+    return HttpResponse(json_data, content_type='application/json')

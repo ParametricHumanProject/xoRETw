@@ -67,6 +67,36 @@ def hasSeniorRole(role_name, senior_name, user):
         return 1
     return 0
 
+def addSeniorRoleRelation(role_name, senior_name, user):
+    print 'Manager - addSeniorRoleRelation'
+    if not hasJuniorRole(role_name, senior_name, user):
+        if not hasSeniorRole(role_name, senior_name, user):
+            if ssdConstraintsAllowSeniorRole(senior_name, role_name, user):
+                # add $senior to the subclass list of $role
+                role_obj = Role.objects.get(name=role_name, user=user)
+                
+                seniors = []
+                
+                if role_obj.senior_roles:
+                    seniors = role_obj.senior_roles.split(',')
+                
+                seniors.append(senior_name)
+                role_obj.senior_roles = ",".join(seniors)
+                role_obj.save()
+                print 'addSeniorRoleRelation - success!'
+                # TODO: updateRoleHierarchy
+                return 1
+        else:
+            e = "FAILED, definition of $type-role relation between <<$role>> and <<$junior>> prohibited by SSD constraints. Either\
+                                 <<$role>> or one of its senior-roles is defined as statically\
+                                 mutual exclusive to <<$junior>>. The prohibitory constraint\
+                                 is either an SSD role constraint defined on <<$junior>>, or an SSD\
+                                 permission constraint defined on one of the permissions of <<$junior>>."
+            return 0
+    else:
+        e = "FAILED: <<$role>> already is a junior-role of <<$junior>>"
+        return 0
+    
 def addJuniorRoleRelation(role_name, junior_name, user):
     print 'Manager - addJuniorRoleRelation'
     if not hasJuniorRole(role_name, junior_name, user):
@@ -96,6 +126,22 @@ def addJuniorRoleRelation(role_name, junior_name, user):
     else:
         e = "FAILED: <<$role>> already is a junior-role of <<$junior>>"
         return 0
+        
+def removeSeniorRoleRelation(role_name, senior_name, user):
+    print 'removeSeniorRoleRelation'
+    # remove senior from role
+    role_obj = Role.objects.get(name=role_name, user=user)
+    
+    seniors = []
+    
+    if role_obj.senior_roles:
+        seniors = role_obj.senior_roles.split(',')
+    
+    seniors.remove(senior_name)
+    role_obj.senior_roles = ",".join(seniors)
+    role_obj.save()
+    print 'removeSeniorRoleRelation - success'
+    return 1
 
 def removeJuniorRoleRelation(role_name, junior_name, user):
     print 'removeJuniorRoleRelation'
@@ -113,52 +159,6 @@ def removeJuniorRoleRelation(role_name, junior_name, user):
     print 'removeJuniorRoleRelation - success'
     return 1
             
-"""
-
-Manager instproc removeJuniorRoleRelation {role junior {type "junior"}} {
-  set role [self]::roles::$role
-  set junior [self]::roles::$junior
-  if {$type == "junior"} {set cproc [self proc]} else {set cproc [self callingproc]}
-  if {[my existRole $role]} {
-    if {[my existRole $junior]} {
-      set old [$role info superclass]
-      set index [lsearch -exact $old $junior]
-      if {$index != -1} {
-	#delete "$junior" from the list of superclasses
-	set new [lreplace $old $index $index]
-	#set the new junior-roles (superclasses)
-	if {$new == ""} {set new "::xotcl::Object"}
-	$role superclass $new
-	if {$type == "junior"} {
-	  my log NORMAL "[self] $cproc <<$junior>> removed from junior-role list of <<$role>>."
-	} else {
-	  my log NORMAL "[self] $cproc <<$role>> removed from senior-role list of <<$junior>>."
-	}
-	my updateRoleHierarchy
-	my removeTraceRelation Role [$role name] senior-role Role [$junior name]
-	return 1
-      } else {
-	if {$type == "junior"} {
-	  my log FAILED "[self] $cproc FAILED: <<$junior>> is not a (direct) junior-role\
-                           of <<$role>>."
-	} else {
-	  my log FAILED "[self] $cproc FAILED: <<$role>> is not a (direct) senior-role\
-                             of <<$junior>>."
-	}
-	return 0
-      }
-    } else {
-      my log FAILED "[self] $cproc FAILED: role <<$junior>> does not exist"
-      return 0
-    }
-  } else {
-    my log FAILED "[self] $cproc FAILED: role <<$role>> does not exist"
-    return 0
-  }
-}
-"""
-
-
 def getMinCardinalityPerm(perm_name, user):
     print 'getMinCardinalityPerm'
     print 'perm_name is ', perm_name
@@ -445,19 +445,19 @@ def getAllJuniorRoles(role_name, user):
     role = Role.objects.get(name=role_name, user=user)
     junior_roles = role.junior_roles
     
-    junior = []
+    juniors = []
     
     if junior_roles:
-        junior = junior_roles.split(',')
+        juniors = junior_roles.split(',')
     
-    if junior:
-        for jr in junior:
+    if juniors:
+        for jr in juniors:
             next_level = getAllJuniorRoles(jr, user)
             for r in next_level:
-                if r not in junior:
-                    junior.append(r)
+                if r not in juniors:
+                    juniors.append(r)
     
-    return junior
+    return juniors
     
 #done
 def getInheritedSSDRoleConstraints(role_name, user):

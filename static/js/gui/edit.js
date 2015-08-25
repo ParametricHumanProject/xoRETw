@@ -1716,12 +1716,6 @@ function Edit_RRA_init(name) {
     $('#dsr').find('option').remove();
     $('#tsr').find('option').remove();
     
-    // foreach r [lsort -dictionary [$pm getRoleList]] {
-    // set djr [$obj getDirectJuniorRoles]
-    // set tjr [$obj getTransitiveJuniorRoles]
-    // set dsr [$obj info subclass]
-    // set tsr [$obj getTransitiveSeniorRoles]
-
     $.ajax({
         method: "GET",
         url: url_get_role_list,
@@ -1792,7 +1786,7 @@ function Edit_RRA_init(name) {
             $("#tjr").append(option);
         }                        
     }).fail(function() {
-        alert( "Error - Edit_PermCCMgmt_init - url_get_transitive_junior_roles failed." );
+        alert( "Error - Edit_RRA_init - url_get_transitive_junior_roles failed." );
     });    
    
     // getDirectSeniorRoles
@@ -1839,7 +1833,7 @@ function Edit_RRA_init(name) {
             $("#tsr").append(option);
         }                        
     }).fail(function() {
-        alert( "Error - Edit_PermCCMgmt_init - url_get_transitive_senior_roles failed." );
+        alert( "Error - Edit_RRA_init - url_get_transitive_senior_roles failed." );
     });    
             
     $('#RRA_modal').modal('show');    
@@ -1891,11 +1885,10 @@ function Edit_RRA_assignJunior() {
     var option = '<option value=' + junior[0] + '>' + junior[0] + '</option>';
     $("#djr").append(option);
     
-    $("#revoke_permission").prop('disabled', false);
+    $("#revoke_junior").prop('disabled', false);
     return;
 
     // set tjr [$obj getTransitiveJuniorRoles]
-    // getTransitiveJuniorRoles
     $.ajax({
         method: "GET",
         url: url_get_transitive_junior_roles,
@@ -1947,7 +1940,7 @@ function Edit_RRA_revokeJunior() {
     return;
     
 }
-//TODO
+
 function Edit_RRA_assignSenior() {
     
     var role = $('#RRA_role').val();
@@ -1980,47 +1973,73 @@ function Edit_RRA_assignSenior() {
             return;
         }
     }
-    // STOPPED HERE    
+    
     $.ajax({
         method: "POST",
-        url: url_add_junior_role_relation,
+        url: url_add_senior_role_relation,
         dataType: "json",
-        data: {role:role, junior:junior[0]}
+        data: {role:role, senior:senior[0]}
     }).done(function(data) {
         
     });
     
-    var option = '<option value=' + junior[0] + '>' + junior[0] + '</option>';
-    $("#djr").append(option);
+    var option = '<option value=' + senior[0] + '>' + senior[0] + '</option>';
+    $("#dsr").append(option);
     
-    $("#revoke_permission").prop('disabled', false);
+    $("#revoke_senior").prop('disabled', false);
     return;
 
-    // set tjr [$obj getTransitiveJuniorRoles]
-    // getTransitiveJuniorRoles
+    // set tsr [$obj getTransitiveSeniorRoles]
     $.ajax({
         method: "GET",
-        url: url_get_transitive_junior_roles,
+        url: url_get_transitive_senior_roles,
         dataType: "json",
         data: {name:name}
     }).done(function(data) {
         
-        var tjr = data['tjr'];
+        var tsr = data['tsr'];
 
         var value = ''
-        for (var i = 0; i < tjr.length; i++) {
-            value = tjr[i];
+        for (var i = 0; i < tsr.length; i++) {
+            value = tsr[i];
             var option = '<option value=' + value + '>' + value + '</option>';
-            $("#tjr").append(option);
+            $("#tsr").append(option);
         }                        
     }).fail(function() {
-        alert( "Error - Edit_RRA_assignJunior - url_get_transitive_junior_roles failed." );
+        alert( "Error - Edit_RRA_assignSenior - url_get_transitive_senior_roles failed." );
     });  
 }
 
-//TODO
+
 function Edit_RRA_revokeSenior() {
-    //alert('Edit_RRA_revokeSenior');
+        
+    var role = $('#RRA_role').val();
+    var senior = $('#dsr').val();
+        
+    if (!senior) {
+        alert('Error: no option selected');
+        $('#dsr').flash();
+        $('#dsr').focus();        
+        return;
+    }
+    
+    $.ajax({
+        method: "POST",
+        url: url_remove_senior_role_relation,
+        dataType: "json",
+        data: {role:role, senior:senior[0]}
+    }).done(function(data) {
+        var selector = "#dsr option[value='" + senior[0] + "']";
+        $(selector).remove();
+        
+        var size = $('#dsr option').size()
+        
+        if (!size) {
+            $("#revoke_senior").prop('disabled', true);
+        }        
+    });
+
+    return;
 }
 
 
