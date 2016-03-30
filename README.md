@@ -25,7 +25,7 @@ Dr. Azam Khan, http://parametrichuman.org/users/azam.khan/
 
 Dave Kanter
 
-Ian Carreon 
+Ian Carreon, http://parametrichuman.org/users/ian.carreon/
 
 ## Videos
 
