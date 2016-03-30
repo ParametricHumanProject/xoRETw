@@ -21,7 +21,7 @@ we would like to begin by porting the xoRET tool to being a web-based database-d
 
 
 ## Contributors 
-Azam Khan
+Dr. Azam Khan, http://parametrichuman.org/users/azam.khan/
 
 Dave Kanter
 
