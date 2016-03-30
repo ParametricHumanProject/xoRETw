@@ -1,6 +1,6 @@
 ## Synopsis
 
-A database-driven webapp port of xoRET by Prof. Mark Strembeck - a role engineering tool for RBAC.
+A database-driven web-based port of xoRET by Prof. Mark Strembeck - a graphical software tool that provides tool support for the scenario-driven role-engineering process (RBAC).
 
 ## Motivation
 
@@ -23,9 +23,9 @@ we would like to begin by porting the xoRET tool to being a web-based database-d
 ## Contributors 
 Dr. Azam Khan, http://parametrichuman.org/users/azam.khan/
 
-Dave Kanter
-
 Ian Carreon, http://parametrichuman.org/users/ian.carreon/
+
+Dave Kanter
 
 ## Videos
 
